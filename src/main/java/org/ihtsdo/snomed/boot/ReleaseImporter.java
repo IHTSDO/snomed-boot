@@ -12,14 +12,21 @@ import org.ihtsdo.snomed.boot.service.LoadingMode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.*;
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.nio.charset.Charset;
+import java.nio.file.*;
+import java.nio.file.attribute.BasicFileAttributes;
 import java.text.NumberFormat;
+import java.util.EnumSet;
+import java.util.List;
 import java.util.Map;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipInputStream;
 
 public class ReleaseImporter {
 
+	public static final Charset UTF_8 = Charset.forName("UTF-8");
 	private final ComponentFactory componentFactory;
 	private final ComponentStore componentStore;
 	private final Logger logger = LoggerFactory.getLogger(getClass());
@@ -29,56 +36,57 @@ public class ReleaseImporter {
 		componentFactory = new ComponentFactory(componentStore);
 	}
 
-	public Map<Long, Concept> loadReleaseZip(String releaseDirPath, LoadingMode loadingMode) throws IOException {
-		File zipFile = findZipFilePath(releaseDirPath);
-		logger.info("Loading release archive {}", zipFile.getAbsolutePath());
-		try (final ZipInputStream zipInputStream = new ZipInputStream(new FileInputStream(zipFile))) {
-			ZipEntry nextEntry;
-			while ((nextEntry = zipInputStream.getNextEntry()) != null) {
-				final String entryName = nextEntry.getName();
-				if (entryName.contains("sct2_Concept_Snapshot")) {
-					loadConcepts(zipInputStream);
-					break;
-				}
-			}
-		}
-		try (final ZipInputStream zipInputStream = new ZipInputStream(new FileInputStream(zipFile))) {
-			ZipEntry nextEntry;
-			while ((nextEntry = zipInputStream.getNextEntry()) != null) {
-				final String entryName = nextEntry.getName();
-				if (entryName.contains("sct2_Relationship_Snapshot")) {
-					loadRelationships(zipInputStream, loadingMode);
-				} else if (entryName.contains("sct2_Description_Snapshot")) {
-					loadDescriptions(zipInputStream, loadingMode);
-				} else if (entryName.contains("der2_") && entryName.contains("Snapshot")) {
-//					loadRefsets(zipInputStream);
-				}
-			}
+	public Map<Long, Concept> loadReleaseFiles(String releaseDirPath, LoadingMode loadingMode) throws IOException {
+		ReleaseFiles releaseFiles = findFiles(releaseDirPath);
+		logger.info("Loading release files {}", releaseFiles);
+		loadConcepts(releaseFiles.getConceptSnapshot());
+		loadRelationships(releaseFiles.getRelationshipSnapshot(), loadingMode);
+		loadDescriptions(releaseFiles.getDescriptionSnapshot(), loadingMode);
+		final List<Path> refsetSnapshots = releaseFiles.getRefsetSnapshots();
+		for (Path refsetSnapshot : refsetSnapshots) {
+			loadRefsets(refsetSnapshot);
 		}
 		logger.info("All in memory. Using approx {} MB of memory.", formatAsMB(Runtime.getRuntime().totalMemory()));
 
 		return componentStore.getConcepts();
 	}
 
-	private File findZipFilePath(String releaseDirPath) throws FileNotFoundException {
+	private ReleaseFiles findFiles(String releaseDirPath) throws IOException {
 		final File releaseDir = new File(releaseDirPath);
 		if (!releaseDir.isDirectory()) {
 			throw new FileNotFoundException("Could not find release directory.");
 		}
-		final File[] zips = releaseDir.listFiles(new FilenameFilter() {
+
+		final ReleaseFiles releaseFiles = new ReleaseFiles();
+
+		Files.walkFileTree(releaseDir.toPath(), EnumSet.of(FileVisitOption.FOLLOW_LINKS), Integer.MAX_VALUE, new SimpleFileVisitor<Path>() {
 			@Override
-			public boolean accept(File dir, String name) {
-				return name.endsWith(".zip");
+			public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
+				final String fileName = file.getFileName().toString();
+				if (fileName.endsWith(".txt")) {
+					if (fileName.startsWith("sct2_Concept_Snapshot")) {
+						releaseFiles.setConceptSnapshot(file);
+					} else if (fileName.startsWith("sct2_Description_Snapshot")) {
+						releaseFiles.setDescriptionSnapshot(file);
+					} else if (fileName.startsWith("sct2_TextDefinition_Snapshot")) {
+						releaseFiles.setTextDefinitionSnapshot(file);
+					} else if (fileName.startsWith("sct2_Relationship_Snapshot")) {
+						releaseFiles.setRelationshipSnapshot(file);
+					} else if (fileName.startsWith("der2_")) {
+						releaseFiles.getRefsetSnapshots().add(file);
+					}
+				}
+				return FileVisitResult.CONTINUE;
 			}
 		});
-		if (zips.length == 0) {
-			throw new FileNotFoundException("Please place a SNOMED-CT RF2 release zip file in the release directory. Content will be loaded from there.");
-		}
-		return zips[0];
+
+		releaseFiles.assertFullSet();
+
+		return releaseFiles;
 	}
 
-	private void loadConcepts(ZipInputStream zipInputStream) throws IOException {
-		readLines(zipInputStream, new ValuesHandler() {
+	private void loadConcepts(Path rf2File) throws IOException {
+		readLines(rf2File, new ValuesHandler() {
 			@Override
 			public void handle(String[] values) {
 				Long conceptId = new Long(values[ComponentFields.id]);
@@ -87,8 +95,8 @@ public class ReleaseImporter {
 		}, "concepts");
 	}
 
-	private void loadRelationships(ZipInputStream zipInputStream, final LoadingMode loadingMode) throws IOException {
-		readLines(zipInputStream, new ValuesHandler() {
+	private void loadRelationships(Path rf2File, final LoadingMode loadingMode) throws IOException {
+		readLines(rf2File, new ValuesHandler() {
 			@Override
 			public void handle(String[] values) {
 				if (values[RelationshipFields.active].equals("1")) {
@@ -107,8 +115,8 @@ public class ReleaseImporter {
 		}, "relationships");
 	}
 
-	private void loadDescriptions(ZipInputStream zipInputStream, final LoadingMode loadingMode) throws IOException {
-		readLines(zipInputStream, new ValuesHandler() {
+	private void loadDescriptions(Path rf2File, final LoadingMode loadingMode) throws IOException {
+		readLines(rf2File, new ValuesHandler() {
 			@Override
 			public void handle(String[] values) {
 				if ("1".equals(values[DescriptionFields.active])) {
@@ -124,8 +132,8 @@ public class ReleaseImporter {
 		}, "descriptions");
 	}
 
-	private void loadRefsets(ZipInputStream zipInputStream) throws IOException {
-		readLines(zipInputStream, new ValuesHandler() {
+	private void loadRefsets(Path rf2File) throws IOException {
+		readLines(rf2File, new ValuesHandler() {
 			@Override
 			public void handle(String[] values) {
 				if ("1".equals(values[DescriptionFields.active])) {
@@ -151,17 +159,18 @@ public class ReleaseImporter {
 		return concept;
 	}
 
-	private void readLines(ZipInputStream conceptsFileStream, ValuesHandler valuesHandler, String componentType) throws IOException {
+	private void readLines(Path rf2FilePath, ValuesHandler valuesHandler, String componentType) throws IOException {
 		logger.info("Reading {} ", componentType);
 		long linesRead = 0L;
-		final BufferedReader reader = new BufferedReader(new InputStreamReader(conceptsFileStream));
-		String line;
-		reader.readLine(); // discard header line
-		while ((line = reader.readLine()) != null) {
-			valuesHandler.handle(line.split("\\t"));
-			linesRead++;
-			if (linesRead % 100000 == 0) {
-				logger.info("{} {} read", linesRead, componentType);
+		try (final BufferedReader reader = Files.newBufferedReader(rf2FilePath, UTF_8)) {
+			String line;
+			reader.readLine(); // discard header line
+			while ((line = reader.readLine()) != null) {
+				valuesHandler.handle(line.split("\\t"));
+				linesRead++;
+				if (linesRead % 100000 == 0) {
+					logger.info("{} {} read", linesRead, componentType);
+				}
 			}
 		}
 		logger.info("{} {} read in total", linesRead, componentType);
