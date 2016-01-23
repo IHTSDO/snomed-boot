@@ -20,32 +20,43 @@ import java.nio.charset.Charset;
 import java.nio.file.*;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.text.NumberFormat;
+import java.util.ArrayList;
 import java.util.EnumSet;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 public class ReleaseImporter {
 
 	public static final Charset UTF_8 = Charset.forName("UTF-8");
 	private final ComponentFactory componentFactory;
 	private final ComponentStore componentStore;
+	private final ExecutorService executorService;
 	private final Logger logger = LoggerFactory.getLogger(getClass());
 
 	public ReleaseImporter() {
 		componentStore = new ComponentStore();
 		componentFactory = new ComponentFactory(componentStore);
+		executorService = Executors.newCachedThreadPool();
 	}
 
-	public Map<Long, Concept> loadReleaseFiles(String releaseDirPath, LoadingMode loadingMode) throws IOException {
+	public Map<Long, Concept> loadReleaseFiles(String releaseDirPath, LoadingMode loadingMode) throws IOException, InterruptedException {
 		ReleaseFiles releaseFiles = findFiles(releaseDirPath);
 		logger.info("Loading release files {}", releaseFiles);
 		loadConcepts(releaseFiles.getConceptSnapshot());
-		loadRelationships(releaseFiles.getRelationshipSnapshot(), loadingMode);
-		loadDescriptions(releaseFiles.getDescriptionSnapshot(), loadingMode);
+
+		List<Callable<String>> tasks = new ArrayList<>();
+		tasks.add(loadRelationships(releaseFiles.getRelationshipSnapshot(), loadingMode));
+		tasks.add(loadDescriptions(releaseFiles.getDescriptionSnapshot(), loadingMode));
 		final List<Path> refsetSnapshots = releaseFiles.getRefsetSnapshots();
 		for (Path refsetSnapshot : refsetSnapshots) {
-			loadRefsets(refsetSnapshot);
+			tasks.add(loadRefsets(refsetSnapshot));
 		}
+
+		executorService.invokeAll(tasks);
+
 		logger.info("All in memory. Using approx {} MB of memory.", formatAsMB(Runtime.getRuntime().totalMemory()));
 
 		return componentStore.getConcepts();
@@ -95,8 +106,8 @@ public class ReleaseImporter {
 		}, "concepts");
 	}
 
-	private void loadRelationships(Path rf2File, final LoadingMode loadingMode) throws IOException {
-		readLines(rf2File, new ValuesHandler() {
+	private Callable<String> loadRelationships(Path rf2File, final LoadingMode loadingMode) throws IOException {
+		return readLinesCallable(rf2File, new ValuesHandler() {
 			@Override
 			public void handle(String[] values) {
 				if (values[RelationshipFields.active].equals("1")) {
@@ -115,8 +126,8 @@ public class ReleaseImporter {
 		}, "relationships");
 	}
 
-	private void loadDescriptions(Path rf2File, final LoadingMode loadingMode) throws IOException {
-		readLines(rf2File, new ValuesHandler() {
+	private Callable<String> loadDescriptions(Path rf2File, final LoadingMode loadingMode) throws IOException {
+		return readLinesCallable(rf2File, new ValuesHandler() {
 			@Override
 			public void handle(String[] values) {
 				if ("1".equals(values[DescriptionFields.active])) {
@@ -132,8 +143,8 @@ public class ReleaseImporter {
 		}, "descriptions");
 	}
 
-	private void loadRefsets(Path rf2File) throws IOException {
-		readLines(rf2File, new ValuesHandler() {
+	private Callable<String> loadRefsets(Path rf2File) throws IOException {
+		return readLinesCallable(rf2File, new ValuesHandler() {
 			@Override
 			public void handle(String[] values) {
 				if ("1".equals(values[DescriptionFields.active])) {
@@ -159,6 +170,16 @@ public class ReleaseImporter {
 		return concept;
 	}
 
+	private Callable<String> readLinesCallable(final Path rf2FilePath, final ValuesHandler valuesHandler, final String componentType) {
+		return new Callable<String>() {
+			@Override
+			public String call() throws Exception {
+				readLines(rf2FilePath, valuesHandler, componentType);
+				return null;
+			}
+		};
+	}
+
 	private void readLines(Path rf2FilePath, ValuesHandler valuesHandler, String componentType) throws IOException {
 		logger.info("Reading {} ", componentType);
 		long linesRead = 0L;
@@ -168,12 +189,9 @@ public class ReleaseImporter {
 			while ((line = reader.readLine()) != null) {
 				valuesHandler.handle(line.split("\\t"));
 				linesRead++;
-				if (linesRead % 100000 == 0) {
-					logger.info("{} {} read", linesRead, componentType);
-				}
 			}
 		}
-		logger.info("{} {} read in total", linesRead, componentType);
+		logger.info("{} {} read from {}", linesRead, componentType, rf2FilePath.getFileName().toString());
 	}
 
 	private String formatAsMB(long bytes) {
