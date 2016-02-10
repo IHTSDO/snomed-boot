@@ -4,11 +4,8 @@ import org.ihtsdo.snomed.boot.domain.Concept;
 import org.ihtsdo.snomed.boot.domain.ConceptConstants;
 import org.ihtsdo.snomed.boot.domain.Description;
 import org.ihtsdo.snomed.boot.domain.Relationship;
-import org.ihtsdo.snomed.boot.domain.rf2.ComponentFields;
-import org.ihtsdo.snomed.boot.domain.rf2.DescriptionFields;
-import org.ihtsdo.snomed.boot.domain.rf2.RefsetFields;
-import org.ihtsdo.snomed.boot.domain.rf2.RelationshipFields;
-import org.ihtsdo.snomed.boot.service.LoadingMode;
+import org.ihtsdo.snomed.boot.domain.rf2.*;
+import org.ihtsdo.snomed.boot.service.LoadingProfile;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -42,17 +39,17 @@ public class ReleaseImporter {
 		executorService = Executors.newCachedThreadPool();
 	}
 
-	public Map<Long, Concept> loadReleaseFiles(String releaseDirPath, LoadingMode loadingMode) throws IOException, InterruptedException {
+	public Map<Long, Concept> loadReleaseFiles(String releaseDirPath, LoadingProfile loadingProfile) throws IOException, InterruptedException {
 		ReleaseFiles releaseFiles = findFiles(releaseDirPath);
 		logger.info("Loading release files {}", releaseFiles);
-		loadConcepts(releaseFiles.getConceptSnapshot());
+		loadConcepts(releaseFiles.getConceptSnapshot(), loadingProfile);
 
 		List<Callable<String>> tasks = new ArrayList<>();
-		tasks.add(loadRelationships(releaseFiles.getRelationshipSnapshot(), loadingMode));
-		tasks.add(loadDescriptions(releaseFiles.getDescriptionSnapshot(), loadingMode));
+		tasks.add(loadRelationships(releaseFiles.getRelationshipSnapshot(), loadingProfile));
+		tasks.add(loadDescriptions(releaseFiles.getDescriptionSnapshot(), loadingProfile));
 		final List<Path> refsetSnapshots = releaseFiles.getRefsetSnapshots();
 		for (Path refsetSnapshot : refsetSnapshots) {
-			tasks.add(loadRefsets(refsetSnapshot));
+			tasks.add(loadRefsets(refsetSnapshot, loadingProfile));
 		}
 
 		executorService.invokeAll(tasks);
@@ -96,21 +93,23 @@ public class ReleaseImporter {
 		return releaseFiles;
 	}
 
-	private void loadConcepts(Path rf2File) throws IOException {
+	private void loadConcepts(Path rf2File, final LoadingProfile loadingProfile) throws IOException {
 		readLines(rf2File, new ValuesHandler() {
 			@Override
 			public void handle(String[] values) {
-				Long conceptId = new Long(values[ComponentFields.id]);
-				componentFactory.createConcept(conceptId, values);
+				if (loadingProfile.isInactiveConcepts() || "1".equals(values[ConceptFields.active])) {
+					Long conceptId = new Long(values[ComponentFields.id]);
+					componentFactory.createConcept(conceptId, values);
+				}
 			}
 		}, "concepts");
 	}
 
-	private Callable<String> loadRelationships(Path rf2File, final LoadingMode loadingMode) throws IOException {
+	private Callable<String> loadRelationships(Path rf2File, final LoadingProfile loadingProfile) throws IOException {
 		return readLinesCallable(rf2File, new ValuesHandler() {
 			@Override
 			public void handle(String[] values) {
-				if (values[RelationshipFields.active].equals("1")) {
+				if (loadingProfile.isInactiveRelationships() || "1".equals(values[RelationshipFields.active])) {
 					final Concept concept = getCreateConcept(values[RelationshipFields.sourceId]);
 					final String type = values[RelationshipFields.typeId];
 					final String value = values[RelationshipFields.destinationId];
@@ -118,7 +117,7 @@ public class ReleaseImporter {
 					if (type.equals(ConceptConstants.isA)) {
 						concept.addParent(getCreateConcept(value));
 					}
-					if (loadingMode == LoadingMode.full) {
+					if (loadingProfile.isRelationshipsOfAllTypes()) {
 						concept.addRelationship(new Relationship(values));
 					}
 				}
@@ -126,16 +125,16 @@ public class ReleaseImporter {
 		}, "relationships");
 	}
 
-	private Callable<String> loadDescriptions(Path rf2File, final LoadingMode loadingMode) throws IOException {
+	private Callable<String> loadDescriptions(Path rf2File, final LoadingProfile loadingProfile) throws IOException {
 		return readLinesCallable(rf2File, new ValuesHandler() {
 			@Override
 			public void handle(String[] values) {
-				if ("1".equals(values[DescriptionFields.active])) {
+				if (loadingProfile.isInactiveDescriptions() || "1".equals(values[DescriptionFields.active])) {
 					final Concept concept = getCreateConcept(new Long(values[DescriptionFields.conceptId]));
 					if (ConceptConstants.FSN.equals(values[DescriptionFields.typeId])) {
 						concept.setFsn(values[DescriptionFields.term]);
 					}
-					if (loadingMode == LoadingMode.full) {
+					if (loadingProfile.isDescriptionsOfAllTypes()) {
 						concept.addDescription(new Description(values));
 					}
 				}
@@ -143,14 +142,17 @@ public class ReleaseImporter {
 		}, "descriptions");
 	}
 
-	private Callable<String> loadRefsets(Path rf2File) throws IOException {
+	private Callable<String> loadRefsets(Path rf2File, final LoadingProfile loadingProfile) throws IOException {
 		return readLinesCallable(rf2File, new ValuesHandler() {
 			@Override
 			public void handle(String[] values) {
-				if ("1".equals(values[DescriptionFields.active])) {
-					final String referencedComponentId = values[RefsetFields.referencedComponentId];
-					if (Concept.isConceptId(referencedComponentId)) {
-						getCreateConcept(new Long(referencedComponentId)).addMemberOfRefsetId(new Long(values[RefsetFields.refsetId]));
+				if (loadingProfile.isInactiveRefsetMembers() || "1".equals(values[RefsetFields.active])) {
+					final String refsetId = values[RefsetFields.refsetId];
+					if (loadingProfile.isAllRefsets() || loadingProfile.isRefset(refsetId)) {
+						final String referencedComponentId = values[RefsetFields.referencedComponentId];
+						if (Concept.isConceptId(referencedComponentId)) {
+							getCreateConcept(new Long(referencedComponentId)).addMemberOfRefsetId(new Long(refsetId));
+						}
 					}
 				}
 			}
