@@ -1,1 +1,1 @@
-A SNOMED-CT RF2 release zip archive should be placed in this directory.
+A SNOMED-CT RF2 release archive should extracted into this directory.
