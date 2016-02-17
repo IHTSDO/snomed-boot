@@ -113,7 +113,9 @@ public class ReleaseImporter {
 					final Concept concept = getCreateConcept(values[RelationshipFields.sourceId]);
 					final String type = values[RelationshipFields.typeId];
 					final String value = values[RelationshipFields.destinationId];
-					concept.addAttribute(type, value);
+					if (loadingProfile.isAttributeMapOnConcept()) {
+						concept.addAttribute(type, value);
+					}
 					if (type.equals(ConceptConstants.isA)) {
 						concept.addParent(getCreateConcept(value));
 					}

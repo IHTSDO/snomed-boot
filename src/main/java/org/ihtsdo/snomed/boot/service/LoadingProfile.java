@@ -9,13 +9,15 @@ import java.util.Set;
 
 public class LoadingProfile implements Cloneable {
 
-	public static LoadingProfile light = new LoadingProfile();
-	public static LoadingProfile full = new LoadingProfile();
+	public static final LoadingProfile light = new LoadingProfile();
+	public static final LoadingProfile full = new LoadingProfile();
 
 	static {
+		light.attributeMapOnConcept = true;
 		light.refsetIds.add(ConceptConstants.GB_EN_LANGUAGE_REFERENCE_SET);
 		light.refsetIds.add(ConceptConstants.US_EN_LANGUAGE_REFERENCE_SET);
 
+		full.attributeMapOnConcept = true;
 		full.descriptionsOfAllTypes = true;
 		full.relationshipsOfAllTypes = true;
 		full.inactiveConcepts = true;
@@ -25,6 +27,7 @@ public class LoadingProfile implements Cloneable {
 		full.allRefsets = true;
 	}
 
+	private boolean attributeMapOnConcept;
 	private boolean descriptionsOfAllTypes;
 	private boolean relationshipsOfAllTypes;
 	private boolean inactiveConcepts = true;
@@ -33,6 +36,14 @@ public class LoadingProfile implements Cloneable {
 	private boolean inactiveRefsetMembers;
 	private boolean allRefsets;
 	private Set<String> refsetIds = new HashSet<>();
+
+	public LoadingProfile withAttributeMapOnConcept() {
+		return this.clone().setAttributeMapOnConcept(true);
+	}
+
+	public LoadingProfile withoutAttributeMapOnConcept() {
+		return this.clone().setAttributeMapOnConcept(false);
+	}
 
 	public LoadingProfile withDescriptionsOfAllTypes() {
 		return this.clone().setDescriptionsOfAllTypes(true);
@@ -104,6 +115,10 @@ public class LoadingProfile implements Cloneable {
 		return clone;
 	}
 
+	public boolean isAttributeMapOnConcept() {
+		return attributeMapOnConcept;
+	}
+
 	public boolean isDescriptionsOfAllTypes() {
 		return descriptionsOfAllTypes;
 	}
@@ -138,6 +153,11 @@ public class LoadingProfile implements Cloneable {
 
 	public ImmutableSet<String> getRefsetIds() {
 		return ImmutableSet.copyOf(refsetIds);
+	}
+
+	private LoadingProfile setAttributeMapOnConcept(boolean attributeMapOnConcept) {
+		this.attributeMapOnConcept = attributeMapOnConcept;
+		return this;
 	}
 
 	private LoadingProfile setDescriptionsOfAllTypes(boolean descriptionsOfAllTypes) {
