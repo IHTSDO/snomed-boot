@@ -2,21 +2,21 @@ package org.ihtsdo.snomed.boot;
 
 import it.unimi.dsi.fastutil.longs.Long2ObjectMap;
 import it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap;
-import org.ihtsdo.snomed.boot.domain.Concept;
+import org.ihtsdo.snomed.boot.factory.implementation.standard.ConceptImpl;
 
 public class ComponentStore {
 
-	private Long2ObjectMap<Concept> concepts;
+	private Long2ObjectMap<ConceptImpl> concepts;
 
 	public ComponentStore() {
 		concepts = new Long2ObjectOpenHashMap<>();
 	}
 
-	public Long2ObjectMap<Concept> getConcepts() {
+	public Long2ObjectMap<ConceptImpl> getConcepts() {
 		return concepts;
 	}
 
-	public Concept addConcept(Concept concept) {
+	public ConceptImpl addConcept(ConceptImpl concept) {
 		concepts.put(concept.getId(), concept);
 		return concept;
 	}

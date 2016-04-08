@@ -1,0 +1,63 @@
+package org.ihtsdo.snomed.boot.factory.implementation.standard;
+
+import org.ihtsdo.snomed.boot.ComponentStore;
+import org.ihtsdo.snomed.boot.domain.*;
+import org.ihtsdo.snomed.boot.factory.ComponentFactory;
+import org.ihtsdo.snomed.boot.factory.FactoryUtils;
+
+public class ComponentFactoryImpl implements ComponentFactory {
+
+	private final ComponentStore componentStore;
+
+	public ComponentFactoryImpl(ComponentStore componentStore) {
+		this.componentStore = componentStore;
+	}
+
+	@Override
+	public Concept createConcept(String conceptId, String effectiveTime, String active, String moduleId, String definitionStatusId) {
+		return componentStore.addConcept(new ConceptImpl(conceptId, effectiveTime, FactoryUtils.parseActive(active), moduleId, definitionStatusId));
+	}
+
+	@Override
+	public void addConceptFSN(String conceptId, String term) {
+		getConceptForReference(conceptId).setFsn(term);
+	}
+
+	@Override
+	public void addConceptParent(String sourceId, String parentId) {
+		getConceptForReference(sourceId).addParent(getConceptForReference(parentId));
+	}
+
+	@Override
+	public void addConceptAttribute(String sourceId, String typeId, String valueId) {
+		getConceptForReference(sourceId).addAttribute(typeId, valueId);
+	}
+
+	@Override
+	public void addRelationship(String id, String effectiveTime, String active, String moduleId, String sourceId,
+			String destinationId, String relationshipGroup, String typeId, String characteristicTypeId, String modifierId) {
+		getConceptForReference(sourceId).addRelationship(new RelationshipImpl(id, effectiveTime, active, moduleId, sourceId,
+				destinationId, relationshipGroup, typeId, characteristicTypeId, modifierId));
+	}
+
+	@Override
+	public void addDescription(String id, String active, String term, String conceptId) {
+		getConceptForReference(conceptId).addDescription(new DescriptionImpl(id, FactoryUtils.parseActive(active), term, conceptId));
+	}
+
+	@Override
+	public void addConceptReferencedInRefsetId(String refsetId, String conceptId) {
+		getConceptForReference(conceptId).addMemberOfRefsetId(Long.parseLong(refsetId));
+	}
+
+	private ConceptImpl getConceptForReference(String id) {
+		ConceptImpl concept = componentStore.getConcepts().get(Long.parseLong(id));
+		if (concept == null) {
+			// Could throw exception here depending on implementation
+			concept = new ConceptImpl(id);
+			componentStore.addConcept(concept);
+		}
+		return concept;
+
+	}
+}

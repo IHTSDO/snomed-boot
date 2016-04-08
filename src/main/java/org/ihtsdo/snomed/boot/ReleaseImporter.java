@@ -2,9 +2,10 @@ package org.ihtsdo.snomed.boot;
 
 import org.ihtsdo.snomed.boot.domain.Concept;
 import org.ihtsdo.snomed.boot.domain.ConceptConstants;
-import org.ihtsdo.snomed.boot.domain.Description;
-import org.ihtsdo.snomed.boot.domain.Relationship;
 import org.ihtsdo.snomed.boot.domain.rf2.*;
+import org.ihtsdo.snomed.boot.factory.ComponentFactory;
+import org.ihtsdo.snomed.boot.factory.implementation.standard.ComponentFactoryImpl;
+import org.ihtsdo.snomed.boot.factory.implementation.standard.ConceptImpl;
 import org.ihtsdo.snomed.boot.service.LoadingProfile;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -35,11 +36,11 @@ public class ReleaseImporter {
 
 	public ReleaseImporter() {
 		componentStore = new ComponentStore();
-		componentFactory = new ComponentFactory(componentStore);
+		componentFactory = new ComponentFactoryImpl(componentStore);
 		executorService = Executors.newCachedThreadPool();
 	}
 
-	public Map<Long, Concept> loadReleaseFiles(String releaseDirPath, LoadingProfile loadingProfile) throws IOException, InterruptedException {
+	public Map<Long, ? extends Concept> loadReleaseFiles(String releaseDirPath, LoadingProfile loadingProfile) throws IOException, InterruptedException {
 		ReleaseFiles releaseFiles = findFiles(releaseDirPath);
 		logger.info("Loading release files {}", releaseFiles);
 		loadConcepts(releaseFiles.getConceptSnapshot(), loadingProfile);
@@ -47,9 +48,11 @@ public class ReleaseImporter {
 		List<Callable<String>> tasks = new ArrayList<>();
 		tasks.add(loadRelationships(releaseFiles.getRelationshipSnapshot(), loadingProfile));
 		tasks.add(loadDescriptions(releaseFiles.getDescriptionSnapshot(), loadingProfile));
-		final List<Path> refsetSnapshots = releaseFiles.getRefsetSnapshots();
-		for (Path refsetSnapshot : refsetSnapshots) {
-			tasks.add(loadRefsets(refsetSnapshot, loadingProfile));
+		if (!loadingProfile.getRefsetIds().isEmpty()) {
+			final List<Path> refsetSnapshots = releaseFiles.getRefsetSnapshots();
+			for (Path refsetSnapshot : refsetSnapshots) {
+				tasks.add(loadRefsets(refsetSnapshot, loadingProfile));
+			}
 		}
 
 		executorService.invokeAll(tasks);
@@ -98,8 +101,9 @@ public class ReleaseImporter {
 			@Override
 			public void handle(String[] values) {
 				if (loadingProfile.isInactiveConcepts() || "1".equals(values[ConceptFields.active])) {
-					Long conceptId = new Long(values[ComponentFields.id]);
-					componentFactory.createConcept(conceptId, values);
+					String conceptId = values[ComponentFields.id];
+					componentFactory.createConcept(conceptId, values[ConceptFields.effectiveTime], values[ConceptFields.active],
+							values[ConceptFields.moduleId], values[ConceptFields.definitionStatusId]);
 				}
 			}
 		}, "concepts");
@@ -110,17 +114,28 @@ public class ReleaseImporter {
 			@Override
 			public void handle(String[] values) {
 				if (loadingProfile.isInactiveRelationships() || "1".equals(values[RelationshipFields.active])) {
-					final Concept concept = getCreateConcept(values[RelationshipFields.sourceId]);
+					final String sourceId = values[RelationshipFields.sourceId];
 					final String type = values[RelationshipFields.typeId];
 					final String value = values[RelationshipFields.destinationId];
 					if (loadingProfile.isAttributeMapOnConcept()) {
-						concept.addAttribute(type, value);
+						componentFactory.addConceptAttribute(sourceId, type, value);
 					}
 					if (type.equals(ConceptConstants.isA)) {
-						concept.addParent(getCreateConcept(value));
+						componentFactory.addConceptParent(sourceId, value);
 					}
 					if (loadingProfile.isRelationshipsOfAllTypes()) {
-						concept.addRelationship(new Relationship(values));
+						componentFactory.addRelationship(
+								values[RelationshipFields.id],
+								values[RelationshipFields.effectiveTime],
+								values[RelationshipFields.active],
+								values[RelationshipFields.moduleId],
+								values[RelationshipFields.sourceId],
+								values[RelationshipFields.destinationId],
+								values[RelationshipFields.relationshipGroup],
+								values[RelationshipFields.typeId],
+								values[RelationshipFields.characteristicTypeId],
+								values[RelationshipFields.modifierId]
+						);
 					}
 				}
 			}
@@ -132,12 +147,18 @@ public class ReleaseImporter {
 			@Override
 			public void handle(String[] values) {
 				if (loadingProfile.isInactiveDescriptions() || "1".equals(values[DescriptionFields.active])) {
-					final Concept concept = getCreateConcept(new Long(values[DescriptionFields.conceptId]));
-					if (ConceptConstants.FSN.equals(values[DescriptionFields.typeId])) {
-						concept.setFsn(values[DescriptionFields.term]);
+					final String conceptId = values[DescriptionFields.conceptId];
+					final String value = values[DescriptionFields.typeId];
+					if (ConceptConstants.FSN.equals(value)) {
+						componentFactory.addConceptFSN(conceptId, values[DescriptionFields.term]);
 					}
 					if (loadingProfile.isDescriptionsOfAllTypes()) {
-						concept.addDescription(new Description(values));
+						componentFactory.addDescription(
+								values[DescriptionFields.id],
+								values[DescriptionFields.active],
+								values[DescriptionFields.term],
+								values[DescriptionFields.conceptId]
+						);
 					}
 				}
 			}
@@ -152,8 +173,8 @@ public class ReleaseImporter {
 					final String refsetId = values[RefsetFields.refsetId];
 					if (loadingProfile.isAllRefsets() || loadingProfile.isRefset(refsetId)) {
 						final String referencedComponentId = values[RefsetFields.referencedComponentId];
-						if (Concept.isConceptId(referencedComponentId)) {
-							getCreateConcept(new Long(referencedComponentId)).addMemberOfRefsetId(new Long(refsetId));
+						if (ConceptImpl.isConceptId(referencedComponentId)) {
+							componentFactory.addConceptReferencedInRefsetId(refsetId, referencedComponentId);
 						}
 					}
 				}
@@ -161,24 +182,15 @@ public class ReleaseImporter {
 		}, "reference set members");
 	}
 
-	private Concept getCreateConcept(String id) {
-		return getCreateConcept(new Long(id));
-	}
-
-	private Concept getCreateConcept(Long id) {
-		Concept concept = componentStore.getConcepts().get(id);
-		if (concept == null) {
-			concept = new Concept(id);
-			componentStore.addConcept(concept);
-		}
-		return concept;
-	}
-
 	private Callable<String> readLinesCallable(final Path rf2FilePath, final ValuesHandler valuesHandler, final String componentType) {
 		return new Callable<String>() {
 			@Override
 			public String call() throws Exception {
-				readLines(rf2FilePath, valuesHandler, componentType);
+				try {
+					readLines(rf2FilePath, valuesHandler, componentType);
+				} catch (Exception e) {
+					logger.error("Failed to read or process lines.", e);
+				}
 				return null;
 			}
 		};

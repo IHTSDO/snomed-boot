@@ -61,6 +61,10 @@ public class LoadingProfile implements Cloneable {
 		return this.clone().setRelationshipsOfAllTypes(false);
 	}
 
+	public LoadingProfile withInactiveComponents() {
+		return this.clone().setInactiveConcepts(true).setInactiveDescriptions(true).setInactiveRelationships(true);
+	}
+
 	public LoadingProfile withInactiveConcepts() {
 		return this.clone().setInactiveConcepts(true);
 	}
@@ -88,9 +92,16 @@ public class LoadingProfile implements Cloneable {
 	public LoadingProfile withInactiveRefsetMembers() {
 		return this.clone().setInactiveRefsetMembers(true);
 	}
-
 	public LoadingProfile withoutInactiveRefsetMembers() {
 		return this.clone().setInactiveRefsetMembers(false);
+	}
+
+	public LoadingProfile withAllRefsets() {
+		return this.clone().setAllRefsets(true);
+	}
+
+	public LoadingProfile withoutAllRefsets() {
+		return this.clone().setAllRefsets(false);
 	}
 
 	public LoadingProfile withRefset(String refsetId) {
@@ -112,6 +123,12 @@ public class LoadingProfile implements Cloneable {
 		for (String id : refsetId) {
 			clone.getRefsetIdsNoClone().remove(id);
 		}
+		return clone;
+	}
+
+	public LoadingProfile withoutAnyRefsets() {
+		final LoadingProfile clone = this.clone();
+		clone.refsetIds.clear();
 		return clone;
 	}
 
@@ -187,6 +204,11 @@ public class LoadingProfile implements Cloneable {
 
 	private LoadingProfile setInactiveRefsetMembers(boolean inactiveRefsetMembers) {
 		this.inactiveRefsetMembers = inactiveRefsetMembers;
+		return this;
+	}
+
+	private LoadingProfile setAllRefsets(boolean allRefsets) {
+		this.allRefsets = allRefsets;
 		return this;
 	}
 
