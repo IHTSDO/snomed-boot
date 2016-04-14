@@ -1,6 +1,6 @@
-package org.ihtsdo.snomed.boot.factory;
+package org.ihtsdo.otf.snomedboot.factory;
 
-import org.ihtsdo.snomed.boot.domain.Concept;
+import org.ihtsdo.otf.snomedboot.domain.Concept;
 
 public interface ComponentFactory {
 

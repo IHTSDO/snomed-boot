@@ -1,6 +1,6 @@
-package org.ihtsdo.snomed.boot.factory.implementation.standard;
+package org.ihtsdo.otf.snomedboot.factory.implementation.standard;
 
-import org.ihtsdo.snomed.boot.domain.Relationship;
+import org.ihtsdo.otf.snomedboot.domain.Relationship;
 
 public class RelationshipImpl implements Relationship {
 

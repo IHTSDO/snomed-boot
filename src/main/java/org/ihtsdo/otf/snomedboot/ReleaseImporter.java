@@ -1,12 +1,12 @@
-package org.ihtsdo.snomed.boot;
+package org.ihtsdo.otf.snomedboot;
 
-import org.ihtsdo.snomed.boot.domain.Concept;
-import org.ihtsdo.snomed.boot.domain.ConceptConstants;
-import org.ihtsdo.snomed.boot.domain.rf2.*;
-import org.ihtsdo.snomed.boot.factory.ComponentFactory;
-import org.ihtsdo.snomed.boot.factory.implementation.standard.ComponentFactoryImpl;
-import org.ihtsdo.snomed.boot.factory.implementation.standard.ConceptImpl;
-import org.ihtsdo.snomed.boot.service.LoadingProfile;
+import org.ihtsdo.otf.snomedboot.domain.Concept;
+import org.ihtsdo.otf.snomedboot.domain.ConceptConstants;
+import org.ihtsdo.otf.snomedboot.domain.rf2.*;
+import org.ihtsdo.otf.snomedboot.factory.ComponentFactory;
+import org.ihtsdo.otf.snomedboot.factory.implementation.standard.ComponentFactoryImpl;
+import org.ihtsdo.otf.snomedboot.factory.implementation.standard.ConceptImpl;
+import org.ihtsdo.otf.snomedboot.factory.LoadingProfile;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -100,10 +100,10 @@ public class ReleaseImporter {
 		readLines(rf2File, new ValuesHandler() {
 			@Override
 			public void handle(String[] values) {
-				if (loadingProfile.isInactiveConcepts() || "1".equals(values[ConceptFields.active])) {
-					String conceptId = values[ComponentFields.id];
-					componentFactory.createConcept(conceptId, values[ConceptFields.effectiveTime], values[ConceptFields.active],
-							values[ConceptFields.moduleId], values[ConceptFields.definitionStatusId]);
+				if (loadingProfile.isInactiveConcepts() || "1".equals(values[ConceptFieldIndexes.active])) {
+					String conceptId = values[ComponentFieldIndexes.id];
+					componentFactory.createConcept(conceptId, values[ConceptFieldIndexes.effectiveTime], values[ConceptFieldIndexes.active],
+							values[ConceptFieldIndexes.moduleId], values[ConceptFieldIndexes.definitionStatusId]);
 				}
 			}
 		}, "concepts");
@@ -113,10 +113,10 @@ public class ReleaseImporter {
 		return readLinesCallable(rf2File, new ValuesHandler() {
 			@Override
 			public void handle(String[] values) {
-				if (loadingProfile.isInactiveRelationships() || "1".equals(values[RelationshipFields.active])) {
-					final String sourceId = values[RelationshipFields.sourceId];
-					final String type = values[RelationshipFields.typeId];
-					final String value = values[RelationshipFields.destinationId];
+				if (loadingProfile.isInactiveRelationships() || "1".equals(values[RelationshipFieldIndexes.active])) {
+					final String sourceId = values[RelationshipFieldIndexes.sourceId];
+					final String type = values[RelationshipFieldIndexes.typeId];
+					final String value = values[RelationshipFieldIndexes.destinationId];
 					if (loadingProfile.isAttributeMapOnConcept()) {
 						componentFactory.addConceptAttribute(sourceId, type, value);
 					}
@@ -125,16 +125,16 @@ public class ReleaseImporter {
 					}
 					if (loadingProfile.isRelationshipsOfAllTypes()) {
 						componentFactory.addRelationship(
-								values[RelationshipFields.id],
-								values[RelationshipFields.effectiveTime],
-								values[RelationshipFields.active],
-								values[RelationshipFields.moduleId],
-								values[RelationshipFields.sourceId],
-								values[RelationshipFields.destinationId],
-								values[RelationshipFields.relationshipGroup],
-								values[RelationshipFields.typeId],
-								values[RelationshipFields.characteristicTypeId],
-								values[RelationshipFields.modifierId]
+								values[RelationshipFieldIndexes.id],
+								values[RelationshipFieldIndexes.effectiveTime],
+								values[RelationshipFieldIndexes.active],
+								values[RelationshipFieldIndexes.moduleId],
+								values[RelationshipFieldIndexes.sourceId],
+								values[RelationshipFieldIndexes.destinationId],
+								values[RelationshipFieldIndexes.relationshipGroup],
+								values[RelationshipFieldIndexes.typeId],
+								values[RelationshipFieldIndexes.characteristicTypeId],
+								values[RelationshipFieldIndexes.modifierId]
 						);
 					}
 				}
@@ -146,18 +146,18 @@ public class ReleaseImporter {
 		return readLinesCallable(rf2File, new ValuesHandler() {
 			@Override
 			public void handle(String[] values) {
-				if (loadingProfile.isInactiveDescriptions() || "1".equals(values[DescriptionFields.active])) {
-					final String conceptId = values[DescriptionFields.conceptId];
-					final String value = values[DescriptionFields.typeId];
+				if (loadingProfile.isInactiveDescriptions() || "1".equals(values[DescriptionFieldIndexes.active])) {
+					final String conceptId = values[DescriptionFieldIndexes.conceptId];
+					final String value = values[DescriptionFieldIndexes.typeId];
 					if (ConceptConstants.FSN.equals(value)) {
-						componentFactory.addConceptFSN(conceptId, values[DescriptionFields.term]);
+						componentFactory.addConceptFSN(conceptId, values[DescriptionFieldIndexes.term]);
 					}
 					if (loadingProfile.isDescriptionsOfAllTypes()) {
 						componentFactory.addDescription(
-								values[DescriptionFields.id],
-								values[DescriptionFields.active],
-								values[DescriptionFields.term],
-								values[DescriptionFields.conceptId]
+								values[DescriptionFieldIndexes.id],
+								values[DescriptionFieldIndexes.active],
+								values[DescriptionFieldIndexes.term],
+								values[DescriptionFieldIndexes.conceptId]
 						);
 					}
 				}
@@ -169,10 +169,10 @@ public class ReleaseImporter {
 		return readLinesCallable(rf2File, new ValuesHandler() {
 			@Override
 			public void handle(String[] values) {
-				if (loadingProfile.isInactiveRefsetMembers() || "1".equals(values[RefsetFields.active])) {
-					final String refsetId = values[RefsetFields.refsetId];
+				if (loadingProfile.isInactiveRefsetMembers() || "1".equals(values[RefsetFieldIndexes.active])) {
+					final String refsetId = values[RefsetFieldIndexes.refsetId];
 					if (loadingProfile.isAllRefsets() || loadingProfile.isRefset(refsetId)) {
-						final String referencedComponentId = values[RefsetFields.referencedComponentId];
+						final String referencedComponentId = values[RefsetFieldIndexes.referencedComponentId];
 						if (ConceptImpl.isConceptId(referencedComponentId)) {
 							componentFactory.addConceptReferencedInRefsetId(refsetId, referencedComponentId);
 						}

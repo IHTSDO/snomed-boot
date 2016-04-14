@@ -1,8 +1,8 @@
-package org.ihtsdo.snomed.boot.factory.implementation.standard;
+package org.ihtsdo.otf.snomedboot.factory.implementation.standard;
 
-import org.ihtsdo.snomed.boot.domain.Concept;
-import org.ihtsdo.snomed.boot.domain.Description;
-import org.ihtsdo.snomed.boot.domain.Relationship;
+import org.ihtsdo.otf.snomedboot.domain.Concept;
+import org.ihtsdo.otf.snomedboot.domain.Description;
+import org.ihtsdo.otf.snomedboot.domain.Relationship;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 

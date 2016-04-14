@@ -1,4 +1,4 @@
-package org.ihtsdo.snomed.boot.factory;
+package org.ihtsdo.otf.snomedboot.factory;
 
 public class FactoryUtils {
 

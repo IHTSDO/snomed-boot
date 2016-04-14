@@ -1,7 +1,7 @@
-package org.ihtsdo.snomed.boot;
+package org.ihtsdo.otf.snomedboot;
 
-import org.ihtsdo.snomed.boot.domain.Concept;
-import org.ihtsdo.snomed.boot.service.LoadingProfile;
+import org.ihtsdo.otf.snomedboot.domain.Concept;
+import org.ihtsdo.otf.snomedboot.factory.LoadingProfile;
 import org.junit.Assert;
 import org.junit.Test;
 

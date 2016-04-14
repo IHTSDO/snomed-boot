@@ -1,9 +1,9 @@
-package org.ihtsdo.snomed.boot.factory.implementation.standard;
+package org.ihtsdo.otf.snomedboot.factory.implementation.standard;
 
-import org.ihtsdo.snomed.boot.ComponentStore;
-import org.ihtsdo.snomed.boot.domain.*;
-import org.ihtsdo.snomed.boot.factory.ComponentFactory;
-import org.ihtsdo.snomed.boot.factory.FactoryUtils;
+import org.ihtsdo.otf.snomedboot.ComponentStore;
+import org.ihtsdo.otf.snomedboot.domain.Concept;
+import org.ihtsdo.otf.snomedboot.factory.ComponentFactory;
+import org.ihtsdo.otf.snomedboot.factory.FactoryUtils;
 
 public class ComponentFactoryImpl implements ComponentFactory {
 

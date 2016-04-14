@@ -1,6 +1,6 @@
-package org.ihtsdo.snomed.boot.domain.rf2;
+package org.ihtsdo.otf.snomedboot.domain.rf2;
 
-public interface RelationshipFields extends ComponentFields {
+public interface RelationshipFieldIndexes extends ComponentFieldIndexes {
 
 	// id	effectiveTime	active	moduleId	sourceId	destinationId	relationshipGroup	typeId	characteristicTypeId	modifierId
 	// 0	1				2		3			4			5				6					7		8						9

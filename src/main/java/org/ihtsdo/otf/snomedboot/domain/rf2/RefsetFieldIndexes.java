@@ -1,6 +1,6 @@
-package org.ihtsdo.snomed.boot.domain.rf2;
+package org.ihtsdo.otf.snomedboot.domain.rf2;
 
-public interface RefsetFields extends ComponentFields {
+public interface RefsetFieldIndexes extends ComponentFieldIndexes {
 
 	// id	effectiveTime	active	moduleId	refsetId	referencedComponentId
 	// 0	1				2		3			4			5

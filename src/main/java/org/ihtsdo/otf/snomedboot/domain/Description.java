@@ -1,4 +1,4 @@
-package org.ihtsdo.snomed.boot.domain;
+package org.ihtsdo.otf.snomedboot.domain;
 
 public interface Description {
 	String getId();

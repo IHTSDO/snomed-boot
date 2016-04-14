@@ -1,4 +1,4 @@
-package org.ihtsdo.snomed.boot;
+package org.ihtsdo.otf.snomedboot;
 
 import java.io.FileNotFoundException;
 import java.nio.file.Path;

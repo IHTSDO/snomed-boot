@@ -1,7 +1,7 @@
-package org.ihtsdo.snomed.boot.service;
+package org.ihtsdo.otf.snomedboot.factory;
 
 import com.google.common.collect.ImmutableSet;
-import org.ihtsdo.snomed.boot.domain.ConceptConstants;
+import org.ihtsdo.otf.snomedboot.domain.ConceptConstants;
 
 import java.util.Collections;
 import java.util.HashSet;
@@ -224,12 +224,14 @@ public class LoadingProfile implements Cloneable {
 	@Override
 	protected LoadingProfile clone() {
 		return new LoadingProfile()
+				.setAttributeMapOnConcept(this.attributeMapOnConcept)
 				.setDescriptionsOfAllTypes(this.descriptionsOfAllTypes)
 				.setRelationshipsOfAllTypes(this.relationshipsOfAllTypes)
 				.setInactiveConcepts(this.inactiveConcepts)
 				.setInactiveDescriptions(this.inactiveDescriptions)
 				.setInactiveRelationships(this.inactiveRelationships)
 				.setInactiveRefsetMembers(this.inactiveRefsetMembers)
+				.setAllRefsets(this.allRefsets)
 				.setRefsetIds(new HashSet<>(this.refsetIds));
 	}
 }

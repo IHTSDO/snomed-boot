@@ -1,6 +1,6 @@
-package org.ihtsdo.snomed.boot.domain;
+package org.ihtsdo.otf.snomedboot.domain;
 
-import org.ihtsdo.snomed.boot.factory.implementation.standard.ConceptImpl;
+import org.ihtsdo.otf.snomedboot.factory.implementation.standard.ConceptImpl;
 import org.junit.Assert;
 import org.junit.Test;
 

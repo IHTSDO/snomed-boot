@@ -1,6 +1,6 @@
-package org.ihtsdo.snomed.boot.domain.rf2;
+package org.ihtsdo.otf.snomedboot.domain.rf2;
 
-public interface DescriptionFields extends ComponentFields {
+public interface DescriptionFieldIndexes extends ComponentFieldIndexes {
 
 	// id	effectiveTime	active	moduleId	conceptId	languageCode	typeId	term	caseSignificanceId
 	// 0	1				2		3			4			5				6		7		8

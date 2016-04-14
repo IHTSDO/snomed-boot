@@ -1,8 +1,8 @@
-package org.ihtsdo.snomed.boot;
+package org.ihtsdo.otf.snomedboot;
 
 import it.unimi.dsi.fastutil.longs.Long2ObjectMap;
 import it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap;
-import org.ihtsdo.snomed.boot.factory.implementation.standard.ConceptImpl;
+import org.ihtsdo.otf.snomedboot.factory.implementation.standard.ConceptImpl;
 
 public class ComponentStore {
 
