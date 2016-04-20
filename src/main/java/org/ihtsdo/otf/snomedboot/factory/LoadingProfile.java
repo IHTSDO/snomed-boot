@@ -18,8 +18,8 @@ public class LoadingProfile implements Cloneable {
 		light.refsetIds.add(ConceptConstants.US_EN_LANGUAGE_REFERENCE_SET);
 
 		full.attributeMapOnConcept = true;
-		full.descriptionsOfAllTypes = true;
-		full.relationshipsOfAllTypes = true;
+		full.fullDescriptionObjects = true;
+		full.fullRelationshipObjects = true;
 		full.inactiveConcepts = true;
 		full.inactiveDescriptions = true;
 		full.inactiveRelationships = true;
@@ -28,8 +28,8 @@ public class LoadingProfile implements Cloneable {
 	}
 
 	private boolean attributeMapOnConcept;
-	private boolean descriptionsOfAllTypes;
-	private boolean relationshipsOfAllTypes;
+	private boolean fullDescriptionObjects;
+	private boolean fullRelationshipObjects;
 	private boolean inactiveConcepts = true;
 	private boolean inactiveDescriptions;
 	private boolean inactiveRelationships;
@@ -45,20 +45,20 @@ public class LoadingProfile implements Cloneable {
 		return this.clone().setAttributeMapOnConcept(false);
 	}
 
-	public LoadingProfile withDescriptionsOfAllTypes() {
-		return this.clone().setDescriptionsOfAllTypes(true);
+	public LoadingProfile withFullDescriptionObjects() {
+		return this.clone().setFullDescriptionObjects(true);
 	}
 
-	public LoadingProfile withoutDescriptionsOfAllTypes() {
-		return this.clone().setDescriptionsOfAllTypes(false);
+	public LoadingProfile withoutFullDescriptionObjects() {
+		return this.clone().setFullDescriptionObjects(false);
 	}
 
-	public LoadingProfile withRelationshipsOfAllTypes() {
-		return this.clone().setRelationshipsOfAllTypes(true);
+	public LoadingProfile withFullRelationshipObjects() {
+		return this.clone().setFullRelationshipObjects(true);
 	}
 
-	public LoadingProfile withoutRelationshipsOfAllTypes() {
-		return this.clone().setRelationshipsOfAllTypes(false);
+	public LoadingProfile withoutFullRelationshipObjects() {
+		return this.clone().setFullRelationshipObjects(false);
 	}
 
 	public LoadingProfile withInactiveComponents() {
@@ -136,12 +136,12 @@ public class LoadingProfile implements Cloneable {
 		return attributeMapOnConcept;
 	}
 
-	public boolean isDescriptionsOfAllTypes() {
-		return descriptionsOfAllTypes;
+	public boolean isFullDescriptionObjects() {
+		return fullDescriptionObjects;
 	}
 
-	public boolean isRelationshipsOfAllTypes() {
-		return relationshipsOfAllTypes;
+	public boolean isFullRelationshipObjects() {
+		return fullRelationshipObjects;
 	}
 
 	public boolean isInactiveConcepts() {
@@ -177,13 +177,13 @@ public class LoadingProfile implements Cloneable {
 		return this;
 	}
 
-	private LoadingProfile setDescriptionsOfAllTypes(boolean descriptionsOfAllTypes) {
-		this.descriptionsOfAllTypes = descriptionsOfAllTypes;
+	private LoadingProfile setFullDescriptionObjects(boolean fullDescriptionObjects) {
+		this.fullDescriptionObjects = fullDescriptionObjects;
 		return this;
 	}
 
-	private LoadingProfile setRelationshipsOfAllTypes(boolean relationshipsOfAllTypes) {
-		this.relationshipsOfAllTypes = relationshipsOfAllTypes;
+	private LoadingProfile setFullRelationshipObjects(boolean fullRelationshipObjects) {
+		this.fullRelationshipObjects = fullRelationshipObjects;
 		return this;
 	}
 
@@ -225,8 +225,8 @@ public class LoadingProfile implements Cloneable {
 	protected LoadingProfile clone() {
 		return new LoadingProfile()
 				.setAttributeMapOnConcept(this.attributeMapOnConcept)
-				.setDescriptionsOfAllTypes(this.descriptionsOfAllTypes)
-				.setRelationshipsOfAllTypes(this.relationshipsOfAllTypes)
+				.setFullDescriptionObjects(this.fullDescriptionObjects)
+				.setFullRelationshipObjects(this.fullRelationshipObjects)
 				.setInactiveConcepts(this.inactiveConcepts)
 				.setInactiveDescriptions(this.inactiveDescriptions)
 				.setInactiveRelationships(this.inactiveRelationships)

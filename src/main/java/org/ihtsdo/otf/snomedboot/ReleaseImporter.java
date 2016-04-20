@@ -123,7 +123,7 @@ public class ReleaseImporter {
 					if (type.equals(ConceptConstants.isA)) {
 						componentFactory.addConceptParent(sourceId, value);
 					}
-					if (loadingProfile.isRelationshipsOfAllTypes()) {
+					if (loadingProfile.isFullRelationshipObjects()) {
 						componentFactory.addRelationship(
 								values[RelationshipFieldIndexes.id],
 								values[RelationshipFieldIndexes.effectiveTime],
@@ -152,7 +152,7 @@ public class ReleaseImporter {
 					if (ConceptConstants.FSN.equals(value)) {
 						componentFactory.addConceptFSN(conceptId, values[DescriptionFieldIndexes.term]);
 					}
-					if (loadingProfile.isDescriptionsOfAllTypes()) {
+					if (loadingProfile.isFullDescriptionObjects()) {
 						componentFactory.addDescription(
 								values[DescriptionFieldIndexes.id],
 								values[DescriptionFieldIndexes.active],
