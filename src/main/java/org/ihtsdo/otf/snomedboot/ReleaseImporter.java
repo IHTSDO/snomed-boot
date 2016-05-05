@@ -117,25 +117,27 @@ public class ReleaseImporter {
 					final String sourceId = values[RelationshipFieldIndexes.sourceId];
 					final String type = values[RelationshipFieldIndexes.typeId];
 					final String value = values[RelationshipFieldIndexes.destinationId];
-					if (loadingProfile.isAttributeMapOnConcept()) {
-						componentFactory.addConceptAttribute(sourceId, type, value);
-					}
-					if (type.equals(ConceptConstants.isA)) {
-						componentFactory.addConceptParent(sourceId, value);
-					}
-					if (loadingProfile.isFullRelationshipObjects()) {
-						componentFactory.addRelationship(
-								values[RelationshipFieldIndexes.id],
-								values[RelationshipFieldIndexes.effectiveTime],
-								values[RelationshipFieldIndexes.active],
-								values[RelationshipFieldIndexes.moduleId],
-								values[RelationshipFieldIndexes.sourceId],
-								values[RelationshipFieldIndexes.destinationId],
-								values[RelationshipFieldIndexes.relationshipGroup],
-								values[RelationshipFieldIndexes.typeId],
-								values[RelationshipFieldIndexes.characteristicTypeId],
-								values[RelationshipFieldIndexes.modifierId]
-						);
+					if (!ConceptConstants.STATED_RELATIONSHIP.equals(type) || loadingProfile.isStatedRelationships()) {
+						if (loadingProfile.isAttributeMapOnConcept()) {
+							componentFactory.addConceptAttribute(sourceId, type, value);
+						}
+						if (type.equals(ConceptConstants.isA)) {
+							componentFactory.addConceptParent(sourceId, value);
+						}
+						if (loadingProfile.isFullRelationshipObjects()) {
+							componentFactory.addRelationship(
+									values[RelationshipFieldIndexes.id],
+									values[RelationshipFieldIndexes.effectiveTime],
+									values[RelationshipFieldIndexes.active],
+									values[RelationshipFieldIndexes.moduleId],
+									values[RelationshipFieldIndexes.sourceId],
+									values[RelationshipFieldIndexes.destinationId],
+									values[RelationshipFieldIndexes.relationshipGroup],
+									values[RelationshipFieldIndexes.typeId],
+									values[RelationshipFieldIndexes.characteristicTypeId],
+									values[RelationshipFieldIndexes.modifierId]
+							);
+						}
 					}
 				}
 			}

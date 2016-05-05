@@ -28,6 +28,7 @@ public class LoadingProfile implements Cloneable {
 	}
 
 	private boolean attributeMapOnConcept;
+	private boolean statedRelationships;
 	private boolean fullDescriptionObjects;
 	private boolean fullRelationshipObjects;
 	private boolean inactiveConcepts = true;
@@ -43,6 +44,14 @@ public class LoadingProfile implements Cloneable {
 
 	public LoadingProfile withoutAttributeMapOnConcept() {
 		return this.clone().setAttributeMapOnConcept(false);
+	}
+
+	public LoadingProfile withStatedRelationships() {
+		return this.clone().setStatedRelationships(true);
+	}
+
+	public LoadingProfile withoutStatedRelationships() {
+		return this.clone().setStatedRelationships(false);
 	}
 
 	public LoadingProfile withFullDescriptionObjects() {
@@ -136,6 +145,10 @@ public class LoadingProfile implements Cloneable {
 		return attributeMapOnConcept;
 	}
 
+	public boolean isStatedRelationships() {
+		return statedRelationships;
+	}
+
 	public boolean isFullDescriptionObjects() {
 		return fullDescriptionObjects;
 	}
@@ -174,6 +187,11 @@ public class LoadingProfile implements Cloneable {
 
 	private LoadingProfile setAttributeMapOnConcept(boolean attributeMapOnConcept) {
 		this.attributeMapOnConcept = attributeMapOnConcept;
+		return this;
+	}
+
+	public LoadingProfile setStatedRelationships(boolean statedRelationships) {
+		this.statedRelationships = statedRelationships;
 		return this;
 	}
 
@@ -225,6 +243,7 @@ public class LoadingProfile implements Cloneable {
 	protected LoadingProfile clone() {
 		return new LoadingProfile()
 				.setAttributeMapOnConcept(this.attributeMapOnConcept)
+				.setStatedRelationships(this.statedRelationships)
 				.setFullDescriptionObjects(this.fullDescriptionObjects)
 				.setFullRelationshipObjects(this.fullRelationshipObjects)
 				.setInactiveConcepts(this.inactiveConcepts)
