@@ -2,6 +2,7 @@ package org.ihtsdo.otf.snomedboot;
 
 import org.ihtsdo.otf.snomedboot.domain.Concept;
 import org.ihtsdo.otf.snomedboot.factory.LoadingProfile;
+import org.ihtsdo.otf.snomedboot.factory.implementation.standard.ComponentFactoryImpl;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -12,8 +13,10 @@ public class ReleaseImporterIntegrationTestManual {
 
 	@Test
 	public void testLoadReleaseZip() throws Exception {
-		ReleaseImporter releaseImporter = new ReleaseImporter();
-		final Map<Long, ? extends Concept> conceptMap = releaseImporter.loadReleaseFiles("release/SnomedCT_RF2Release_INT_20150731", LoadingProfile.light);
+		final ComponentStore componentStore = new ComponentStore();
+		ReleaseImporter releaseImporter = new ReleaseImporter(new ComponentFactoryImpl(componentStore));
+		releaseImporter.loadReleaseFiles("release/SnomedCT_RF2Release_INT_20150731", LoadingProfile.light);
+		final Map<Long, ? extends Concept> conceptMap = componentStore.getConcepts();
 
 		int activeConcepts = 0;
 		for (Concept concept : conceptMap.values()) {

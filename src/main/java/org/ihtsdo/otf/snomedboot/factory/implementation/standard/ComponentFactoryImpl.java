@@ -1,7 +1,6 @@
 package org.ihtsdo.otf.snomedboot.factory.implementation.standard;
 
 import org.ihtsdo.otf.snomedboot.ComponentStore;
-import org.ihtsdo.otf.snomedboot.domain.Concept;
 import org.ihtsdo.otf.snomedboot.factory.ComponentFactory;
 import org.ihtsdo.otf.snomedboot.factory.FactoryUtils;
 
@@ -14,8 +13,8 @@ public class ComponentFactoryImpl implements ComponentFactory {
 	}
 
 	@Override
-	public Concept createConcept(String conceptId, String effectiveTime, String active, String moduleId, String definitionStatusId) {
-		return componentStore.addConcept(new ConceptImpl(conceptId, effectiveTime, FactoryUtils.parseActive(active), moduleId, definitionStatusId));
+	public void createConcept(String conceptId, String effectiveTime, String active, String moduleId, String definitionStatusId) {
+		componentStore.addConcept(new ConceptImpl(conceptId, effectiveTime, FactoryUtils.parseActive(active), moduleId, definitionStatusId));
 	}
 
 	@Override
@@ -41,7 +40,7 @@ public class ComponentFactoryImpl implements ComponentFactory {
 	}
 
 	@Override
-	public void addDescription(String id, String active, String term, String conceptId) {
+	public void addDescription(String id, String effectiveTime, String active, String moduleId, String conceptId, String languageCode, String typeId, String term, String caseSignificanceId) {
 		getConceptForReference(conceptId).addDescription(new DescriptionImpl(id, FactoryUtils.parseActive(active), term, conceptId));
 	}
 

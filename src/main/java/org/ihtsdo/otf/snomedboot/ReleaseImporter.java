@@ -1,12 +1,10 @@
 package org.ihtsdo.otf.snomedboot;
 
-import org.ihtsdo.otf.snomedboot.domain.Concept;
 import org.ihtsdo.otf.snomedboot.domain.ConceptConstants;
 import org.ihtsdo.otf.snomedboot.domain.rf2.*;
 import org.ihtsdo.otf.snomedboot.factory.ComponentFactory;
-import org.ihtsdo.otf.snomedboot.factory.implementation.standard.ComponentFactoryImpl;
-import org.ihtsdo.otf.snomedboot.factory.implementation.standard.ConceptImpl;
 import org.ihtsdo.otf.snomedboot.factory.LoadingProfile;
+import org.ihtsdo.otf.snomedboot.factory.implementation.standard.ConceptImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -21,7 +19,6 @@ import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.EnumSet;
 import java.util.List;
-import java.util.Map;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -30,36 +27,44 @@ public class ReleaseImporter {
 
 	public static final Charset UTF_8 = Charset.forName("UTF-8");
 	private final ComponentFactory componentFactory;
-	private final ComponentStore componentStore;
 	private final ExecutorService executorService;
 	private final Logger logger = LoggerFactory.getLogger(getClass());
 
-	public ReleaseImporter() {
-		componentStore = new ComponentStore();
-		componentFactory = new ComponentFactoryImpl(componentStore);
+	public ReleaseImporter(ComponentFactory componentFactory) {
+		this.componentFactory = componentFactory;
 		executorService = Executors.newCachedThreadPool();
 	}
 
-	public Map<Long, ? extends Concept> loadReleaseFiles(String releaseDirPath, LoadingProfile loadingProfile) throws IOException, InterruptedException {
-		ReleaseFiles releaseFiles = findFiles(releaseDirPath);
-		logger.info("Loading release files {}", releaseFiles);
-		loadConcepts(releaseFiles.getConceptSnapshot(), loadingProfile);
-
-		List<Callable<String>> tasks = new ArrayList<>();
-		tasks.add(loadRelationships(releaseFiles.getRelationshipSnapshot(), loadingProfile));
-		tasks.add(loadDescriptions(releaseFiles.getDescriptionSnapshot(), loadingProfile));
-		if (!loadingProfile.getRefsetIds().isEmpty()) {
-			final List<Path> refsetSnapshots = releaseFiles.getRefsetSnapshots();
-			for (Path refsetSnapshot : refsetSnapshots) {
-				tasks.add(loadRefsets(refsetSnapshot, loadingProfile));
-			}
+	public void loadReleaseFiles(String releaseDirPath, LoadingProfile loadingProfile) throws ReleaseImportException {
+		ReleaseFiles releaseFiles = null;
+		try {
+			releaseFiles = findFiles(releaseDirPath);
+		} catch (IOException e) {
+			throw new ReleaseImportException("Failed to find release files during release import process.", e);
 		}
 
-		executorService.invokeAll(tasks);
+		logger.info("Loading release files {}", releaseFiles);
 
-		logger.info("All in memory. Using approx {} MB of memory.", formatAsMB(Runtime.getRuntime().totalMemory()));
 
-		return componentStore.getConcepts();
+		try {
+			loadConcepts(releaseFiles.getConceptSnapshot(), loadingProfile);
+
+			List<Callable<String>> tasks = new ArrayList<>();
+			tasks.add(loadRelationships(releaseFiles.getRelationshipSnapshot(), loadingProfile));
+			tasks.add(loadDescriptions(releaseFiles.getDescriptionSnapshot(), loadingProfile));
+			if (!loadingProfile.getRefsetIds().isEmpty()) {
+				final List<Path> refsetSnapshots = releaseFiles.getRefsetSnapshots();
+				for (Path refsetSnapshot : refsetSnapshots) {
+					tasks.add(loadRefsets(refsetSnapshot, loadingProfile));
+				}
+			}
+
+			executorService.invokeAll(tasks);
+
+			logger.info("All in memory. Using approx {} MB of memory.", formatAsMB(Runtime.getRuntime().totalMemory()));
+		} catch (IOException | InterruptedException e) {
+			throw new ReleaseImportException("Failed to load release files during release import process.", e);
+		}
 	}
 
 	private ReleaseFiles findFiles(String releaseDirPath) throws IOException {
@@ -109,7 +114,7 @@ public class ReleaseImporter {
 		}, "concepts");
 	}
 
-	private Callable<String> loadRelationships(Path rf2File, final LoadingProfile loadingProfile) throws IOException {
+	private Callable<String> loadRelationships(Path rf2File, final LoadingProfile loadingProfile) {
 		return readLinesCallable(rf2File, new ValuesHandler() {
 			@Override
 			public void handle(String[] values) {
@@ -144,7 +149,7 @@ public class ReleaseImporter {
 		}, "relationships");
 	}
 
-	private Callable<String> loadDescriptions(Path rf2File, final LoadingProfile loadingProfile) throws IOException {
+	private Callable<String> loadDescriptions(Path rf2File, final LoadingProfile loadingProfile) {
 		return readLinesCallable(rf2File, new ValuesHandler() {
 			@Override
 			public void handle(String[] values) {
@@ -157,9 +162,14 @@ public class ReleaseImporter {
 					if (loadingProfile.isFullDescriptionObjects()) {
 						componentFactory.addDescription(
 								values[DescriptionFieldIndexes.id],
+								values[DescriptionFieldIndexes.effectiveTime],
 								values[DescriptionFieldIndexes.active],
+								values[DescriptionFieldIndexes.moduleId],
+								values[DescriptionFieldIndexes.conceptId],
+								values[DescriptionFieldIndexes.languageCode],
+								values[DescriptionFieldIndexes.typeId],
 								values[DescriptionFieldIndexes.term],
-								values[DescriptionFieldIndexes.conceptId]
+								values[DescriptionFieldIndexes.caseSignificanceId]
 						);
 					}
 				}
@@ -167,7 +177,7 @@ public class ReleaseImporter {
 		}, "descriptions");
 	}
 
-	private Callable<String> loadRefsets(Path rf2File, final LoadingProfile loadingProfile) throws IOException {
+	private Callable<String> loadRefsets(Path rf2File, final LoadingProfile loadingProfile) {
 		return readLinesCallable(rf2File, new ValuesHandler() {
 			@Override
 			public void handle(String[] values) {
