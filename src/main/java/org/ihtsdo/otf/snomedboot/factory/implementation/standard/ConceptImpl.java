@@ -51,14 +51,6 @@ public class ConceptImpl implements Concept {
 		return memberOfRefsetIds;
 	}
 
-	public static boolean isConceptId(String componentId) {
-		if (componentId != null) {
-			final int length = componentId.length();
-			return length > 3 && componentId.substring(length - 2, length - 1).equals("0");
-		}
-		return false;
-	}
-
 	/**
 	 * @return A set of all ancestors
 	 * @throws IllegalStateException if an active relationship is found pointing to an inactive parent concept.

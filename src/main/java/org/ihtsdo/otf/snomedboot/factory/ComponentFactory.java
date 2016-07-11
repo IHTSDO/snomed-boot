@@ -16,4 +16,6 @@ public interface ComponentFactory {
 	void addDescription(String id, String effectiveTime, String active, String moduleId, String conceptId, String languageCode, String typeId, String term, String caseSignificanceId);
 
 	void addConceptReferencedInRefsetId(String refsetId, String conceptId);
+
+	void addReferenceSetMember(String id, String effectiveTime, String active, String moduleId, String refsetId, String referencedComponentId, String... otherValues);
 }

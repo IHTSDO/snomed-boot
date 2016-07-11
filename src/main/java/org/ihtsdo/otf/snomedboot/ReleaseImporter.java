@@ -3,8 +3,8 @@ package org.ihtsdo.otf.snomedboot;
 import org.ihtsdo.otf.snomedboot.domain.ConceptConstants;
 import org.ihtsdo.otf.snomedboot.domain.rf2.*;
 import org.ihtsdo.otf.snomedboot.factory.ComponentFactory;
+import org.ihtsdo.otf.snomedboot.factory.FactoryUtils;
 import org.ihtsdo.otf.snomedboot.factory.LoadingProfile;
-import org.ihtsdo.otf.snomedboot.factory.implementation.standard.ConceptImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -17,6 +17,7 @@ import java.nio.file.*;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.text.NumberFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.EnumSet;
 import java.util.List;
 import java.util.concurrent.Callable;
@@ -36,7 +37,7 @@ public class ReleaseImporter {
 	}
 
 	public void loadReleaseFiles(String releaseDirPath, LoadingProfile loadingProfile) throws ReleaseImportException {
-		ReleaseFiles releaseFiles = null;
+		ReleaseFiles releaseFiles;
 		try {
 			releaseFiles = findFiles(releaseDirPath);
 		} catch (IOException e) {
@@ -52,7 +53,7 @@ public class ReleaseImporter {
 			List<Callable<String>> tasks = new ArrayList<>();
 			tasks.add(loadRelationships(releaseFiles.getRelationshipSnapshot(), loadingProfile));
 			tasks.add(loadDescriptions(releaseFiles.getDescriptionSnapshot(), loadingProfile));
-			if (!loadingProfile.getRefsetIds().isEmpty()) {
+			if (loadingProfile.isAllRefsets() || !loadingProfile.getRefsetIds().isEmpty()) {
 				final List<Path> refsetSnapshots = releaseFiles.getRefsetSnapshots();
 				for (Path refsetSnapshot : refsetSnapshots) {
 					tasks.add(loadRefsets(refsetSnapshot, loadingProfile));
@@ -88,7 +89,7 @@ public class ReleaseImporter {
 						releaseFiles.setTextDefinitionSnapshot(file);
 					} else if (fileName.startsWith("sct2_Relationship_Snapshot")) {
 						releaseFiles.setRelationshipSnapshot(file);
-					} else if (fileName.startsWith("der2_")) {
+					} else if (fileName.startsWith("der2_") && fileName.contains("Snapshot")) {
 						releaseFiles.getRefsetSnapshots().add(file);
 					}
 				}
@@ -185,8 +186,19 @@ public class ReleaseImporter {
 					final String refsetId = values[RefsetFieldIndexes.refsetId];
 					if (loadingProfile.isAllRefsets() || loadingProfile.isRefset(refsetId)) {
 						final String referencedComponentId = values[RefsetFieldIndexes.referencedComponentId];
-						if (ConceptImpl.isConceptId(referencedComponentId)) {
+						if (FactoryUtils.isConceptId(referencedComponentId)) {
 							componentFactory.addConceptReferencedInRefsetId(refsetId, referencedComponentId);
+						}
+						if (loadingProfile.isFullRefsetMemberObjects()) {
+							componentFactory.addReferenceSetMember(
+									values[RefsetFieldIndexes.id],
+									values[RefsetFieldIndexes.effectiveTime],
+									values[RefsetFieldIndexes.active],
+									values[RefsetFieldIndexes.moduleId],
+									values[RefsetFieldIndexes.refsetId],
+									values[RefsetFieldIndexes.referencedComponentId],
+									Arrays.copyOfRange(values, RefsetFieldIndexes.referencedComponentId + 1, values.length)
+							);
 						}
 					}
 				}

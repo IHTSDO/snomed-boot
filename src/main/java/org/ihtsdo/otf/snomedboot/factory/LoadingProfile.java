@@ -25,6 +25,7 @@ public class LoadingProfile implements Cloneable {
 		full.inactiveRelationships = true;
 		full.inactiveRefsetMembers = true;
 		full.allRefsets = true;
+		full.fullRefsetMemberObjects = true;
 	}
 
 	private boolean attributeMapOnConcept;
@@ -36,6 +37,7 @@ public class LoadingProfile implements Cloneable {
 	private boolean inactiveRelationships;
 	private boolean inactiveRefsetMembers;
 	private boolean allRefsets;
+	private boolean fullRefsetMemberObjects;
 	private Set<String> refsetIds = new HashSet<>();
 
 	public LoadingProfile withAttributeMapOnConcept() {
@@ -113,6 +115,14 @@ public class LoadingProfile implements Cloneable {
 		return this.clone().setAllRefsets(false);
 	}
 
+	public LoadingProfile withFullRefsetMemberObjects() {
+		return this.clone().setFullRefsetMemberObjects(true);
+	}
+
+	public LoadingProfile withoutFullRefsetMemberObjects() {
+		return this.clone().setFullRefsetMemberObjects(false);
+	}
+
 	public LoadingProfile withRefset(String refsetId) {
 		return withRefsets(refsetId);
 	}
@@ -177,6 +187,10 @@ public class LoadingProfile implements Cloneable {
 		return allRefsets;
 	}
 
+	public boolean isFullRefsetMemberObjects() {
+		return fullRefsetMemberObjects;
+	}
+
 	public boolean isRefset(String refsetId) {
 		return refsetIds.contains(refsetId);
 	}
@@ -230,6 +244,11 @@ public class LoadingProfile implements Cloneable {
 		return this;
 	}
 
+	public LoadingProfile setFullRefsetMemberObjects(boolean fullRefsetMemberObjects) {
+		this.fullRefsetMemberObjects = fullRefsetMemberObjects;
+		return this;
+	}
+
 	private LoadingProfile setRefsetIds(Set<String> refsetIds) {
 		this.refsetIds = refsetIds;
 		return this;
@@ -251,6 +270,7 @@ public class LoadingProfile implements Cloneable {
 				.setInactiveRelationships(this.inactiveRelationships)
 				.setInactiveRefsetMembers(this.inactiveRefsetMembers)
 				.setAllRefsets(this.allRefsets)
+				.setFullRefsetMemberObjects(this.fullRefsetMemberObjects)
 				.setRefsetIds(new HashSet<>(this.refsetIds));
 	}
 }

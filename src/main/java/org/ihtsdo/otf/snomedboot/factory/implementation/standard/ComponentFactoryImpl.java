@@ -49,6 +49,11 @@ public class ComponentFactoryImpl implements ComponentFactory {
 		getConceptForReference(conceptId).addMemberOfRefsetId(Long.parseLong(refsetId));
 	}
 
+	@Override
+	public void addReferenceSetMember(String id, String effectiveTime, String active, String moduleId, String refsetId, String referencedComponentId, String... otherValues) {
+
+	}
+
 	private ConceptImpl getConceptForReference(String id) {
 		ConceptImpl concept = componentStore.getConcepts().get(Long.parseLong(id));
 		if (concept == null) {
