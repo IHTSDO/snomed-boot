@@ -54,6 +54,16 @@ public class ComponentFactoryImpl implements ComponentFactory {
 
 	}
 
+	@Override
+	public void loadingComponentsStarting() {
+
+	}
+
+	@Override
+	public void loadingComponentsCompleted() {
+
+	}
+
 	private ConceptImpl getConceptForReference(String id) {
 		ConceptImpl concept = componentStore.getConcepts().get(Long.parseLong(id));
 		if (concept == null) {

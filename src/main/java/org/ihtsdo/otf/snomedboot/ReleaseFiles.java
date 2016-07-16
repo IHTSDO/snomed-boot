@@ -7,64 +7,64 @@ import java.util.List;
 
 class ReleaseFiles {
 
-	private Path conceptSnapshot;
-	private Path descriptionSnapshot;
-	private Path textDefinitionSnapshot;
-	private Path relationshipSnapshot;
-	private List<Path> refsetSnapshots;
+	private Path conceptPath;
+	private Path descriptionPath;
+	private Path textDefinitionPath;
+	private Path relationshipPath;
+	private List<Path> refsetPaths;
 
 	public ReleaseFiles() {
-		refsetSnapshots = new ArrayList<>();
+		refsetPaths = new ArrayList<>();
 	}
 
-	public Path getConceptSnapshot() {
-		return conceptSnapshot;
+	public Path getConceptPath() {
+		return conceptPath;
 	}
 
-	public void setConceptSnapshot(Path conceptSnapshot) {
-		this.conceptSnapshot = conceptSnapshot;
+	public void setConceptPath(Path conceptPath) {
+		this.conceptPath = conceptPath;
 	}
 
-	public Path getDescriptionSnapshot() {
-		return descriptionSnapshot;
+	public Path getDescriptionPath() {
+		return descriptionPath;
 	}
 
-	public void setDescriptionSnapshot(Path descriptionSnapshot) {
-		this.descriptionSnapshot = descriptionSnapshot;
+	public void setDescriptionPath(Path descriptionPath) {
+		this.descriptionPath = descriptionPath;
 	}
 
-	public Path getTextDefinitionSnapshot() {
-		return textDefinitionSnapshot;
+	public Path getTextDefinitionPath() {
+		return textDefinitionPath;
 	}
 
-	public void setTextDefinitionSnapshot(Path textDefinitionSnapshot) {
-		this.textDefinitionSnapshot = textDefinitionSnapshot;
+	public void setTextDefinitionPath(Path textDefinitionPath) {
+		this.textDefinitionPath = textDefinitionPath;
 	}
 
-	public Path getRelationshipSnapshot() {
-		return relationshipSnapshot;
+	public Path getRelationshipPath() {
+		return relationshipPath;
 	}
 
-	public void setRelationshipSnapshot(Path relationshipSnapshot) {
-		this.relationshipSnapshot = relationshipSnapshot;
+	public void setRelationshipPath(Path relationshipPath) {
+		this.relationshipPath = relationshipPath;
 	}
 
-	public List<Path> getRefsetSnapshots() {
-		return refsetSnapshots;
+	public List<Path> getRefsetPaths() {
+		return refsetPaths;
 	}
 
-	public void setRefsetSnapshots(List<Path> refsetSnapshots) {
-		this.refsetSnapshots = refsetSnapshots;
+	public void setRefsetPaths(List<Path> refsetPaths) {
+		this.refsetPaths = refsetPaths;
 	}
 
 	public void assertFullSet() throws FileNotFoundException {
-		if (conceptSnapshot == null) {
+		if (conceptPath == null) {
 			throw new FileNotFoundException("Concept RF2 file not found.");
-		} else if (descriptionSnapshot == null) {
+		} else if (descriptionPath == null) {
 			throw new FileNotFoundException("Description RF2 file not found.");
-		} else if (textDefinitionSnapshot == null) {
+		} else if (textDefinitionPath == null) {
 			throw new FileNotFoundException("TextDefinition RF2 file not found.");
-		} else if (relationshipSnapshot == null) {
+		} else if (relationshipPath == null) {
 			throw new FileNotFoundException("Relationship RF2 file not found.");
 		}
 	}
@@ -72,11 +72,11 @@ class ReleaseFiles {
 	@Override
 	public String toString() {
 		return "ReleaseFiles{" +
-				"conceptSnapshot=" + conceptSnapshot +
-				", descriptionSnapshot=" + descriptionSnapshot +
-				", textDefinitionSnapshot=" + textDefinitionSnapshot +
-				", relationshipSnapshot=" + relationshipSnapshot +
-				", refsetSnapshots=" + refsetSnapshots +
+				"conceptPath=" + conceptPath +
+				", descriptionPath=" + descriptionPath +
+				", textDefinitionPath=" + textDefinitionPath +
+				", relationshipPath=" + relationshipPath +
+				", refsetPaths=" + refsetPaths +
 				'}';
 	}
 }

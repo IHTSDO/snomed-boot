@@ -10,22 +10,22 @@ import java.util.Set;
 public class LoadingProfile implements Cloneable {
 
 	public static final LoadingProfile light = new LoadingProfile();
-	public static final LoadingProfile full = new LoadingProfile();
+	public static final LoadingProfile complete = new LoadingProfile();
 
 	static {
 		light.attributeMapOnConcept = true;
 		light.refsetIds.add(ConceptConstants.GB_EN_LANGUAGE_REFERENCE_SET);
 		light.refsetIds.add(ConceptConstants.US_EN_LANGUAGE_REFERENCE_SET);
 
-		full.attributeMapOnConcept = true;
-		full.fullDescriptionObjects = true;
-		full.fullRelationshipObjects = true;
-		full.inactiveConcepts = true;
-		full.inactiveDescriptions = true;
-		full.inactiveRelationships = true;
-		full.inactiveRefsetMembers = true;
-		full.allRefsets = true;
-		full.fullRefsetMemberObjects = true;
+		complete.attributeMapOnConcept = true;
+		complete.fullDescriptionObjects = true;
+		complete.fullRelationshipObjects = true;
+		complete.inactiveConcepts = true;
+		complete.inactiveDescriptions = true;
+		complete.inactiveRelationships = true;
+		complete.inactiveRefsetMembers = true;
+		complete.allRefsets = true;
+		complete.fullRefsetMemberObjects = true;
 	}
 
 	private boolean attributeMapOnConcept;

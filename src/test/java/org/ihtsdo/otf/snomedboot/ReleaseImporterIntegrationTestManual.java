@@ -14,8 +14,8 @@ public class ReleaseImporterIntegrationTestManual {
 	@Test
 	public void testLoadReleaseZip() throws Exception {
 		final ComponentStore componentStore = new ComponentStore();
-		ReleaseImporter releaseImporter = new ReleaseImporter(new ComponentFactoryImpl(componentStore));
-		releaseImporter.loadReleaseFiles("release/SnomedCT_RF2Release_INT_20150731", LoadingProfile.light);
+		ReleaseImporter releaseImporter = new ReleaseImporter();
+		releaseImporter.loadSnapshotReleaseFiles("release/SnomedCT_RF2Release_INT_20150731", LoadingProfile.light, new ComponentFactoryImpl(componentStore));
 		final Map<Long, ? extends Concept> conceptMap = componentStore.getConcepts();
 
 		int activeConcepts = 0;

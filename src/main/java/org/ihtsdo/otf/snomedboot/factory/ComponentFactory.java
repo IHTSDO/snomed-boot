@@ -2,6 +2,10 @@ package org.ihtsdo.otf.snomedboot.factory;
 
 public interface ComponentFactory {
 
+	void loadingComponentsStarting();
+
+	void loadingComponentsCompleted();
+
 	void createConcept(String conceptId, String effectiveTime, String active, String moduleId, String definitionStatusId);
 
 	void addConceptFSN(String conceptId, String term);
