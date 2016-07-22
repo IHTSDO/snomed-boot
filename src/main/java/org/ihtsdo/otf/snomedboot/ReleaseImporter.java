@@ -278,6 +278,7 @@ public class ReleaseImporter {
 			for (Path refsetPath : releaseFiles.getRefsetPaths()) {
 				gatherVersions(refsetPath, versions);
 			}
+			logger.info("Release versions found: {}", versions);
 			return versions;
 		}
 

@@ -12,6 +12,8 @@ public interface ComponentFactory {
 
 	void addConceptParent(String sourceId, String parentId);
 
+	void removeConceptParent(String sourceId, String destinationId);
+
 	void addConceptAttribute(String sourceId, String typeId, String valueId);
 
 	void addRelationship(String id, String effectiveTime, String active, String moduleId, String sourceId,

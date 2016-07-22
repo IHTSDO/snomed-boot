@@ -6,10 +6,7 @@ import org.ihtsdo.otf.snomedboot.domain.Relationship;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 public class ConceptImpl implements Concept {
 
@@ -57,17 +54,23 @@ public class ConceptImpl implements Concept {
 	 */
 	@Override
 	public Set<Long> getAncestorIds() throws IllegalStateException {
-		return collectParentIds(this, new HashSet<Long>());
+		final Stack<Long> stack = new Stack<>();
+		stack.push(id);
+		return collectParentIds(this, new HashSet<Long>(), stack);
 	}
 
-	private Set<Long> collectParentIds(ConceptImpl concept, Set<Long> ancestors) throws IllegalStateException{
+	private Set<Long> collectParentIds(ConceptImpl concept, Set<Long> ancestors, Stack<Long> stack) {
 		for (Concept parentInt : concept.parents) {
 			ConceptImpl parent = (ConceptImpl) parentInt;
-			if (!parent.isActive()) {
-				throw new IllegalStateException("Active isA relationship from active concept " + concept.id + " to inactive concept " + parent.id);
+			final Long parentId = parent.id;
+			if (stack.contains(parentId)) {
+				stack.push(parentId);
+				throw new IllegalStateException("Ancestor loop detected: " + stack.toString());
 			}
-			ancestors.add(parent.id);
-			collectParentIds(parent, ancestors);
+			ancestors.add(parentId);
+			stack.push(parentId);
+			collectParentIds(parent, ancestors, stack);
+			stack.pop();
 		}
 		return ancestors;
 	}
@@ -79,6 +82,10 @@ public class ConceptImpl implements Concept {
 
 	public void addParent(Concept parentConcept) {
 		parents.add(parentConcept);
+	}
+
+	public void removeParent(Concept parentConcept) {
+		parents.remove(parentConcept);
 	}
 
 	@Override

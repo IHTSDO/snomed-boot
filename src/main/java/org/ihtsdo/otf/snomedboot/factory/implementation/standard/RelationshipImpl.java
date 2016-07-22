@@ -4,16 +4,16 @@ import org.ihtsdo.otf.snomedboot.domain.Relationship;
 
 public class RelationshipImpl implements Relationship {
 
-	private final String id;
-	private final String effectiveTime;
-	private final String active;
-	private final String moduleId;
-	private final String sourceId;
+	private String id;
+	private String effectiveTime;
+	private String active;
+	private String moduleId;
+	private String sourceId;
 	private final String destinationId;
 	private final String relationshipGroup;
 	private final String typeId;
-	private final String characteristicTypeId;
-	private final String modifierId;
+	private String characteristicTypeId;
+	private String modifierId;
 
 	public RelationshipImpl(String id, String effectiveTime, String active, String moduleId, String sourceId, String destinationId,
 			String relationshipGroup, String typeId, String characteristicTypeId, String modifierId) {
@@ -29,18 +29,10 @@ public class RelationshipImpl implements Relationship {
 		this.modifierId = modifierId;
 	}
 
-	public RelationshipImpl(String sourceId, String destinationId) {
+	public RelationshipImpl(String destinationId, String relationshipGroup, String typeId) {
 		this.destinationId = destinationId;
-		this.sourceId = sourceId;
-
-		id = "";
-		effectiveTime = "";
-		active = "";
-		moduleId = "";
-		relationshipGroup = "";
-		typeId = "";
-		characteristicTypeId = "";
-		modifierId = "";
+		this.relationshipGroup = relationshipGroup;
+		this.typeId = typeId;
 	}
 
 	@Override

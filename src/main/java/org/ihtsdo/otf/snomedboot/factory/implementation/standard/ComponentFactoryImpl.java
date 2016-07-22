@@ -28,6 +28,11 @@ public class ComponentFactoryImpl implements ComponentFactory {
 	}
 
 	@Override
+	public void removeConceptParent(String sourceId, String parentId) {
+		getConceptForReference(sourceId).removeParent(getConceptForReference(parentId));
+	}
+
+	@Override
 	public void addConceptAttribute(String sourceId, String typeId, String valueId) {
 		getConceptForReference(sourceId).addAttribute(typeId, valueId);
 	}
