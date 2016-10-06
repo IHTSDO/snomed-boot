@@ -18,6 +18,7 @@ public class LoadingProfile implements Cloneable {
 		light.refsetIds.add(ConceptConstants.US_EN_LANGUAGE_REFERENCE_SET);
 
 		complete.attributeMapOnConcept = true;
+		complete.statedRelationships = true;
 		complete.fullDescriptionObjects = true;
 		complete.fullRelationshipObjects = true;
 		complete.inactiveConcepts = true;
