@@ -11,6 +11,7 @@ class ReleaseFiles {
 	private Path descriptionPath;
 	private Path textDefinitionPath;
 	private Path relationshipPath;
+	private Path statedRelationshipPath;
 	private List<Path> refsetPaths;
 
 	public ReleaseFiles() {
@@ -49,6 +50,14 @@ class ReleaseFiles {
 		this.relationshipPath = relationshipPath;
 	}
 
+	public Path getStatedRelationshipPath() {
+		return statedRelationshipPath;
+	}
+
+	public void setStatedRelationshipPath(Path statedRelationshipPath) {
+		this.statedRelationshipPath = statedRelationshipPath;
+	}
+
 	public List<Path> getRefsetPaths() {
 		return refsetPaths;
 	}
@@ -76,6 +85,7 @@ class ReleaseFiles {
 				", descriptionPath=" + descriptionPath +
 				", textDefinitionPath=" + textDefinitionPath +
 				", relationshipPath=" + relationshipPath +
+				", statedRelationshipPath=" + statedRelationshipPath +
 				", refsetPaths=" + refsetPaths +
 				'}';
 	}

@@ -102,18 +102,24 @@ public class ReleaseImporter {
 		private void loadAll(LoadingProfile loadingProfile, ReleaseFiles releaseFiles, String releaseVersion) throws IOException, InterruptedException {
 			loadConcepts(releaseFiles.getConceptPath(), loadingProfile, releaseVersion);
 
-			List<Callable<String>> tasks = new ArrayList<>();
-			tasks.add(loadRelationships(releaseFiles.getRelationshipPath(), loadingProfile, releaseVersion));
-			tasks.add(loadDescriptions(releaseFiles.getDescriptionPath(), loadingProfile, releaseVersion));
-			tasks.add(loadDescriptions(releaseFiles.getTextDefinitionPath(), loadingProfile, releaseVersion));
+			List<Callable<String>> coreComponentTasks = new ArrayList<>();
+			coreComponentTasks.add(loadRelationships(releaseFiles.getRelationshipPath(), loadingProfile, releaseVersion));
+			if (loadingProfile.isStatedRelationships()) {
+				coreComponentTasks.add(loadRelationships(releaseFiles.getStatedRelationshipPath(), loadingProfile, releaseVersion));
+			}
+			coreComponentTasks.add(loadDescriptions(releaseFiles.getDescriptionPath(), loadingProfile, releaseVersion));
+			coreComponentTasks.add(loadDescriptions(releaseFiles.getTextDefinitionPath(), loadingProfile, releaseVersion));
+
+			List<Callable<String>> refsetTasks = new ArrayList<>();
 			if (loadingProfile.isAllRefsets() || !loadingProfile.getRefsetIds().isEmpty()) {
 				final List<Path> refsetSnapshots = releaseFiles.getRefsetPaths();
 				for (Path refsetSnapshot : refsetSnapshots) {
-					tasks.add(loadRefsets(refsetSnapshot, loadingProfile, releaseVersion));
+					refsetTasks.add(loadRefsets(refsetSnapshot, loadingProfile, releaseVersion));
 				}
 			}
 
-			executorService.invokeAll(tasks);
+			executorService.invokeAll(coreComponentTasks);
+			executorService.invokeAll(refsetTasks);
 		}
 
 		private ReleaseFiles findFiles(String releaseDirPath, final String fileType) throws IOException {
@@ -137,6 +143,8 @@ public class ReleaseImporter {
 							releaseFiles.setTextDefinitionPath(file);
 						} else if (fileName.startsWith("sct2_Relationship_" + fileType)) {
 							releaseFiles.setRelationshipPath(file);
+						} else if (fileName.startsWith("sct2_StatedRelationship_" + fileType)) {
+							releaseFiles.setStatedRelationshipPath(file);
 						} else if (fileName.startsWith("der2_") && fileName.contains(fileType)) {
 							releaseFiles.getRefsetPaths().add(file);
 						}
