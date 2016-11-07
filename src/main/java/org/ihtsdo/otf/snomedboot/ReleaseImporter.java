@@ -235,9 +235,9 @@ public class ReleaseImporter {
 		}
 
 		private Callable<String> loadRefsets(Path rf2File, final LoadingProfile loadingProfile, String releaseVersion) {
-			return readLinesCallable(rf2File, new ValuesHandler() {
+			return readLinesCallable(rf2File, new FieldNamesAndValuesHandler() {
 				@Override
-				public void handle(String[] values) {
+				public void handle(String[] fieldNames, String[] values) {
 					if (loadingProfile.isInactiveRefsetMembers() || "1".equals(values[RefsetFieldIndexes.active])) {
 						final String refsetId = values[RefsetFieldIndexes.refsetId];
 						if (loadingProfile.isAllRefsets() || loadingProfile.isRefset(refsetId)) {
@@ -247,6 +247,7 @@ public class ReleaseImporter {
 							}
 							if (loadingProfile.isFullRefsetMemberObjects()) {
 								componentFactory.addReferenceSetMember(
+										fieldNames,
 										values[RefsetFieldIndexes.id],
 										values[RefsetFieldIndexes.effectiveTime],
 										values[RefsetFieldIndexes.active],
@@ -262,12 +263,12 @@ public class ReleaseImporter {
 			}, "reference set members", releaseVersion);
 		}
 
-		private Callable<String> readLinesCallable(final Path rf2FilePath, final ValuesHandler valuesHandler, final String componentType, final String releaseVersion) {
+		private Callable<String> readLinesCallable(final Path rf2FilePath, final FileContentHandler contentHandler, final String componentType, final String releaseVersion) {
 			return new Callable<String>() {
 				@Override
 				public String call() throws Exception {
 					try {
-						readLines(rf2FilePath, valuesHandler, componentType, releaseVersion);
+						readLines(rf2FilePath, contentHandler, componentType, releaseVersion);
 					} catch (Exception e) {
 						logger.error("Failed to read or process lines.", e);
 					}
@@ -303,22 +304,31 @@ public class ReleaseImporter {
 			}
 		}
 
-		private void readLines(Path rf2FilePath, ValuesHandler valuesHandler, String componentType, String releaseVersion) throws IOException {
+		private void readLines(Path rf2FilePath, FileContentHandler contentHandler, String componentType, String releaseVersion) throws IOException {
 			if (releaseVersion != null) {
 				logger.info("Reading {} for release {}", componentType, releaseVersion);
 			} else {
 				logger.info("Reading {} ", componentType);
 			}
 			long linesRead = 0L;
+
+			final ValuesHandler valuesHandler = contentHandler instanceof ValuesHandler ? ((ValuesHandler) contentHandler) : null;
+			final FieldNamesAndValuesHandler fieldNamesAndValuesHandler = contentHandler instanceof FieldNamesAndValuesHandler ? ((FieldNamesAndValuesHandler) contentHandler) : null;
+
 			try (final BufferedReader reader = Files.newBufferedReader(rf2FilePath, UTF_8)) {
 				String line;
-				reader.readLine(); // discard header line
-				String[] split;
+				final String header = reader.readLine();
+				final String[] fieldNames = header.split("\\t");
+				String[] values;
 				while ((line = reader.readLine()) != null) {
 					linesRead++;
-					split = line.split("\\t");
-					if (releaseVersion == null || releaseVersion.equals(split[ComponentFieldIndexes.effectiveTime])) {
-						valuesHandler.handle(split);
+					values = line.split("\\t");
+					if (releaseVersion == null || releaseVersion.equals(values[ComponentFieldIndexes.effectiveTime])) {
+						if (valuesHandler != null) {
+							valuesHandler.handle(values);
+						} else if (fieldNamesAndValuesHandler != null) {
+							fieldNamesAndValuesHandler.handle(fieldNames, values);
+						}
 					}
 				}
 			}
@@ -329,8 +339,15 @@ public class ReleaseImporter {
 			return NumberFormat.getInstance().format((bytes / 1024) / 1024);
 		}
 
-		private interface ValuesHandler {
+		private interface FileContentHandler {
+		}
+
+		private interface ValuesHandler extends FileContentHandler {
 			void handle(String[] values);
+		}
+
+		private interface FieldNamesAndValuesHandler extends FileContentHandler {
+			void handle(String[] fieldNames, String[] values);
 		}
 	}
 

@@ -55,7 +55,7 @@ public class ComponentFactoryImpl implements ComponentFactory {
 	}
 
 	@Override
-	public void addReferenceSetMember(String id, String effectiveTime, String active, String moduleId, String refsetId, String referencedComponentId, String... otherValues) {
+	public void addReferenceSetMember(String[] fieldNames, String id, String effectiveTime, String active, String moduleId, String refsetId, String referencedComponentId, String... otherValues) {
 
 	}
 

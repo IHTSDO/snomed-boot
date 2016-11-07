@@ -23,5 +23,5 @@ public interface ComponentFactory {
 
 	void addConceptReferencedInRefsetId(String refsetId, String conceptId);
 
-	void addReferenceSetMember(String id, String effectiveTime, String active, String moduleId, String refsetId, String referencedComponentId, String... otherValues);
+	void addReferenceSetMember(String[] fieldNames, String id, String effectiveTime, String active, String moduleId, String refsetId, String referencedComponentId, String... otherValues);
 }
