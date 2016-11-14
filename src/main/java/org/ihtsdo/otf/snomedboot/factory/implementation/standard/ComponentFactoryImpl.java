@@ -23,13 +23,13 @@ public class ComponentFactoryImpl implements ComponentFactory {
 	}
 
 	@Override
-	public void addConceptParent(String sourceId, String parentId) {
-		getConceptForReference(sourceId).addParent(getConceptForReference(parentId));
+	public void addInferredConceptParent(String sourceId, String parentId) {
+		getConceptForReference(sourceId).addInferredParent(getConceptForReference(parentId));
 	}
 
 	@Override
-	public void removeConceptParent(String sourceId, String parentId) {
-		getConceptForReference(sourceId).removeParent(getConceptForReference(parentId));
+	public void removeInferredConceptParent(String sourceId, String parentId) {
+		getConceptForReference(sourceId).removeInferredParent(getConceptForReference(parentId));
 	}
 
 	@Override

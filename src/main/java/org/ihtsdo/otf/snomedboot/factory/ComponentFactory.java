@@ -10,9 +10,9 @@ public interface ComponentFactory {
 
 	void addConceptFSN(String conceptId, String term);
 
-	void addConceptParent(String sourceId, String parentId);
+	void addInferredConceptParent(String sourceId, String parentId);
 
-	void removeConceptParent(String sourceId, String destinationId);
+	void removeInferredConceptParent(String sourceId, String destinationId);
 
 	void addConceptAttribute(String sourceId, String typeId, String valueId);
 

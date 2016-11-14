@@ -17,7 +17,7 @@ public class ConceptImpl implements Concept {
 	private String definitionStatusId;
 	private String fsn;
 	private final MultiValueMap<String, String> attributes;
-	private final Set<Concept> parents;
+	private final Set<Concept> inferredParents;
 	private final Set<Long> memberOfRefsetIds;
 	private final List<Relationship> relationships;
 	private final List<Description> descriptions;
@@ -25,7 +25,7 @@ public class ConceptImpl implements Concept {
 	public ConceptImpl(String id) {
 		this.id = Long.parseLong(id);
 		attributes = new LinkedMultiValueMap<>();
-		parents = new HashSet<>();
+		inferredParents = new HashSet<>();
 		memberOfRefsetIds = new HashSet<>();
 		relationships = new ArrayList<>();
 		descriptions = new ArrayList<>();
@@ -49,18 +49,19 @@ public class ConceptImpl implements Concept {
 	}
 
 	/**
-	 * @return A set of all ancestors
-	 * @throws IllegalStateException if an active relationship is found pointing to an inactive parent concept.
+	 * @return A set of all inferred ancestors
+	 * @throws IllegalStateException if an active relationship is found pointing to an inactive parent concept
+	 * or if an ancestor loop is found.
 	 */
 	@Override
 	public Set<Long> getAncestorIds() throws IllegalStateException {
 		final Stack<Long> stack = new Stack<>();
 		stack.push(id);
-		return collectParentIds(this, new HashSet<Long>(), stack);
+		return collectInferredParentIds(this, new HashSet<Long>(), stack);
 	}
 
-	private Set<Long> collectParentIds(ConceptImpl concept, Set<Long> ancestors, Stack<Long> stack) {
-		for (Concept parentInt : concept.parents) {
+	private Set<Long> collectInferredParentIds(ConceptImpl concept, Set<Long> ancestors, Stack<Long> stack) {
+		for (Concept parentInt : concept.inferredParents) {
 			ConceptImpl parent = (ConceptImpl) parentInt;
 			if (!parent.isActive()) {
 				throw new IllegalStateException("Is-a relationship points to inactive parent concept: " + concept.getId() + " -> " + parent.getId());
@@ -72,7 +73,7 @@ public class ConceptImpl implements Concept {
 			}
 			ancestors.add(parentId);
 			stack.push(parentId);
-			collectParentIds(parent, ancestors, stack);
+			collectInferredParentIds(parent, ancestors, stack);
 			stack.pop();
 		}
 		return ancestors;
@@ -83,12 +84,12 @@ public class ConceptImpl implements Concept {
 		return active;
 	}
 
-	public void addParent(Concept parentConcept) {
-		parents.add(parentConcept);
+	public void addInferredParent(Concept parentConcept) {
+		inferredParents.add(parentConcept);
 	}
 
-	public void removeParent(Concept parentConcept) {
-		parents.remove(parentConcept);
+	public void removeInferredParent(Concept parentConcept) {
+		inferredParents.remove(parentConcept);
 	}
 
 	@Override

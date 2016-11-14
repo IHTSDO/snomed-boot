@@ -175,7 +175,8 @@ public class ReleaseImporter {
 			return readLinesCallable(rf2File, new ValuesHandler() {
 				@Override
 				public void handle(String[] values) {
-					if (loadingProfile.isInactiveRelationships() || "1".equals(values[RelationshipFieldIndexes.active])) {
+					final boolean active = "1".equals(values[RelationshipFieldIndexes.active]);
+					if (loadingProfile.isInactiveRelationships() || active) {
 						final String sourceId = values[RelationshipFieldIndexes.sourceId];
 						final String type = values[RelationshipFieldIndexes.typeId];
 						final String value = values[RelationshipFieldIndexes.destinationId];
@@ -183,8 +184,12 @@ public class ReleaseImporter {
 							if (loadingProfile.isAttributeMapOnConcept()) {
 								componentFactory.addConceptAttribute(sourceId, type, value);
 							}
-							if (type.equals(ConceptConstants.isA)) {
-								componentFactory.addConceptParent(sourceId, value);
+							if (type.equals(ConceptConstants.isA) && ConceptConstants.INFERRED_RELATIONSHIP.equals(type)) {
+								if (active) {
+									componentFactory.addInferredConceptParent(sourceId, value);
+								} else {
+									componentFactory.removeInferredConceptParent(sourceId, value);
+								}
 							}
 							if (loadingProfile.isFullRelationshipObjects()) {
 								componentFactory.addRelationship(
