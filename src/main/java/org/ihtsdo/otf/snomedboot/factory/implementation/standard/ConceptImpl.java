@@ -62,6 +62,9 @@ public class ConceptImpl implements Concept {
 	private Set<Long> collectParentIds(ConceptImpl concept, Set<Long> ancestors, Stack<Long> stack) {
 		for (Concept parentInt : concept.parents) {
 			ConceptImpl parent = (ConceptImpl) parentInt;
+			if (!parent.isActive()) {
+				throw new IllegalStateException("Is-a relationship points to inactive parent concept: " + concept.getId() + " -> " + parent.getId());
+			}
 			final Long parentId = parent.id;
 			if (stack.contains(parentId)) {
 				stack.push(parentId);
