@@ -135,17 +135,17 @@ public class ReleaseImporter {
 				public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
 					final String fileName = file.getFileName().toString();
 					if (fileName.endsWith(".txt")) {
-						if (fileName.startsWith("sct2_Concept_" + fileType)) {
+						if (fileName.startsWith("sct2_Concept_" + fileType) || fileName.startsWith("xsct2_Concept_" + fileType)) {
 							releaseFiles.setConceptPath(file);
-						} else if (fileName.startsWith("sct2_Description_" + fileType)) {
+						} else if (fileName.startsWith("sct2_Description_" + fileType) || fileName.startsWith("xsct2_Description_" + fileType)) {
 							releaseFiles.setDescriptionPath(file);
-						} else if (fileName.startsWith("sct2_TextDefinition_" + fileType)) {
+						} else if (fileName.startsWith("sct2_TextDefinition_" + fileType) || fileName.startsWith("xsct2_TextDefinition_" + fileType)) {
 							releaseFiles.setTextDefinitionPath(file);
-						} else if (fileName.startsWith("sct2_Relationship_" + fileType)) {
+						} else if (fileName.startsWith("sct2_Relationship_" + fileType) || fileName.startsWith("xsct2_Relationship_" + fileType)) {
 							releaseFiles.setRelationshipPath(file);
-						} else if (fileName.startsWith("sct2_StatedRelationship_" + fileType)) {
+						} else if (fileName.startsWith("sct2_StatedRelationship_" + fileType) || fileName.startsWith("xsct2_StatedRelationship_" + fileType)) {
 							releaseFiles.setStatedRelationshipPath(file);
-						} else if (fileName.startsWith("der2_") && fileName.contains(fileType)) {
+						} else if (fileName.startsWith("der2_") && fileName.contains(fileType) || fileName.startsWith("xder2_") && fileName.contains(fileType)) {
 							releaseFiles.getRefsetPaths().add(file);
 						}
 					}
