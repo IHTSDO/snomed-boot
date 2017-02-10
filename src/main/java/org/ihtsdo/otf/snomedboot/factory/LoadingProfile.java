@@ -33,7 +33,7 @@ public class LoadingProfile implements Cloneable {
 	private boolean statedRelationships;
 	private boolean fullDescriptionObjects;
 	private boolean fullRelationshipObjects;
-	private boolean inactiveConcepts = true;
+	private boolean inactiveConcepts;
 	private boolean inactiveDescriptions;
 	private boolean inactiveRelationships;
 	private boolean inactiveRefsetMembers;

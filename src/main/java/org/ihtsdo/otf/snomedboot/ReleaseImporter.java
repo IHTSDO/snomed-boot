@@ -8,11 +8,10 @@ import org.ihtsdo.otf.snomedboot.factory.HistoryAwareComponentFactory;
 import org.ihtsdo.otf.snomedboot.factory.LoadingProfile;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.util.FileSystemUtils;
+import org.springframework.util.StreamUtils;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.IOException;
+import java.io.*;
 import java.nio.charset.Charset;
 import java.nio.file.*;
 import java.nio.file.attribute.BasicFileAttributes;
@@ -23,6 +22,8 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipInputStream;
 
 public class ReleaseImporter {
 
@@ -34,6 +35,47 @@ public class ReleaseImporter {
 
 	public void loadSnapshotReleaseFiles(String releaseDirPath, LoadingProfile loadingProfile, ComponentFactory componentFactory) throws ReleaseImportException {
 		new ImportRun(componentFactory).doLoadReleaseFiles(releaseDirPath, loadingProfile, ImportType.SNAPSHOT);
+	}
+
+	public void loadFullReleaseFiles(InputStream releaseZip, LoadingProfile loadingProfile, HistoryAwareComponentFactory componentFactory) throws ReleaseImportException {
+		File releaseDir = unzipRelease(releaseZip, "Full");
+		loadFullReleaseFiles(releaseDir.getAbsolutePath(), loadingProfile, componentFactory);
+		FileSystemUtils.deleteRecursively(releaseDir);
+	}
+
+	public void loadSnapshotReleaseFiles(InputStream releaseZip, LoadingProfile loadingProfile, ComponentFactory componentFactory) throws ReleaseImportException {
+		File releaseDir = unzipRelease(releaseZip, "Snapshot");
+		loadSnapshotReleaseFiles(releaseDir.getAbsolutePath(), loadingProfile, componentFactory);
+		FileSystemUtils.deleteRecursively(releaseDir);
+	}
+
+	private File unzipRelease(InputStream releaseZip, String filenameFilter) throws ReleaseImportException {
+		try {
+			File tempDir = Files.createTempDirectory(null).toFile();
+			try (InputStream snomedReleaseZipStream = releaseZip) {
+				File zipFile = new File(tempDir, "release.zip");
+				try (FileOutputStream out = new FileOutputStream(zipFile)) {
+					StreamUtils.copy(snomedReleaseZipStream, out);
+				}
+
+				ZipInputStream zipInputStream = new ZipInputStream(new FileInputStream(zipFile));
+				ZipEntry zipEntry;
+				while ((zipEntry = zipInputStream.getNextEntry()) != null) {
+					String zipEntryName = zipEntry.getName();
+					if (zipEntryName.contains(filenameFilter)) {
+						// Create file without directory nesting
+						File file = new File(tempDir, new File(zipEntryName).getName());
+						file.createNewFile();
+						try (FileOutputStream entryOutputStream = new FileOutputStream(file)) {
+							StreamUtils.copy(zipInputStream, entryOutputStream);
+						}
+					}
+				}
+			}
+			return tempDir;
+		} catch (IOException e) {
+			throw new ReleaseImportException("Filed to unzip snomed release file.", e);
+		}
 	}
 
 	private enum ImportType {
