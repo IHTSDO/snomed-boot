@@ -221,12 +221,13 @@ public class ReleaseImporter {
 					if (loadingProfile.isInactiveRelationships() || active) {
 						final String sourceId = values[RelationshipFieldIndexes.sourceId];
 						final String type = values[RelationshipFieldIndexes.typeId];
+						final String characteristicType = values[RelationshipFieldIndexes.characteristicTypeId];
 						final String value = values[RelationshipFieldIndexes.destinationId];
 						if (!ConceptConstants.STATED_RELATIONSHIP.equals(type) || loadingProfile.isStatedRelationships()) {
 							if (loadingProfile.isAttributeMapOnConcept()) {
 								componentFactory.addConceptAttribute(sourceId, type, value);
 							}
-							if (type.equals(ConceptConstants.isA) && ConceptConstants.INFERRED_RELATIONSHIP.equals(type)) {
+							if (type.equals(ConceptConstants.isA) && ConceptConstants.INFERRED_RELATIONSHIP.equals(characteristicType)) {
 								if (active) {
 									componentFactory.addInferredConceptParent(sourceId, value);
 								} else {
