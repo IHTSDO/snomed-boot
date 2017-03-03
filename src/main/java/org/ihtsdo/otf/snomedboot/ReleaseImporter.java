@@ -37,19 +37,29 @@ public class ReleaseImporter {
 		new ImportRun(componentFactory).doLoadReleaseFiles(releaseDirPath, loadingProfile, ImportType.SNAPSHOT);
 	}
 
+	public void loadDeltaReleaseFiles(String releaseDirPath, LoadingProfile loadingProfile, ComponentFactory componentFactory) throws ReleaseImportException {
+		new ImportRun(componentFactory).doLoadReleaseFiles(releaseDirPath, loadingProfile, ImportType.DELTA);
+	}
+
 	public void loadFullReleaseFiles(InputStream releaseZip, LoadingProfile loadingProfile, HistoryAwareComponentFactory componentFactory) throws ReleaseImportException {
-		File releaseDir = unzipRelease(releaseZip, "Full");
+		File releaseDir = unzipRelease(releaseZip, ImportType.FULL);
 		loadFullReleaseFiles(releaseDir.getAbsolutePath(), loadingProfile, componentFactory);
 		FileSystemUtils.deleteRecursively(releaseDir);
 	}
 
 	public void loadSnapshotReleaseFiles(InputStream releaseZip, LoadingProfile loadingProfile, ComponentFactory componentFactory) throws ReleaseImportException {
-		File releaseDir = unzipRelease(releaseZip, "Snapshot");
+		File releaseDir = unzipRelease(releaseZip, ImportType.SNAPSHOT);
 		loadSnapshotReleaseFiles(releaseDir.getAbsolutePath(), loadingProfile, componentFactory);
 		FileSystemUtils.deleteRecursively(releaseDir);
 	}
 
-	private File unzipRelease(InputStream releaseZip, String filenameFilter) throws ReleaseImportException {
+	public void loadDeltaReleaseFiles(InputStream releaseZip, LoadingProfile loadingProfile, ComponentFactory componentFactory) throws ReleaseImportException {
+		File releaseDir = unzipRelease(releaseZip, ImportType.DELTA);
+		loadDeltaReleaseFiles(releaseDir.getAbsolutePath(), loadingProfile, componentFactory);
+		FileSystemUtils.deleteRecursively(releaseDir);
+	}
+
+	private File unzipRelease(InputStream releaseZip, ImportType filenameFilter) throws ReleaseImportException {
 		try {
 			File tempDir = Files.createTempDirectory(null).toFile();
 			try (InputStream snomedReleaseZipStream = releaseZip) {
@@ -62,7 +72,7 @@ public class ReleaseImporter {
 				ZipEntry zipEntry;
 				while ((zipEntry = zipInputStream.getNextEntry()) != null) {
 					String zipEntryName = zipEntry.getName();
-					if (zipEntryName.contains(filenameFilter)) {
+					if (zipEntryName.contains(filenameFilter.getFilenamePart())) {
 						// Create file without directory nesting
 						File file = new File(tempDir, new File(zipEntryName).getName());
 						file.createNewFile();
@@ -80,7 +90,7 @@ public class ReleaseImporter {
 
 	private enum ImportType {
 
-		SNAPSHOT("Snapshot"), FULL("Full");
+		DELTA("Delta"), SNAPSHOT("Snapshot"), FULL("Full");
 
 		private String filenamePart;
 
