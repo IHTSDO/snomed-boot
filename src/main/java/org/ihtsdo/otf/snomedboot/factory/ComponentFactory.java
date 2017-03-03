@@ -6,7 +6,16 @@ public interface ComponentFactory {
 
 	void loadingComponentsCompleted();
 
-	void createConcept(String conceptId, String effectiveTime, String active, String moduleId, String definitionStatusId);
+
+	void newConceptState(String conceptId, String effectiveTime, String active, String moduleId, String definitionStatusId);
+
+	void newDescriptionState(String id, String effectiveTime, String active, String moduleId, String conceptId, String languageCode, String typeId, String term, String caseSignificanceId);
+
+	void newRelationshipState(String id, String effectiveTime, String active, String moduleId, String sourceId,
+							  String destinationId, String relationshipGroup, String typeId, String characteristicTypeId, String modifierId);
+
+	void newReferenceSetMemberState(String[] fieldNames, String id, String effectiveTime, String active, String moduleId, String refsetId, String referencedComponentId, String... otherValues);
+
 
 	void addConceptFSN(String conceptId, String term);
 
@@ -16,12 +25,5 @@ public interface ComponentFactory {
 
 	void addConceptAttribute(String sourceId, String typeId, String valueId);
 
-	void addRelationship(String id, String effectiveTime, String active, String moduleId, String sourceId,
-			String destinationId, String relationshipGroup, String typeId, String characteristicTypeId, String modifierId);
-
-	void addDescription(String id, String effectiveTime, String active, String moduleId, String conceptId, String languageCode, String typeId, String term, String caseSignificanceId);
-
 	void addConceptReferencedInRefsetId(String refsetId, String conceptId);
-
-	void addReferenceSetMember(String[] fieldNames, String id, String effectiveTime, String active, String moduleId, String refsetId, String referencedComponentId, String... otherValues);
 }

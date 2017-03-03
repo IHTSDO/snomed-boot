@@ -206,7 +206,7 @@ public class ReleaseImporter {
 				public void handle(String[] values) {
 					if (loadingProfile.isInactiveConcepts() || "1".equals(values[ConceptFieldIndexes.active])) {
 						String conceptId = values[ComponentFieldIndexes.id];
-						componentFactory.createConcept(conceptId, values[ConceptFieldIndexes.effectiveTime], values[ConceptFieldIndexes.active],
+						componentFactory.newConceptState(conceptId, values[ConceptFieldIndexes.effectiveTime], values[ConceptFieldIndexes.active],
 								values[ConceptFieldIndexes.moduleId], values[ConceptFieldIndexes.definitionStatusId]);
 					}
 				}
@@ -235,7 +235,7 @@ public class ReleaseImporter {
 								}
 							}
 							if (loadingProfile.isFullRelationshipObjects()) {
-								componentFactory.addRelationship(
+								componentFactory.newRelationshipState(
 										values[RelationshipFieldIndexes.id],
 										values[RelationshipFieldIndexes.effectiveTime],
 										values[RelationshipFieldIndexes.active],
@@ -265,7 +265,7 @@ public class ReleaseImporter {
 							componentFactory.addConceptFSN(conceptId, values[DescriptionFieldIndexes.term]);
 						}
 						if (loadingProfile.isFullDescriptionObjects()) {
-							componentFactory.addDescription(
+							componentFactory.newDescriptionState(
 									values[DescriptionFieldIndexes.id],
 									values[DescriptionFieldIndexes.effectiveTime],
 									values[DescriptionFieldIndexes.active],
@@ -294,7 +294,7 @@ public class ReleaseImporter {
 								componentFactory.addConceptReferencedInRefsetId(refsetId, referencedComponentId);
 							}
 							if (loadingProfile.isFullRefsetMemberObjects()) {
-								componentFactory.addReferenceSetMember(
+								componentFactory.newReferenceSetMemberState(
 										fieldNames,
 										values[RefsetFieldIndexes.id],
 										values[RefsetFieldIndexes.effectiveTime],
