@@ -45,13 +45,28 @@ public class ComponentFactoryImpl implements ComponentFactory {
 	}
 
 	@Override
+	public void addStatedConceptParent(String sourceId, String parentId) {
+		getConceptForReference(sourceId).addStatedParent(getConceptForReference(parentId));
+	}
+
+	@Override
 	public void removeInferredConceptParent(String sourceId, String parentId) {
 		getConceptForReference(sourceId).removeInferredParent(getConceptForReference(parentId));
 	}
 
 	@Override
-	public void addConceptAttribute(String sourceId, String typeId, String valueId) {
-		getConceptForReference(sourceId).addAttribute(typeId, valueId);
+	public void removeStatedConceptParent(String sourceId, String parentId) {
+		getConceptForReference(sourceId).removeStatedParent(getConceptForReference(parentId));
+	}
+
+	@Override
+	public void addInferredConceptAttribute(String sourceId, String typeId, String valueId) {
+		getConceptForReference(sourceId).addInferredAttribute(typeId, valueId);
+	}
+
+	@Override
+	public void addStatedConceptAttribute(String sourceId, String typeId, String valueId) {
+		getConceptForReference(sourceId).addStatedAttribute(typeId, valueId);
 	}
 
 	@Override

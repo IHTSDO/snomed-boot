@@ -233,15 +233,26 @@ public class ReleaseImporter {
 						final String type = values[RelationshipFieldIndexes.typeId];
 						final String characteristicType = values[RelationshipFieldIndexes.characteristicTypeId];
 						final String value = values[RelationshipFieldIndexes.destinationId];
-						if (!ConceptConstants.STATED_RELATIONSHIP.equals(type) || loadingProfile.isStatedRelationships()) {
-							if (loadingProfile.isAttributeMapOnConcept()) {
-								componentFactory.addConceptAttribute(sourceId, type, value);
-							}
-							if (type.equals(ConceptConstants.isA) && ConceptConstants.INFERRED_RELATIONSHIP.equals(characteristicType)) {
+						boolean inferred = ConceptConstants.INFERRED_RELATIONSHIP.equals(characteristicType);
+						if (!inferred && loadingProfile.isStatedAttributeMapOnConcept()) {
+							componentFactory.addStatedConceptAttribute(sourceId, type, value);
+						} else if (inferred && loadingProfile.isInferredAttributeMapOnConcept()) {
+							componentFactory.addInferredConceptAttribute(sourceId, type, value);
+						}
+						if (inferred || loadingProfile.isStatedRelationships()) {
+							if (type.equals(ConceptConstants.isA)) {
 								if (active) {
-									componentFactory.addInferredConceptParent(sourceId, value);
+									if (inferred) {
+										componentFactory.addInferredConceptParent(sourceId, value);
+									} else {
+										componentFactory.addStatedConceptParent(sourceId, value);
+									}
 								} else {
-									componentFactory.removeInferredConceptParent(sourceId, value);
+									if (inferred) {
+										componentFactory.removeInferredConceptParent(sourceId, value);
+									} else {
+										componentFactory.removeStatedConceptParent(sourceId, value);
+									}
 								}
 							}
 							if (loadingProfile.isFullRelationshipObjects()) {

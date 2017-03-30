@@ -33,7 +33,7 @@ public class ReleaseImporterIntegrationTestManual {
 		Assert.assertEquals("900000000000073002", concept.getDefinitionStatusId());
 		Assert.assertEquals("20040731", concept.getEffectiveTime());
 		Assert.assertEquals("900000000000207008", concept.getModuleId());
-		final Set<Long> ancestorIds = concept.getAncestorIds();
+		final Set<Long> ancestorIds = concept.getInferredAncestorIds();
 		Assert.assertEquals(30, ancestorIds.size());
 
 		Assert.assertEquals("No description components expected with light loading profile", 0, concept.getDescriptions().size());

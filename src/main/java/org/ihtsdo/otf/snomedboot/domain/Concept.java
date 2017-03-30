@@ -10,7 +10,9 @@ public interface Concept {
 
 	Set<Long> getMemberOfRefsetIds();
 
-	Set<Long> getAncestorIds() throws IllegalStateException;
+	Set<Long> getInferredAncestorIds() throws IllegalStateException;
+
+	Set<Long> getStatedAncestorIds() throws IllegalStateException;
 
 	boolean isActive();
 
@@ -22,7 +24,9 @@ public interface Concept {
 
 	String getFsn();
 
-	MultiValueMap<String, String> getAttributes();
+	MultiValueMap<String, String> getInferredAttributes();
+
+	MultiValueMap<String, String> getStatedAttributes();
 
 	List<Relationship> getRelationships();
 

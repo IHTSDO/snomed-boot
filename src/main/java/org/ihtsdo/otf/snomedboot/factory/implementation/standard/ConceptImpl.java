@@ -16,16 +16,20 @@ public class ConceptImpl implements Concept {
 	private String moduleId;
 	private String definitionStatusId;
 	private String fsn;
-	private final MultiValueMap<String, String> attributes;
+	private final MultiValueMap<String, String> inferredAttributes;
+	private final MultiValueMap<String, String> statedAttributes;
 	private final Set<Concept> inferredParents;
+	private final Set<Concept> statedParents;
 	private final Set<Long> memberOfRefsetIds;
 	private final List<Relationship> relationships;
 	private final List<Description> descriptions;
 
 	public ConceptImpl(String id) {
 		this.id = Long.parseLong(id);
-		attributes = new LinkedMultiValueMap<>();
+		inferredAttributes = new LinkedMultiValueMap<>();
+		statedAttributes = new LinkedMultiValueMap<>();
 		inferredParents = new HashSet<>();
+		statedParents = new HashSet<>();
 		memberOfRefsetIds = new HashSet<>();
 		relationships = new ArrayList<>();
 		descriptions = new ArrayList<>();
@@ -54,14 +58,26 @@ public class ConceptImpl implements Concept {
 	 * or if an ancestor loop is found.
 	 */
 	@Override
-	public Set<Long> getAncestorIds() throws IllegalStateException {
+	public Set<Long> getInferredAncestorIds() throws IllegalStateException {
 		final Stack<Long> stack = new Stack<>();
 		stack.push(id);
-		return collectInferredParentIds(this, new HashSet<Long>(), stack);
+		return collectParentIds(this, new HashSet<Long>(), stack, true);
 	}
 
-	private Set<Long> collectInferredParentIds(ConceptImpl concept, Set<Long> ancestors, Stack<Long> stack) {
-		for (Concept parentInt : concept.inferredParents) {
+	/**
+	 * @return A set of all stated ancestors
+	 * @throws IllegalStateException if an active relationship is found pointing to an inactive parent concept
+	 * or if an ancestor loop is found.
+	 */
+	@Override
+	public Set<Long> getStatedAncestorIds() throws IllegalStateException {
+		final Stack<Long> stack = new Stack<>();
+		stack.push(id);
+		return collectParentIds(this, new HashSet<Long>(), stack, false);
+	}
+
+	private Set<Long> collectParentIds(ConceptImpl concept, Set<Long> ancestors, Stack<Long> stack, boolean inferred) {
+		for (Concept parentInt : inferred ? concept.inferredParents : concept.statedParents) {
 			ConceptImpl parent = (ConceptImpl) parentInt;
 			if (!parent.isActive()) {
 				throw new IllegalStateException("Is-a relationship points to inactive parent concept: " + concept.getId() + " -> " + parent.getId());
@@ -73,7 +89,7 @@ public class ConceptImpl implements Concept {
 			}
 			ancestors.add(parentId);
 			stack.push(parentId);
-			collectInferredParentIds(parent, ancestors, stack);
+			collectParentIds(parent, ancestors, stack, inferred);
 			stack.pop();
 		}
 		return ancestors;
@@ -90,6 +106,14 @@ public class ConceptImpl implements Concept {
 
 	public void removeInferredParent(Concept parentConcept) {
 		inferredParents.remove(parentConcept);
+	}
+
+	public void addStatedParent(Concept parentConcept) {
+		statedParents.add(parentConcept);
+	}
+
+	public void removeStatedParent(Concept parentConcept) {
+		statedParents.remove(parentConcept);
 	}
 
 	@Override
@@ -122,12 +146,21 @@ public class ConceptImpl implements Concept {
 	}
 
 	@Override
-	public MultiValueMap<String, String> getAttributes() {
-		return attributes;
+	public MultiValueMap<String, String> getInferredAttributes() {
+		return inferredAttributes;
 	}
 
-	public void addAttribute(String type, String value) {
-		attributes.add(type, value);
+	public void addInferredAttribute(String type, String value) {
+		inferredAttributes.add(type, value);
+	}
+
+	@Override
+	public MultiValueMap<String, String> getStatedAttributes() {
+		return statedAttributes;
+	}
+
+	public void addStatedAttribute(String type, String value) {
+		statedAttributes.add(type, value);
 	}
 
 	public void addRelationship(Relationship relationship) {

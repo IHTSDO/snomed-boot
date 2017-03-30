@@ -21,9 +21,15 @@ public interface ComponentFactory {
 
 	void addInferredConceptParent(String sourceId, String parentId);
 
+	void addStatedConceptParent(String sourceId, String parentId);
+
 	void removeInferredConceptParent(String sourceId, String destinationId);
 
-	void addConceptAttribute(String sourceId, String typeId, String valueId);
+	void removeStatedConceptParent(String sourceId, String destinationId);
+
+	void addInferredConceptAttribute(String sourceId, String typeId, String valueId);
+
+	void addStatedConceptAttribute(String sourceId, String typeId, String valueId);
 
 	void addConceptReferencedInRefsetId(String refsetId, String conceptId);
 }

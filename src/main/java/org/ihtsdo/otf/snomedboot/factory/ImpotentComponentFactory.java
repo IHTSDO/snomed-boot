@@ -42,12 +42,27 @@ public class ImpotentComponentFactory implements ComponentFactory {
 	}
 
 	@Override
+	public void addStatedConceptParent(String sourceId, String parentId) {
+
+	}
+
+	@Override
 	public void removeInferredConceptParent(String sourceId, String destinationId) {
 
 	}
 
 	@Override
-	public void addConceptAttribute(String sourceId, String typeId, String valueId) {
+	public void removeStatedConceptParent(String sourceId, String destinationId) {
+
+	}
+
+	@Override
+	public void addInferredConceptAttribute(String sourceId, String typeId, String valueId) {
+
+	}
+
+	@Override
+	public void addStatedConceptAttribute(String sourceId, String typeId, String valueId) {
 
 	}
 

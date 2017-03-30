@@ -13,11 +13,11 @@ public class LoadingProfile implements Cloneable {
 	public static final LoadingProfile complete = new LoadingProfile();
 
 	static {
-		light.attributeMapOnConcept = true;
+		light.inferredAttributeMapOnConcept = true;
 		light.refsetIds.add(ConceptConstants.GB_EN_LANGUAGE_REFERENCE_SET);
 		light.refsetIds.add(ConceptConstants.US_EN_LANGUAGE_REFERENCE_SET);
 
-		complete.attributeMapOnConcept = true;
+		complete.inferredAttributeMapOnConcept = true;
 		complete.statedRelationships = true;
 		complete.fullDescriptionObjects = true;
 		complete.fullRelationshipObjects = true;
@@ -29,7 +29,8 @@ public class LoadingProfile implements Cloneable {
 		complete.fullRefsetMemberObjects = true;
 	}
 
-	private boolean attributeMapOnConcept;
+	private boolean inferredAttributeMapOnConcept;
+	private boolean statedAttributeMapOnConcept;
 	private boolean statedRelationships;
 	private boolean fullDescriptionObjects;
 	private boolean fullRelationshipObjects;
@@ -41,12 +42,20 @@ public class LoadingProfile implements Cloneable {
 	private boolean fullRefsetMemberObjects;
 	private Set<String> refsetIds = new HashSet<>();
 
-	public LoadingProfile withAttributeMapOnConcept() {
-		return this.clone().setAttributeMapOnConcept(true);
+	public LoadingProfile withInferredAttributeMapOnConcept() {
+		return this.clone().setInferredAttributeMapOnConcept(true);
 	}
 
-	public LoadingProfile withoutAttributeMapOnConcept() {
-		return this.clone().setAttributeMapOnConcept(false);
+	public LoadingProfile withoutInferredAttributeMapOnConcept() {
+		return this.clone().setInferredAttributeMapOnConcept(false);
+	}
+
+	public LoadingProfile withStatedAttributeMapOnConcept() {
+		return this.clone().setStatedAttributeMapOnConcept(true);
+	}
+
+	public LoadingProfile withoutStatedAttributeMapOnConcept() {
+		return this.clone().setStatedAttributeMapOnConcept(false);
 	}
 
 	public LoadingProfile withStatedRelationships() {
@@ -152,8 +161,12 @@ public class LoadingProfile implements Cloneable {
 		return clone;
 	}
 
-	public boolean isAttributeMapOnConcept() {
-		return attributeMapOnConcept;
+	public boolean isInferredAttributeMapOnConcept() {
+		return inferredAttributeMapOnConcept;
+	}
+
+	public boolean isStatedAttributeMapOnConcept() {
+		return statedAttributeMapOnConcept;
 	}
 
 	public boolean isStatedRelationships() {
@@ -200,8 +213,13 @@ public class LoadingProfile implements Cloneable {
 		return ImmutableSet.copyOf(refsetIds);
 	}
 
-	private LoadingProfile setAttributeMapOnConcept(boolean attributeMapOnConcept) {
-		this.attributeMapOnConcept = attributeMapOnConcept;
+	private LoadingProfile setInferredAttributeMapOnConcept(boolean inferredAttributeMapOnConcept) {
+		this.inferredAttributeMapOnConcept = inferredAttributeMapOnConcept;
+		return this;
+	}
+
+	public LoadingProfile setStatedAttributeMapOnConcept(boolean statedAttributeMapOnConcept) {
+		this.statedAttributeMapOnConcept = statedAttributeMapOnConcept;
 		return this;
 	}
 
@@ -262,7 +280,8 @@ public class LoadingProfile implements Cloneable {
 	@Override
 	protected LoadingProfile clone() {
 		return new LoadingProfile()
-				.setAttributeMapOnConcept(this.attributeMapOnConcept)
+				.setInferredAttributeMapOnConcept(this.inferredAttributeMapOnConcept)
+				.setStatedAttributeMapOnConcept(this.statedAttributeMapOnConcept)
 				.setStatedRelationships(this.statedRelationships)
 				.setFullDescriptionObjects(this.fullDescriptionObjects)
 				.setFullRelationshipObjects(this.fullRelationshipObjects)
