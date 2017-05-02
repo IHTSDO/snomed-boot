@@ -40,6 +40,7 @@ public class LoadingProfile implements Cloneable {
 	private boolean inactiveRefsetMembers;
 	private boolean allRefsets;
 	private boolean fullRefsetMemberObjects;
+	private boolean justRefsets;
 	private Set<String> refsetIds = new HashSet<>();
 
 	public LoadingProfile withInferredAttributeMapOnConcept() {
@@ -133,6 +134,14 @@ public class LoadingProfile implements Cloneable {
 		return this.clone().setFullRefsetMemberObjects(false);
 	}
 
+	public LoadingProfile withJustRefsets() {
+		return this.clone().setJustRefsets(true);
+	}
+
+	public LoadingProfile withoutJustRefsets() {
+		return this.clone().setJustRefsets(false);
+	}
+
 	public LoadingProfile withRefset(String refsetId) {
 		return withRefsets(refsetId);
 	}
@@ -205,6 +214,10 @@ public class LoadingProfile implements Cloneable {
 		return fullRefsetMemberObjects;
 	}
 
+	public boolean isJustRefsets() {
+		return justRefsets;
+	}
+
 	public boolean isRefset(String refsetId) {
 		return refsetIds.contains(refsetId);
 	}
@@ -268,6 +281,11 @@ public class LoadingProfile implements Cloneable {
 		return this;
 	}
 
+	public LoadingProfile setJustRefsets(boolean justRefsets) {
+		this.justRefsets = justRefsets;
+		return this;
+	}
+
 	private LoadingProfile setRefsetIds(Set<String> refsetIds) {
 		this.refsetIds = refsetIds;
 		return this;
@@ -291,6 +309,7 @@ public class LoadingProfile implements Cloneable {
 				.setInactiveRefsetMembers(this.inactiveRefsetMembers)
 				.setAllRefsets(this.allRefsets)
 				.setFullRefsetMemberObjects(this.fullRefsetMemberObjects)
+				.setJustRefsets(this.justRefsets)
 				.setRefsetIds(new HashSet<>(this.refsetIds));
 	}
 }

@@ -120,7 +120,7 @@ public class ReleaseImporter {
 		private void doLoadReleaseFiles(String releaseDirPath, LoadingProfile loadingProfile, ImportType importType) throws ReleaseImportException {
 			ReleaseFiles releaseFiles;
 			try {
-				releaseFiles = findFiles(releaseDirPath, importType.getFilenamePart());
+				releaseFiles = findFiles(releaseDirPath, importType.getFilenamePart(), loadingProfile);
 			} catch (IOException e) {
 				throw new ReleaseImportException("Failed to find release files during release import process.", e);
 			}
@@ -152,15 +152,17 @@ public class ReleaseImporter {
 		}
 
 		private void loadAll(LoadingProfile loadingProfile, ReleaseFiles releaseFiles, String releaseVersion) throws IOException, InterruptedException {
-			loadConcepts(releaseFiles.getConceptPath(), loadingProfile, releaseVersion);
-
 			List<Callable<String>> coreComponentTasks = new ArrayList<>();
-			coreComponentTasks.add(loadRelationships(releaseFiles.getRelationshipPath(), loadingProfile, releaseVersion));
-			if (loadingProfile.isStatedRelationships()) {
-				coreComponentTasks.add(loadRelationships(releaseFiles.getStatedRelationshipPath(), loadingProfile, releaseVersion));
+			if (!loadingProfile.isJustRefsets()) {
+				loadConcepts(releaseFiles.getConceptPath(), loadingProfile, releaseVersion);
+
+				coreComponentTasks.add(loadRelationships(releaseFiles.getRelationshipPath(), loadingProfile, releaseVersion));
+				if (loadingProfile.isStatedRelationships()) {
+					coreComponentTasks.add(loadRelationships(releaseFiles.getStatedRelationshipPath(), loadingProfile, releaseVersion));
+				}
+				coreComponentTasks.add(loadDescriptions(releaseFiles.getDescriptionPath(), loadingProfile, releaseVersion));
+				coreComponentTasks.add(loadDescriptions(releaseFiles.getTextDefinitionPath(), loadingProfile, releaseVersion));
 			}
-			coreComponentTasks.add(loadDescriptions(releaseFiles.getDescriptionPath(), loadingProfile, releaseVersion));
-			coreComponentTasks.add(loadDescriptions(releaseFiles.getTextDefinitionPath(), loadingProfile, releaseVersion));
 
 			List<Callable<String>> refsetTasks = new ArrayList<>();
 			if (loadingProfile.isAllRefsets() || !loadingProfile.getRefsetIds().isEmpty()) {
@@ -174,7 +176,7 @@ public class ReleaseImporter {
 			executorService.invokeAll(refsetTasks);
 		}
 
-		private ReleaseFiles findFiles(String releaseDirPath, final String fileType) throws IOException {
+		private ReleaseFiles findFiles(String releaseDirPath, final String fileType, LoadingProfile loadingProfile) throws IOException {
 			final File releaseDir = new File(releaseDirPath);
 			if (!releaseDir.isDirectory()) {
 				throw new FileNotFoundException("Could not find release directory.");
@@ -205,7 +207,9 @@ public class ReleaseImporter {
 				}
 			});
 
-			releaseFiles.assertFullSet();
+			if (!loadingProfile.isJustRefsets()) {
+				releaseFiles.assertFullSet();
+			}
 
 			return releaseFiles;
 		}
@@ -361,14 +365,16 @@ public class ReleaseImporter {
 		}
 
 		private void gatherVersions(Path filePath, Set<String> versions) throws IOException {
-			try (final BufferedReader reader = Files.newBufferedReader(filePath, UTF_8)) {
-				String line;
-				reader.readLine(); // discard header line
-				Matcher matcher;
-				while ((line = reader.readLine()) != null) {
-					matcher = DATE_EXTRACT_PATTERN.matcher(line);
-					matcher.find();
-					versions.add(matcher.group(1));
+			if (filePath != null) {
+				try (final BufferedReader reader = Files.newBufferedReader(filePath, UTF_8)) {
+					String line;
+					reader.readLine(); // discard header line
+					Matcher matcher;
+					while ((line = reader.readLine()) != null) {
+						matcher = DATE_EXTRACT_PATTERN.matcher(line);
+						matcher.find();
+						versions.add(matcher.group(1));
+					}
 				}
 			}
 		}
