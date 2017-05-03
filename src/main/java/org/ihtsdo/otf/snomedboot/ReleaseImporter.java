@@ -250,26 +250,30 @@ public class ReleaseImporter {
 						final String sourceId = values[RelationshipFieldIndexes.sourceId];
 						final String type = values[RelationshipFieldIndexes.typeId];
 						final String characteristicType = values[RelationshipFieldIndexes.characteristicTypeId];
-						final String value = values[RelationshipFieldIndexes.destinationId];
+						final String destinationId = values[RelationshipFieldIndexes.destinationId];
 						boolean inferred = ConceptConstants.INFERRED_RELATIONSHIP.equals(characteristicType);
 						if (!inferred && loadingProfile.isStatedAttributeMapOnConcept()) {
-							componentFactory.addStatedConceptAttribute(sourceId, type, value);
+							componentFactory.addStatedConceptAttribute(sourceId, type, destinationId);
 						} else if (inferred && loadingProfile.isInferredAttributeMapOnConcept()) {
-							componentFactory.addInferredConceptAttribute(sourceId, type, value);
+							componentFactory.addInferredConceptAttribute(sourceId, type, destinationId);
 						}
 						if (inferred || loadingProfile.isStatedRelationships()) {
 							if (type.equals(ConceptConstants.isA)) {
 								if (active) {
 									if (inferred) {
-										componentFactory.addInferredConceptParent(sourceId, value);
+										componentFactory.addInferredConceptParent(sourceId, destinationId);
+										componentFactory.addInferredConceptChild(sourceId, destinationId);
 									} else {
-										componentFactory.addStatedConceptParent(sourceId, value);
+										componentFactory.addStatedConceptParent(sourceId, destinationId);
+										componentFactory.addStatedConceptChild(sourceId, destinationId);
 									}
 								} else {
 									if (inferred) {
-										componentFactory.removeInferredConceptParent(sourceId, value);
+										componentFactory.removeInferredConceptParent(sourceId, destinationId);
+										componentFactory.removeInferredConceptChild(sourceId, destinationId);
 									} else {
-										componentFactory.removeStatedConceptParent(sourceId, value);
+										componentFactory.removeStatedConceptParent(sourceId, destinationId);
+										componentFactory.removeStatedConceptChild(sourceId, destinationId);
 									}
 								}
 							}

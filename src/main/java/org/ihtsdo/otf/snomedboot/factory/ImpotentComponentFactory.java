@@ -70,4 +70,24 @@ public class ImpotentComponentFactory implements ComponentFactory {
 	public void addConceptReferencedInRefsetId(String refsetId, String conceptId) {
 
 	}
+
+	@Override
+	public void addInferredConceptChild(String sourceId, String destinationId) {
+
+	}
+
+	@Override
+	public void addStatedConceptChild(String sourceId, String destinationId) {
+
+	}
+
+	@Override
+	public void removeInferredConceptChild(String sourceId, String destinationId) {
+
+	}
+
+	@Override
+	public void removeStatedConceptChild(String sourceId, String destinationId) {
+
+	}
 }

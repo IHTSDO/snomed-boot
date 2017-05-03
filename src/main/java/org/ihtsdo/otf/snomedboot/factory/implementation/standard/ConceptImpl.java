@@ -20,6 +20,8 @@ public class ConceptImpl implements Concept {
 	private final MultiValueMap<String, String> statedAttributes;
 	private final Set<Concept> inferredParents;
 	private final Set<Concept> statedParents;
+	private final Set<Concept> inferredChildren;
+	private final Set<Concept> statedChildren;
 	private final Set<Long> memberOfRefsetIds;
 	private final List<Relationship> relationships;
 	private final List<Description> descriptions;
@@ -30,6 +32,8 @@ public class ConceptImpl implements Concept {
 		statedAttributes = new LinkedMultiValueMap<>();
 		inferredParents = new HashSet<>();
 		statedParents = new HashSet<>();
+		inferredChildren = new HashSet<>();
+		statedChildren = new HashSet<>();
 		memberOfRefsetIds = new HashSet<>();
 		relationships = new ArrayList<>();
 		descriptions = new ArrayList<>();
@@ -94,6 +98,35 @@ public class ConceptImpl implements Concept {
 		}
 		return ancestors;
 	}
+	
+	/**
+	 * @return A set of all inferred descendants
+	 */
+	@Override
+	public Set<Long> getInferredDescendantIds() throws IllegalStateException {
+		return collectChildIds(this, new HashSet<Long>(),true);
+	}
+
+	/**
+	 * @return A set of all stated ancestors
+	 */
+	@Override
+	public Set<Long> getStatedDescendantIds() throws IllegalStateException {
+		return collectChildIds(this, new HashSet<Long>(),  false);
+	}
+	
+	private Set<Long> collectChildIds(ConceptImpl concept, Set<Long> descendants, boolean inferred) {
+		for (Concept childInt : inferred ? concept.inferredChildren : concept.statedChildren) {
+			ConceptImpl child = (ConceptImpl) childInt;
+			if (!child.isActive()) {
+				throw new IllegalStateException("Is-a relationship points to inactive child concept: " + concept.getId() + " -> " + child.getId());
+			}
+			final Long childId = child.id;
+			descendants.add(childId);
+			collectChildIds(child, descendants, inferred);
+		}
+		return descendants;
+	}
 
 	@Override
 	public boolean isActive() {
@@ -114,6 +147,22 @@ public class ConceptImpl implements Concept {
 
 	public void removeStatedParent(Concept parentConcept) {
 		statedParents.remove(parentConcept);
+	}
+	
+	public void addInferredChild(Concept childConcept) {
+		inferredChildren.add(childConcept);
+	}
+
+	public void removeInferredChild(Concept childConcept) {
+		inferredChildren.remove(childConcept);
+	}
+
+	public void addStatedChild(Concept childConcept) {
+		statedChildren.add(childConcept);
+	}
+
+	public void removeStatedChild(Concept childConcept) {
+		statedChildren.remove(childConcept);
 	}
 
 	@Override

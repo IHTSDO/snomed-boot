@@ -31,4 +31,8 @@ public interface Concept {
 	List<Relationship> getRelationships();
 
 	List<Description> getDescriptions();
+
+	Set<Long> getInferredDescendantIds() throws IllegalStateException;
+
+	Set<Long> getStatedDescendantIds() throws IllegalStateException;
 }

@@ -17,10 +17,10 @@ ReleaseImporter releaseImporter = new ReleaseImporter();
 
 // Load SNOMED CT components into memory
 ComponentStore componentStore = new ComponentStore();
-releaseImporter.loadSnapshotReleaseFiles("release/SnomedCT_RF2Release_INT_20160731", LoadingProfile.light, new ComponentFactoryImpl(componentStore));
+releaseImporter.loadSnapshotReleaseFiles("release/SnomedCT_RF2Release_INT_20170131", LoadingProfile.light, new ComponentFactoryImpl(componentStore));
 Map<Long, ? extends Concept> conceptMap = componentStore.getConcepts();
 
-// Get tranitive closure for concept 285355007 | Blood blister (disorder) |
+// Get transitive closure for concept 285355007 | Blood blister (disorder) |
 Set<Long> transitiveClosure = conceptMap.get("285355007").getInferredAncestorIds();
 ```
 
