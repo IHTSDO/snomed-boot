@@ -21,7 +21,7 @@ releaseImporter.loadSnapshotReleaseFiles("release/SnomedCT_RF2Release_INT_201607
 Map<Long, ? extends Concept> conceptMap = componentStore.getConcepts();
 
 // Get tranitive closure for concept 285355007 | Blood blister (disorder) |
-Set<Long> transitiveClosure = conceptMap.get("285355007").getAncestorIds();
+Set<Long> transitiveClosure = conceptMap.get("285355007").getInferredAncestorIds();
 ```
 
 ## Contribute
