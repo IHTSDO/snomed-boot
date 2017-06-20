@@ -42,6 +42,7 @@ public class LoadingProfile implements Cloneable {
 	private boolean fullRefsetMemberObjects;
 	private boolean justRefsets;
 	private Set<String> refsetIds = new HashSet<>();
+	private Set<String> includedReferenceSetFilenamePatterns = new HashSet<>();
 
 	public LoadingProfile withInferredAttributeMapOnConcept() {
 		return this.clone().setInferredAttributeMapOnConcept(true);
@@ -284,6 +285,10 @@ public class LoadingProfile implements Cloneable {
 	public LoadingProfile setJustRefsets(boolean justRefsets) {
 		this.justRefsets = justRefsets;
 		return this;
+	}
+
+	public Set<String> getIncludedReferenceSetFilenamePatterns() {
+		return includedReferenceSetFilenamePatterns;
 	}
 
 	private LoadingProfile setRefsetIds(Set<String> refsetIds) {

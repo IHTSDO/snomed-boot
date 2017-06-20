@@ -166,9 +166,23 @@ public class ReleaseImporter {
 
 			List<Callable<String>> refsetTasks = new ArrayList<>();
 			if (loadingProfile.isAllRefsets() || !loadingProfile.getRefsetIds().isEmpty()) {
+				Set<String> includedReferenceSetFilenamePatterns = loadingProfile.getIncludedReferenceSetFilenamePatterns();
+				logger.info("includedReferenceSetPathPatterns: {}", includedReferenceSetFilenamePatterns);
 				final List<Path> refsetSnapshots = releaseFiles.getRefsetPaths();
 				for (Path refsetSnapshot : refsetSnapshots) {
-					refsetTasks.add(loadRefsets(refsetSnapshot, loadingProfile, releaseVersion));
+					if (includedReferenceSetFilenamePatterns.isEmpty()) {
+						refsetTasks.add(loadRefsets(refsetSnapshot, loadingProfile, releaseVersion));
+					} else {
+						for (String pattern : includedReferenceSetFilenamePatterns) {
+							String filename = refsetSnapshot.getFileName().toString();
+							if (filename.matches(pattern)) {
+								logger.info("refset '{}' matches pattern '{}'", filename, pattern);
+								refsetTasks.add(loadRefsets(refsetSnapshot, loadingProfile, releaseVersion));
+								break;
+							}
+							logger.info("refset '{}' does not match any patterns", filename);
+						}
+					}
 				}
 			}
 
