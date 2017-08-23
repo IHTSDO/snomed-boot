@@ -4,27 +4,27 @@ import org.ihtsdo.otf.snomedboot.domain.Description;
 
 public class DescriptionImpl implements Description {
 
-	private final String id;
+	private final Long id;
 	private final boolean active;
 	private final String term;
-	private final String conceptId;
+	private final Long conceptId;
 
 	public DescriptionImpl(String id, boolean active, String term, String conceptId) {
-		this.id = id;
+		this.id = Long.parseLong(id);
 		this.active = active;
 		this.term = term;
-		this.conceptId = conceptId;
+		this.conceptId =  Long.parseLong(conceptId);
 	}
 
-	public DescriptionImpl(String term, boolean active, String conceptId) {
-		this.id = "";
+	public DescriptionImpl(String term, boolean active, Long conceptId) {
+		this.id = null;
 		this.active = active;
 		this.term = term;
 		this.conceptId = conceptId;
 	}
 
 	@Override
-	public String getId() {
+	public Long getId() {
 		return id;
 	}
 
@@ -39,7 +39,7 @@ public class DescriptionImpl implements Description {
 	}
 
 	@Override
-	public String getConceptId() {
+	public Long getConceptId() {
 		return conceptId;
 	}
 }
