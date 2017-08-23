@@ -125,7 +125,7 @@ public class ReleaseImporter {
 				throw new ReleaseImportException("Failed to find release files during release import process.", e);
 			}
 
-			logger.info("Loading release files {}", releaseFiles);
+			logger.info("Loading {} release files {}", importType, releaseFiles);
 
 
 			try {
@@ -135,7 +135,7 @@ public class ReleaseImporter {
 					final Set<String> releaseVersions = gatherVersions(releaseFiles);
 					for (String releaseVersion : releaseVersions) {
 						((HistoryAwareComponentFactory) componentFactory).loadingReleaseDeltaStarting(releaseVersion);
-						logger.info("Loading release {}", releaseVersion);
+						logger.info("Loading release delta {}", releaseVersion);
 						loadAll(loadingProfile, releaseFiles, releaseVersion);
 						((HistoryAwareComponentFactory) componentFactory).loadingReleaseDeltaFinished(releaseVersion);
 					}
@@ -160,8 +160,11 @@ public class ReleaseImporter {
 				if (loadingProfile.isStatedRelationships()) {
 					coreComponentTasks.add(loadRelationships(releaseFiles.getStatedRelationshipPath(), loadingProfile, releaseVersion));
 				}
-				coreComponentTasks.add(loadDescriptions(releaseFiles.getDescriptionPath(), loadingProfile, releaseVersion));
-				coreComponentTasks.add(loadDescriptions(releaseFiles.getTextDefinitionPath(), loadingProfile, releaseVersion));
+				
+				if (loadingProfile.isDescriptions() || loadingProfile.isFullDescriptionObjects()) {
+					coreComponentTasks.add(loadDescriptions(releaseFiles.getDescriptionPath(), loadingProfile, releaseVersion));
+					coreComponentTasks.add(loadDescriptions(releaseFiles.getTextDefinitionPath(), loadingProfile, releaseVersion));
+				}
 			}
 
 			List<Callable<String>> refsetTasks = new ArrayList<>();

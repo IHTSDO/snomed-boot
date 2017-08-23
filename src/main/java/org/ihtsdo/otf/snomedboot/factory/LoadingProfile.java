@@ -14,10 +14,12 @@ public class LoadingProfile implements Cloneable {
 
 	static {
 		light.inferredAttributeMapOnConcept = true;
+		light.descriptions = true;
 		light.refsetIds.add(ConceptConstants.GB_EN_LANGUAGE_REFERENCE_SET);
 		light.refsetIds.add(ConceptConstants.US_EN_LANGUAGE_REFERENCE_SET);
 
 		complete.inferredAttributeMapOnConcept = true;
+		complete.descriptions = true;
 		complete.statedRelationships = true;
 		complete.fullDescriptionObjects = true;
 		complete.fullRelationshipObjects = true;
@@ -32,6 +34,7 @@ public class LoadingProfile implements Cloneable {
 	private boolean inferredAttributeMapOnConcept;
 	private boolean statedAttributeMapOnConcept;
 	private boolean statedRelationships;
+	private boolean descriptions;
 	private boolean fullDescriptionObjects;
 	private boolean fullRelationshipObjects;
 	private boolean inactiveConcepts;
@@ -70,6 +73,10 @@ public class LoadingProfile implements Cloneable {
 
 	public LoadingProfile withFullDescriptionObjects() {
 		return this.clone().setFullDescriptionObjects(true);
+	}
+	
+	public LoadingProfile withoutDescriptions() {
+		return this.clone().setDescriptions(false);
 	}
 
 	public LoadingProfile withoutFullDescriptionObjects() {
@@ -182,6 +189,10 @@ public class LoadingProfile implements Cloneable {
 	public boolean isStatedRelationships() {
 		return statedRelationships;
 	}
+	
+	public boolean isDescriptions() {
+		return descriptions;
+	}
 
 	public boolean isFullDescriptionObjects() {
 		return fullDescriptionObjects;
@@ -239,6 +250,11 @@ public class LoadingProfile implements Cloneable {
 
 	public LoadingProfile setStatedRelationships(boolean statedRelationships) {
 		this.statedRelationships = statedRelationships;
+		return this;
+	}
+	
+	private LoadingProfile setDescriptions(boolean descriptions) {
+		this.descriptions = descriptions;
 		return this;
 	}
 
@@ -306,6 +322,7 @@ public class LoadingProfile implements Cloneable {
 				.setInferredAttributeMapOnConcept(this.inferredAttributeMapOnConcept)
 				.setStatedAttributeMapOnConcept(this.statedAttributeMapOnConcept)
 				.setStatedRelationships(this.statedRelationships)
+				.setDescriptions(this.descriptions)
 				.setFullDescriptionObjects(this.fullDescriptionObjects)
 				.setFullRelationshipObjects(this.fullRelationshipObjects)
 				.setInactiveConcepts(this.inactiveConcepts)
