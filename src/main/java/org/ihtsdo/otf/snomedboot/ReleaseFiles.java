@@ -1,5 +1,7 @@
 package org.ihtsdo.otf.snomedboot;
 
+import org.ihtsdo.otf.snomedboot.factory.LoadingProfile;
+
 import java.io.FileNotFoundException;
 import java.nio.file.Path;
 import java.util.ArrayList;
@@ -66,13 +68,15 @@ class ReleaseFiles {
 		this.refsetPaths = refsetPaths;
 	}
 
-	public void assertFullSet() throws FileNotFoundException {
-		if (conceptPath == null) {
-			throw new FileNotFoundException("Concept RF2 file not found.");
-		} else if (descriptionPath == null) {
-			throw new FileNotFoundException("Description RF2 file not found.");
-		} else if (relationshipPath == null) {
-			throw new FileNotFoundException("Relationship RF2 file not found.");
+	public void assertFullSet(LoadingProfile loadingProfile) throws FileNotFoundException {
+		if (!loadingProfile.isJustRefsets()) {
+			if (conceptPath == null) {
+				throw new FileNotFoundException("Concept RF2 file not found.");
+			} else if (loadingProfile.isDescriptions() && descriptionPath == null) {
+				throw new FileNotFoundException("Description RF2 file not found.");
+			} else if (relationshipPath == null) {
+				throw new FileNotFoundException("Relationship RF2 file not found.");
+			}
 		}
 	}
 

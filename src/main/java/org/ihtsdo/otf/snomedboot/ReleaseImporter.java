@@ -224,9 +224,7 @@ public class ReleaseImporter {
 				}
 			});
 
-			if (!loadingProfile.isJustRefsets()) {
-				releaseFiles.assertFullSet();
-			}
+			releaseFiles.assertFullSet(loadingProfile);
 
 			return releaseFiles;
 		}
