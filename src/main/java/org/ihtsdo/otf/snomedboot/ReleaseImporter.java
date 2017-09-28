@@ -278,6 +278,7 @@ public class ReleaseImporter {
 									}
 								}
 							}
+							
 							if (loadingProfile.isFullRelationshipObjects()) {
 								componentFactory.newRelationshipState(
 										values[RelationshipFieldIndexes.id],

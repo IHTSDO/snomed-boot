@@ -140,6 +140,10 @@ public class ConceptImpl implements Concept {
 	public void removeInferredParent(Concept parentConcept) {
 		inferredParents.remove(parentConcept);
 	}
+	
+	public Set<Concept> getInferredParents() {
+		return inferredParents;
+	}
 
 	public void addStatedParent(Concept parentConcept) {
 		statedParents.add(parentConcept);
@@ -147,6 +151,10 @@ public class ConceptImpl implements Concept {
 
 	public void removeStatedParent(Concept parentConcept) {
 		statedParents.remove(parentConcept);
+	}
+	
+	public Set<Concept> getStatedParents() {
+		return statedParents;
 	}
 	
 	public void addInferredChild(Concept childConcept) {
