@@ -158,12 +158,16 @@ public class ReleaseImporter {
 
 				coreComponentTasks.add(loadRelationships(releaseFiles.getRelationshipPath(), loadingProfile, releaseVersion));
 				if (loadingProfile.isStatedRelationships()) {
-					coreComponentTasks.add(loadRelationships(releaseFiles.getStatedRelationshipPath(), loadingProfile, releaseVersion));
+					if (releaseFiles.getStatedRelationshipPath() != null) {
+						coreComponentTasks.add(loadRelationships(releaseFiles.getStatedRelationshipPath(), loadingProfile, releaseVersion));
+					}
 				}
 				
 				if (loadingProfile.isDescriptions() || loadingProfile.isFullDescriptionObjects()) {
 					coreComponentTasks.add(loadDescriptions(releaseFiles.getDescriptionPath(), loadingProfile, releaseVersion));
-					coreComponentTasks.add(loadDescriptions(releaseFiles.getTextDefinitionPath(), loadingProfile, releaseVersion));
+					if (releaseFiles.getTextDefinitionPath() != null) {
+						coreComponentTasks.add(loadDescriptions(releaseFiles.getTextDefinitionPath(), loadingProfile, releaseVersion));
+					}
 				}
 			}
 
