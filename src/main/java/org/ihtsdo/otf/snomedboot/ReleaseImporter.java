@@ -186,8 +186,9 @@ public class ReleaseImporter {
 								logger.info("refset '{}' matches pattern '{}'", filename, pattern);
 								refsetTasks.add(loadRefsets(refsetSnapshot, loadingProfile, releaseVersion));
 								break;
+							} else {
+								logger.info("refset '{}' does not match any patterns", filename);
 							}
-							logger.info("refset '{}' does not match any patterns", filename);
 						}
 					}
 				}
