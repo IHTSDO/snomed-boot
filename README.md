@@ -1,16 +1,23 @@
 # Snomed Boot
-A Java framework for loading SNOMED CT components and reference set members from RF2 into memory, a database (or anything) via factory methods.
+An extensible Java framework for loading SNOMED CT RF2 content into any implementation.
 
 ## Key Features
-- Highly extensible
-- Loading Profiles - only get the components or refsets you are interested in.
-- Multithreaded - concepts load first, then relationships and descriptions in parallel, then all reference set memebers in parallel.
+- Extensible factory based design
+- Supports component streaming for better overall performance and less pressure on memory
+- Multithreaded
+  - Concepts load first
+  - Then Relationships and Descriptions load in parallel
+  - Then all reference set memebers in parallel.
+- Loading Profiles allow content to be filtered
+  - by content type 
+  - by reference set filename pattern
+  - by reference set identifier 
 
 ## Component Factories
 This project is oriented around the ComponentFactory and HistoryAwareComponentFactory. These interfaces allow a factory implementation to recieve the properties of every component and member. The HistoryAwareComponentFactory is useful when loading full files containing more than one release.
 
-### Memory Factory Implementation
-The default factory implementation targets memory. It builds a map of concepts with their descriptions and relationships connected. This is an extremely fast way to get hold the transitive closure for every concept.
+## In-Memory Implementation
+The default factory implementation loads content into memory. It builds a map of concepts with their descriptions and relationships connected. This is an extremely fast way to get hold the transitive closure for every concept.
 ```java
 // Create release importer
 ReleaseImporter releaseImporter = new ReleaseImporter();
@@ -25,6 +32,4 @@ Set<Long> transitiveClosure = conceptMap.get("285355007").getInferredAncestorIds
 ```
 
 ## Contribute
-Feel free to fork and improve this project.
-
-If you create a factory implementation based on this project please name the repo snomed-boot-X and share it here. e.g. snomed-boot-mysql.
+We welcome your suggestions and contributions. Feel free to fork this project and submit a pull request of your changes.
