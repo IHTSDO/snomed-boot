@@ -235,69 +235,63 @@ public class ReleaseImporter {
 		}
 
 		private void loadConcepts(Path rf2File, final LoadingProfile loadingProfile, final String releaseVersion) throws IOException {
-			readLines(rf2File, new ValuesHandler() {
-				@Override
-				public void handle(String[] values) {
-					if (loadingProfile.isInactiveConcepts() || "1".equals(values[ConceptFieldIndexes.active])) {
-						String conceptId = values[ComponentFieldIndexes.id];
-						componentFactory.newConceptState(conceptId, values[ConceptFieldIndexes.effectiveTime], values[ConceptFieldIndexes.active],
-								values[ConceptFieldIndexes.moduleId], values[ConceptFieldIndexes.definitionStatusId]);
-					}
+			readLines(rf2File, (ValuesHandler) values -> {
+				if (loadingProfile.isInactiveConcepts() || "1".equals(values[ConceptFieldIndexes.active])) {
+					String conceptId = values[ComponentFieldIndexes.id];
+					componentFactory.newConceptState(conceptId, values[ConceptFieldIndexes.effectiveTime], values[ConceptFieldIndexes.active],
+							values[ConceptFieldIndexes.moduleId], values[ConceptFieldIndexes.definitionStatusId]);
 				}
 			}, "concepts", releaseVersion);
 		}
 
 		private Callable<String> loadRelationships(Path rf2File, final LoadingProfile loadingProfile, String releaseVersion) {
-			return readLinesCallable(rf2File, new ValuesHandler() {
-				@Override
-				public void handle(String[] values) {
-					final boolean active = "1".equals(values[RelationshipFieldIndexes.active]);
-					if (loadingProfile.isInactiveRelationships() || active) {
-						final String sourceId = values[RelationshipFieldIndexes.sourceId];
-						final String type = values[RelationshipFieldIndexes.typeId];
-						final String characteristicType = values[RelationshipFieldIndexes.characteristicTypeId];
-						final String destinationId = values[RelationshipFieldIndexes.destinationId];
-						boolean inferred = ConceptConstants.INFERRED_RELATIONSHIP.equals(characteristicType);
-						if (!inferred && loadingProfile.isStatedAttributeMapOnConcept()) {
-							componentFactory.addStatedConceptAttribute(sourceId, type, destinationId);
-						} else if (inferred && loadingProfile.isInferredAttributeMapOnConcept()) {
-							componentFactory.addInferredConceptAttribute(sourceId, type, destinationId);
-						}
-						if (inferred || loadingProfile.isStatedRelationships()) {
-							if (type.equals(ConceptConstants.isA)) {
-								if (active) {
-									if (inferred) {
-										componentFactory.addInferredConceptParent(sourceId, destinationId);
-										componentFactory.addInferredConceptChild(sourceId, destinationId);
-									} else {
-										componentFactory.addStatedConceptParent(sourceId, destinationId);
-										componentFactory.addStatedConceptChild(sourceId, destinationId);
-									}
+			return readLinesCallable(rf2File, (ValuesHandler) values -> {
+				final boolean active = "1".equals(values[RelationshipFieldIndexes.active]);
+				if (loadingProfile.isInactiveRelationships() || active) {
+					final String sourceId = values[RelationshipFieldIndexes.sourceId];
+					final String type = values[RelationshipFieldIndexes.typeId];
+					final String characteristicType = values[RelationshipFieldIndexes.characteristicTypeId];
+					final String destinationId = values[RelationshipFieldIndexes.destinationId];
+					boolean inferred = ConceptConstants.INFERRED_RELATIONSHIP.equals(characteristicType);
+					if (!inferred && loadingProfile.isStatedAttributeMapOnConcept()) {
+						componentFactory.addStatedConceptAttribute(sourceId, type, destinationId);
+					} else if (inferred && loadingProfile.isInferredAttributeMapOnConcept()) {
+						componentFactory.addInferredConceptAttribute(sourceId, type, destinationId);
+					}
+					if (inferred || loadingProfile.isStatedRelationships()) {
+						if (type.equals(ConceptConstants.isA)) {
+							if (active) {
+								if (inferred) {
+									componentFactory.addInferredConceptParent(sourceId, destinationId);
+									componentFactory.addInferredConceptChild(sourceId, destinationId);
 								} else {
-									if (inferred) {
-										componentFactory.removeInferredConceptParent(sourceId, destinationId);
-										componentFactory.removeInferredConceptChild(sourceId, destinationId);
-									} else {
-										componentFactory.removeStatedConceptParent(sourceId, destinationId);
-										componentFactory.removeStatedConceptChild(sourceId, destinationId);
-									}
+									componentFactory.addStatedConceptParent(sourceId, destinationId);
+									componentFactory.addStatedConceptChild(sourceId, destinationId);
+								}
+							} else {
+								if (inferred) {
+									componentFactory.removeInferredConceptParent(sourceId, destinationId);
+									componentFactory.removeInferredConceptChild(sourceId, destinationId);
+								} else {
+									componentFactory.removeStatedConceptParent(sourceId, destinationId);
+									componentFactory.removeStatedConceptChild(sourceId, destinationId);
 								}
 							}
-							
-							if (loadingProfile.isFullRelationshipObjects()) {
-								componentFactory.newRelationshipState(
-										values[RelationshipFieldIndexes.id],
-										values[RelationshipFieldIndexes.effectiveTime],
-										values[RelationshipFieldIndexes.active],
-										values[RelationshipFieldIndexes.moduleId],
-										values[RelationshipFieldIndexes.sourceId],
-										values[RelationshipFieldIndexes.destinationId],
-										values[RelationshipFieldIndexes.relationshipGroup],
-										values[RelationshipFieldIndexes.typeId],
-										values[RelationshipFieldIndexes.characteristicTypeId],
-										values[RelationshipFieldIndexes.modifierId]
-								);
-							}
+						}
+
+						if (loadingProfile.isFullRelationshipObjects()) {
+							componentFactory.newRelationshipState(
+									values[RelationshipFieldIndexes.id],
+									values[RelationshipFieldIndexes.effectiveTime],
+									values[RelationshipFieldIndexes.active],
+									values[RelationshipFieldIndexes.moduleId],
+									values[RelationshipFieldIndexes.sourceId],
+									values[RelationshipFieldIndexes.destinationId],
+									values[RelationshipFieldIndexes.relationshipGroup],
+									values[RelationshipFieldIndexes.typeId],
+									values[RelationshipFieldIndexes.characteristicTypeId],
+									values[RelationshipFieldIndexes.modifierId]
+							);
 						}
 					}
 				}
@@ -305,56 +299,50 @@ public class ReleaseImporter {
 		}
 
 		private Callable<String> loadDescriptions(Path rf2File, final LoadingProfile loadingProfile, String releaseVersion) {
-			return readLinesCallable(rf2File, new ValuesHandler() {
-				@Override
-				public void handle(String[] values) {
-					if (loadingProfile.isInactiveDescriptions() || "1".equals(values[DescriptionFieldIndexes.active])) {
-						final String conceptId = values[DescriptionFieldIndexes.conceptId];
-						final String value = values[DescriptionFieldIndexes.typeId];
-						if (ConceptConstants.FSN.equals(value)) {
-							componentFactory.addConceptFSN(conceptId, values[DescriptionFieldIndexes.term]);
-						}
-						if (loadingProfile.isFullDescriptionObjects()) {
-							componentFactory.newDescriptionState(
-									values[DescriptionFieldIndexes.id],
-									values[DescriptionFieldIndexes.effectiveTime],
-									values[DescriptionFieldIndexes.active],
-									values[DescriptionFieldIndexes.moduleId],
-									values[DescriptionFieldIndexes.conceptId],
-									values[DescriptionFieldIndexes.languageCode],
-									values[DescriptionFieldIndexes.typeId],
-									values[DescriptionFieldIndexes.term],
-									values[DescriptionFieldIndexes.caseSignificanceId]
-							);
-						}
+			return readLinesCallable(rf2File, (ValuesHandler) values -> {
+				if (loadingProfile.isInactiveDescriptions() || "1".equals(values[DescriptionFieldIndexes.active])) {
+					final String conceptId = values[DescriptionFieldIndexes.conceptId];
+					final String value = values[DescriptionFieldIndexes.typeId];
+					if (ConceptConstants.FSN.equals(value)) {
+						componentFactory.addConceptFSN(conceptId, values[DescriptionFieldIndexes.term]);
+					}
+					if (loadingProfile.isFullDescriptionObjects()) {
+						componentFactory.newDescriptionState(
+								values[DescriptionFieldIndexes.id],
+								values[DescriptionFieldIndexes.effectiveTime],
+								values[DescriptionFieldIndexes.active],
+								values[DescriptionFieldIndexes.moduleId],
+								values[DescriptionFieldIndexes.conceptId],
+								values[DescriptionFieldIndexes.languageCode],
+								values[DescriptionFieldIndexes.typeId],
+								values[DescriptionFieldIndexes.term],
+								values[DescriptionFieldIndexes.caseSignificanceId]
+						);
 					}
 				}
 			}, "descriptions", releaseVersion);
 		}
 
 		private Callable<String> loadRefsets(Path rf2File, final LoadingProfile loadingProfile, String releaseVersion) {
-			return readLinesCallable(rf2File, new FieldNamesAndValuesHandler() {
-				@Override
-				public void handle(String[] fieldNames, String[] values) {
-					if (loadingProfile.isInactiveRefsetMembers() || "1".equals(values[RefsetFieldIndexes.active])) {
-						final String refsetId = values[RefsetFieldIndexes.refsetId];
-						if (loadingProfile.isAllRefsets() || loadingProfile.isRefset(refsetId)) {
-							final String referencedComponentId = values[RefsetFieldIndexes.referencedComponentId];
-							if (FactoryUtils.isConceptId(referencedComponentId)) {
-								componentFactory.addConceptReferencedInRefsetId(refsetId, referencedComponentId);
-							}
-							if (loadingProfile.isFullRefsetMemberObjects()) {
-								componentFactory.newReferenceSetMemberState(
-										fieldNames,
-										values[RefsetFieldIndexes.id],
-										values[RefsetFieldIndexes.effectiveTime],
-										values[RefsetFieldIndexes.active],
-										values[RefsetFieldIndexes.moduleId],
-										values[RefsetFieldIndexes.refsetId],
-										values[RefsetFieldIndexes.referencedComponentId],
-										Arrays.copyOfRange(values, RefsetFieldIndexes.referencedComponentId + 1, values.length)
-								);
-							}
+			return readLinesCallable(rf2File, (FieldNamesAndValuesHandler) (fieldNames, values) -> {
+				if (loadingProfile.isInactiveRefsetMembers() || "1".equals(values[RefsetFieldIndexes.active])) {
+					final String refsetId = values[RefsetFieldIndexes.refsetId];
+					if (loadingProfile.isAllRefsets() || loadingProfile.isRefset(refsetId)) {
+						final String referencedComponentId = values[RefsetFieldIndexes.referencedComponentId];
+						if (FactoryUtils.isConceptId(referencedComponentId)) {
+							componentFactory.addConceptReferencedInRefsetId(refsetId, referencedComponentId);
+						}
+						if (loadingProfile.isFullRefsetMemberObjects()) {
+							componentFactory.newReferenceSetMemberState(
+									fieldNames,
+									values[RefsetFieldIndexes.id],
+									values[RefsetFieldIndexes.effectiveTime],
+									values[RefsetFieldIndexes.active],
+									values[RefsetFieldIndexes.moduleId],
+									values[RefsetFieldIndexes.refsetId],
+									values[RefsetFieldIndexes.referencedComponentId],
+									Arrays.copyOfRange(values, RefsetFieldIndexes.referencedComponentId + 1, values.length)
+							);
 						}
 					}
 				}
@@ -362,16 +350,13 @@ public class ReleaseImporter {
 		}
 
 		private Callable<String> readLinesCallable(final Path rf2FilePath, final FileContentHandler contentHandler, final String componentType, final String releaseVersion) {
-			return new Callable<String>() {
-				@Override
-				public String call() throws Exception {
-					try {
-						readLines(rf2FilePath, contentHandler, componentType, releaseVersion);
-					} catch (Exception e) {
-						logger.error("Failed to read or process lines.", e);
-					}
-					return null;
+			return () -> {
+				try {
+					readLines(rf2FilePath, contentHandler, componentType, releaseVersion);
+				} catch (Exception e) {
+					logger.error("Failed to read or process lines.", e);
 				}
+				return null;
 			};
 		}
 
