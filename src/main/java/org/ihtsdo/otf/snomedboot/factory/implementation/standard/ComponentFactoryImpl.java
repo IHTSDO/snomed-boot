@@ -1,10 +1,10 @@
 package org.ihtsdo.otf.snomedboot.factory.implementation.standard;
 
-import org.ihtsdo.otf.snomedboot.ComponentStore;
 import org.ihtsdo.otf.snomedboot.factory.ComponentFactory;
 import org.ihtsdo.otf.snomedboot.factory.FactoryUtils;
+import org.ihtsdo.otf.snomedboot.factory.ImpotentComponentFactory;
 
-public class ComponentFactoryImpl implements ComponentFactory {
+public class ComponentFactoryImpl extends ImpotentComponentFactory {
 
 	private final ComponentStore componentStore;
 
@@ -27,11 +27,6 @@ public class ComponentFactoryImpl implements ComponentFactory {
 									 String destinationId, String relationshipGroup, String typeId, String characteristicTypeId, String modifierId) {
 		getConceptForReference(sourceId).addRelationship(new RelationshipImpl(id, effectiveTime, active, moduleId, sourceId,
 				destinationId, relationshipGroup, typeId, characteristicTypeId, modifierId));
-	}
-
-	@Override
-	public void newReferenceSetMemberState(String[] fieldNames, String id, String effectiveTime, String active, String moduleId, String refsetId, String referencedComponentId, String... otherValues) {
-
 	}
 
 	@Override
@@ -92,16 +87,6 @@ public class ComponentFactoryImpl implements ComponentFactory {
 	@Override
 	public void addConceptReferencedInRefsetId(String refsetId, String conceptId) {
 		getConceptForReference(conceptId).addMemberOfRefsetId(Long.parseLong(refsetId));
-	}
-
-	@Override
-	public void loadingComponentsStarting() {
-
-	}
-
-	@Override
-	public void loadingComponentsCompleted() {
-
 	}
 
 	private ConceptImpl getConceptForReference(String id) {
