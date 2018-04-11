@@ -330,6 +330,11 @@ public class LoadingProfile implements Cloneable {
 		return this;
 	}
 
+	private LoadingProfile setIncludedReferenceSetFilenamePatterns(Set<String> includedReferenceSetFilenamePatterns) {
+		this.includedReferenceSetFilenamePatterns = includedReferenceSetFilenamePatterns;
+		return this;
+	}
+
 	private Set<String> getRefsetIdsNoClone() {
 		return refsetIds;
 	}
@@ -350,6 +355,7 @@ public class LoadingProfile implements Cloneable {
 				.setAllRefsets(this.allRefsets)
 				.setFullRefsetMemberObjects(this.fullRefsetMemberObjects)
 				.setJustRefsets(this.justRefsets)
-				.setRefsetIds(new HashSet<>(this.refsetIds));
+				.setRefsetIds(new HashSet<>(this.refsetIds))
+				.setIncludedReferenceSetFilenamePatterns(new HashSet<>(this.includedReferenceSetFilenamePatterns));
 	}
 }
