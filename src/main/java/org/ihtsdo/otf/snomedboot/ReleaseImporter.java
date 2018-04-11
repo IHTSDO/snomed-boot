@@ -41,8 +41,8 @@ public class ReleaseImporter {
 	 * This is achieved by gathering the latest effectiveTime for each component and using this information within a content filter.
 	 * This is useful when loading Extension archives in combination with the International Edition.
 	 */
-	public void loadEffectiveSnapshotReleaseFiles(List<String> releaseDirPaths, LoadingProfile loadingProfile, ComponentFactory componentFactory) throws ReleaseImportException {
-		new ImportRun(componentFactory).doLoadReleaseFiles(releaseDirPaths, loadingProfile.withSnapshotEffectiveComponentFilter(), ImportType.SNAPSHOT);
+	public void loadEffectiveSnapshotReleaseFiles(Set<String> releaseDirPaths, LoadingProfile loadingProfile, ComponentFactory componentFactory) throws ReleaseImportException {
+		new ImportRun(componentFactory).doLoadReleaseFiles(new ArrayList<>(releaseDirPaths), loadingProfile.withSnapshotEffectiveComponentFilter(), ImportType.SNAPSHOT);
 	}
 
 	public void loadDeltaReleaseFiles(String releaseDirPath, LoadingProfile loadingProfile, ComponentFactory componentFactory) throws ReleaseImportException {
@@ -62,11 +62,11 @@ public class ReleaseImporter {
 	}
 
 	/**
-	 * Load only the effective components from multiple snapshots archives.
+	 * Load only the effective components from multiple snapshot archives.
 	 * This is achieved by gathering the latest effectiveTime for each component and using this information within a content filter.
 	 * This is useful when loading Extension archives in combination with the International Edition.
 	 */
-	public void loadEffectiveSnapshotReleaseFileStreams(List<InputStream> releaseZips, LoadingProfile loadingProfile, ComponentFactory componentFactory) throws ReleaseImportException {
+	public void loadEffectiveSnapshotReleaseFileStreams(Set<InputStream> releaseZips, LoadingProfile loadingProfile, ComponentFactory componentFactory) throws ReleaseImportException {
 		File tempDir = createTempDir();
 		int a = 1;
 		for (InputStream releaseZip : releaseZips) {
@@ -74,9 +74,8 @@ public class ReleaseImporter {
 			releaseTempDir.mkdirs();
 			unzipRelease(releaseZip, ImportType.SNAPSHOT, releaseTempDir);
 		}
-		loadEffectiveSnapshotReleaseFiles(Collections.singletonList(tempDir.getAbsolutePath()), loadingProfile, componentFactory);
+		loadEffectiveSnapshotReleaseFiles(Collections.singleton(tempDir.getAbsolutePath()), loadingProfile, componentFactory);
 		FileSystemUtils.deleteRecursively(tempDir);
-
 	}
 
 	public void loadDeltaReleaseFiles(InputStream releaseZip, LoadingProfile loadingProfile, ComponentFactory componentFactory) throws ReleaseImportException {
@@ -177,7 +176,7 @@ public class ReleaseImporter {
 			try {
 
 				if (loadingProfile.isSnapshotEffectiveComponentFilter()) {
-					logger.info("Gathering effective dates for effective component filtering.", importType, releaseFiles);
+					logger.info("Gathering effective dates for effective component filtering.");
 					LatestEffectiveDateComponentFactory latestEffectiveDateComponentFactory = new LatestEffectiveDateComponentFactory();
 					runComponentFactory.preprocessingContent();
 

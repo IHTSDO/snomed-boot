@@ -1,6 +1,6 @@
 package org.ihtsdo.otf.snomedboot;
 
-import com.google.common.collect.Lists;
+import com.google.common.collect.Sets;
 import org.ihtsdo.otf.snomedboot.factory.LoadingProfile;
 import org.ihtsdo.otf.snomedboot.factory.TestComponentFactory;
 import org.junit.Test;
@@ -9,10 +9,10 @@ import org.snomed.otf.snomedboot.testutil.ZipUtil;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.util.List;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 public class ReleaseImporterTest {
 
@@ -50,7 +50,7 @@ public class ReleaseImporterTest {
 
 		// Load effective components
 		testComponentFactory = new TestComponentFactory();
-		releaseImporter.loadEffectiveSnapshotReleaseFileStreams(Lists.newArrayList(new FileInputStream(baseRF2SnapshotZip), new FileInputStream(extensionRF2SnapshotZip)), LoadingProfile.complete, testComponentFactory);
+		releaseImporter.loadEffectiveSnapshotReleaseFileStreams(Sets.newHashSet(new FileInputStream(baseRF2SnapshotZip), new FileInputStream(extensionRF2SnapshotZip)), LoadingProfile.complete, testComponentFactory);
 
 		conceptLines = testComponentFactory.getConceptLines();
 		assertEquals(12, conceptLines.size());
