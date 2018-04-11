@@ -31,6 +31,7 @@ public class LoadingProfile implements Cloneable {
 		complete.fullRefsetMemberObjects = true;
 	}
 
+	private boolean snapshotEffectiveComponentFilter;
 	private boolean inferredAttributeMapOnConcept;
 	private boolean statedAttributeMapOnConcept;
 	private boolean statedRelationships;
@@ -47,107 +48,115 @@ public class LoadingProfile implements Cloneable {
 	private Set<String> refsetIds = new HashSet<>();
 	private Set<String> includedReferenceSetFilenamePatterns = new HashSet<>();
 
+	public LoadingProfile withSnapshotEffectiveComponentFilter() {
+		return this.cloneObject().setSnapshotEffectiveComponentFilter(true);
+	}
+
+	public LoadingProfile withoutSnapshotEffectiveComponentFilter() {
+		return this.cloneObject().setSnapshotEffectiveComponentFilter(false);
+	}
+
 	public LoadingProfile withInferredAttributeMapOnConcept() {
-		return this.clone().setInferredAttributeMapOnConcept(true);
+		return this.cloneObject().setInferredAttributeMapOnConcept(true);
 	}
 
 	public LoadingProfile withoutInferredAttributeMapOnConcept() {
-		return this.clone().setInferredAttributeMapOnConcept(false);
+		return this.cloneObject().setInferredAttributeMapOnConcept(false);
 	}
 
 	public LoadingProfile withStatedAttributeMapOnConcept() {
-		return this.clone().setStatedAttributeMapOnConcept(true);
+		return this.cloneObject().setStatedAttributeMapOnConcept(true);
 	}
 
 	public LoadingProfile withoutStatedAttributeMapOnConcept() {
-		return this.clone().setStatedAttributeMapOnConcept(false);
+		return this.cloneObject().setStatedAttributeMapOnConcept(false);
 	}
 
 	public LoadingProfile withStatedRelationships() {
-		return this.clone().setStatedRelationships(true);
+		return this.cloneObject().setStatedRelationships(true);
 	}
 
 	public LoadingProfile withoutStatedRelationships() {
-		return this.clone().setStatedRelationships(false);
+		return this.cloneObject().setStatedRelationships(false);
 	}
 
 	public LoadingProfile withFullDescriptionObjects() {
-		return this.clone().setFullDescriptionObjects(true);
+		return this.cloneObject().setFullDescriptionObjects(true);
 	}
 	
 	public LoadingProfile withoutDescriptions() {
-		return this.clone().setDescriptions(false);
+		return this.cloneObject().setDescriptions(false);
 	}
 
 	public LoadingProfile withoutFullDescriptionObjects() {
-		return this.clone().setFullDescriptionObjects(false);
+		return this.cloneObject().setFullDescriptionObjects(false);
 	}
 
 	public LoadingProfile withFullRelationshipObjects() {
-		return this.clone().setFullRelationshipObjects(true);
+		return this.cloneObject().setFullRelationshipObjects(true);
 	}
 
 	public LoadingProfile withoutFullRelationshipObjects() {
-		return this.clone().setFullRelationshipObjects(false);
+		return this.cloneObject().setFullRelationshipObjects(false);
 	}
 
 	public LoadingProfile withInactiveComponents() {
-		return this.clone().setInactiveConcepts(true).setInactiveDescriptions(true).setInactiveRelationships(true);
+		return this.cloneObject().setInactiveConcepts(true).setInactiveDescriptions(true).setInactiveRelationships(true);
 	}
 
 	public LoadingProfile withInactiveConcepts() {
-		return this.clone().setInactiveConcepts(true);
+		return this.cloneObject().setInactiveConcepts(true);
 	}
 
 	public LoadingProfile withoutInactiveConcepts() {
-		return this.clone().setInactiveConcepts(false);
+		return this.cloneObject().setInactiveConcepts(false);
 	}
 
 	public LoadingProfile withInactiveDescriptions() {
-		return this.clone().setInactiveDescriptions(true);
+		return this.cloneObject().setInactiveDescriptions(true);
 	}
 
 	public LoadingProfile withoutInactiveDescriptions() {
-		return this.clone().setInactiveDescriptions(false);
+		return this.cloneObject().setInactiveDescriptions(false);
 	}
 
 	public LoadingProfile withInactiveRelationships() {
-		return this.clone().setInactiveRelationships(true);
+		return this.cloneObject().setInactiveRelationships(true);
 	}
 
 	public LoadingProfile withoutInactiveRelationships() {
-		return this.clone().setInactiveRelationships(false);
+		return this.cloneObject().setInactiveRelationships(false);
 	}
 
 	public LoadingProfile withInactiveRefsetMembers() {
-		return this.clone().setInactiveRefsetMembers(true);
+		return this.cloneObject().setInactiveRefsetMembers(true);
 	}
 	public LoadingProfile withoutInactiveRefsetMembers() {
-		return this.clone().setInactiveRefsetMembers(false);
+		return this.cloneObject().setInactiveRefsetMembers(false);
 	}
 
 	public LoadingProfile withAllRefsets() {
-		return this.clone().setAllRefsets(true);
+		return this.cloneObject().setAllRefsets(true);
 	}
 
 	public LoadingProfile withoutAllRefsets() {
-		return this.clone().setAllRefsets(false);
+		return this.cloneObject().setAllRefsets(false);
 	}
 
 	public LoadingProfile withFullRefsetMemberObjects() {
-		return this.clone().setFullRefsetMemberObjects(true);
+		return this.cloneObject().setFullRefsetMemberObjects(true);
 	}
 
 	public LoadingProfile withoutFullRefsetMemberObjects() {
-		return this.clone().setFullRefsetMemberObjects(false);
+		return this.cloneObject().setFullRefsetMemberObjects(false);
 	}
 
 	public LoadingProfile withJustRefsets() {
-		return this.clone().setJustRefsets(true);
+		return this.cloneObject().setJustRefsets(true);
 	}
 
 	public LoadingProfile withoutJustRefsets() {
-		return this.clone().setJustRefsets(false);
+		return this.cloneObject().setJustRefsets(false);
 	}
 
 	public LoadingProfile withRefset(String refsetId) {
@@ -155,7 +164,7 @@ public class LoadingProfile implements Cloneable {
 	}
 
 	public LoadingProfile withRefsets(String... refsetId) {
-		final LoadingProfile clone = this.clone();
+		final LoadingProfile clone = this.cloneObject();
 		Collections.addAll(clone.getRefsetIdsNoClone(), refsetId);
 		return clone;
 	}
@@ -165,7 +174,7 @@ public class LoadingProfile implements Cloneable {
 	}
 
 	public LoadingProfile withoutRefsets(String... refsetId) {
-		final LoadingProfile clone = this.clone();
+		final LoadingProfile clone = this.cloneObject();
 		for (String id : refsetId) {
 			clone.getRefsetIdsNoClone().remove(id);
 		}
@@ -173,9 +182,13 @@ public class LoadingProfile implements Cloneable {
 	}
 
 	public LoadingProfile withoutAnyRefsets() {
-		final LoadingProfile clone = this.clone();
+		final LoadingProfile clone = this.cloneObject();
 		clone.refsetIds.clear();
 		return clone;
+	}
+
+	public boolean isSnapshotEffectiveComponentFilter() {
+		return snapshotEffectiveComponentFilter;
 	}
 
 	public boolean isInferredAttributeMapOnConcept() {
@@ -238,17 +251,22 @@ public class LoadingProfile implements Cloneable {
 		return ImmutableSet.copyOf(refsetIds);
 	}
 
+	private LoadingProfile setSnapshotEffectiveComponentFilter(boolean snapshotEffectiveComponentFilter) {
+		this.snapshotEffectiveComponentFilter = snapshotEffectiveComponentFilter;
+		return this;
+	}
+
 	private LoadingProfile setInferredAttributeMapOnConcept(boolean inferredAttributeMapOnConcept) {
 		this.inferredAttributeMapOnConcept = inferredAttributeMapOnConcept;
 		return this;
 	}
 
-	public LoadingProfile setStatedAttributeMapOnConcept(boolean statedAttributeMapOnConcept) {
+	private LoadingProfile setStatedAttributeMapOnConcept(boolean statedAttributeMapOnConcept) {
 		this.statedAttributeMapOnConcept = statedAttributeMapOnConcept;
 		return this;
 	}
 
-	public LoadingProfile setStatedRelationships(boolean statedRelationships) {
+	private LoadingProfile setStatedRelationships(boolean statedRelationships) {
 		this.statedRelationships = statedRelationships;
 		return this;
 	}
@@ -293,12 +311,12 @@ public class LoadingProfile implements Cloneable {
 		return this;
 	}
 
-	public LoadingProfile setFullRefsetMemberObjects(boolean fullRefsetMemberObjects) {
+	private LoadingProfile setFullRefsetMemberObjects(boolean fullRefsetMemberObjects) {
 		this.fullRefsetMemberObjects = fullRefsetMemberObjects;
 		return this;
 	}
 
-	public LoadingProfile setJustRefsets(boolean justRefsets) {
+	private LoadingProfile setJustRefsets(boolean justRefsets) {
 		this.justRefsets = justRefsets;
 		return this;
 	}
@@ -316,9 +334,9 @@ public class LoadingProfile implements Cloneable {
 		return refsetIds;
 	}
 
-	@Override
-	protected LoadingProfile clone() {
+	private LoadingProfile cloneObject() {
 		return new LoadingProfile()
+				.setSnapshotEffectiveComponentFilter(this.snapshotEffectiveComponentFilter)
 				.setInferredAttributeMapOnConcept(this.inferredAttributeMapOnConcept)
 				.setStatedAttributeMapOnConcept(this.statedAttributeMapOnConcept)
 				.setStatedRelationships(this.statedRelationships)

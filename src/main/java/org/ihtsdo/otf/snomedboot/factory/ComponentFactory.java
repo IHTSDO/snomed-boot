@@ -2,6 +2,8 @@ package org.ihtsdo.otf.snomedboot.factory;
 
 public interface ComponentFactory {
 
+	void preprocessingContent();
+
 	void loadingComponentsStarting();
 
 	void loadingComponentsCompleted();

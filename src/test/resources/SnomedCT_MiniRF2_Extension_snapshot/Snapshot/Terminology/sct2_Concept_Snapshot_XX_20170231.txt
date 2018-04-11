@@ -1,0 +1,16 @@
+#
+# Comments are removed by unit test
+#
+id	effectiveTime	active	moduleId	definitionStatusId
+
+# Extension module
+100101001	20170231	1	100101001	900000000000074008
+
+# Structure of endocrine system
+113331007	20170231	0	100101001	900000000000074008
+
+# Disorder of endocrine system
+362969004	20170231	0	100101001	900000000000073002
+
+# Diabetes mellitus - this version no longer active, module is now international
+73211009	20160231	1	100101001	900000000000074008

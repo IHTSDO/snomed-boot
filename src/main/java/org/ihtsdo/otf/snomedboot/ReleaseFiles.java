@@ -9,73 +9,69 @@ import java.util.List;
 
 class ReleaseFiles {
 
-	private Path conceptPath;
-	private Path descriptionPath;
-	private Path textDefinitionPath;
-	private Path relationshipPath;
-	private Path statedRelationshipPath;
-	private List<Path> refsetPaths;
+	private final List<Path> conceptPaths = new ArrayList<>();
+	private final List<Path> descriptionPaths = new ArrayList<>();
+	private final List<Path> textDefinitionPaths = new ArrayList<>();
+	private final List<Path> relationshipPaths = new ArrayList<>();
+	private final List<Path> statedRelationshipPaths = new ArrayList<>();
+	private final List<Path> refsetPaths = new ArrayList<>();
 
-	public ReleaseFiles() {
-		refsetPaths = new ArrayList<>();
+	public void addConceptPath(Path file) {
+		conceptPaths.add(file);
 	}
 
-	public Path getConceptPath() {
-		return conceptPath;
+	public void addDescriptionPath(Path file) {
+		descriptionPaths.add(file);
 	}
 
-	public void setConceptPath(Path conceptPath) {
-		this.conceptPath = conceptPath;
+	public void addTextDefinitionPath(Path file) {
+		textDefinitionPaths.add(file);
 	}
 
-	public Path getDescriptionPath() {
-		return descriptionPath;
+	public void addRelationshipPath(Path file) {
+		relationshipPaths.add(file);
 	}
 
-	public void setDescriptionPath(Path descriptionPath) {
-		this.descriptionPath = descriptionPath;
+	public void addStatedRelationshipPath(Path file) {
+		statedRelationshipPaths.add(file);
 	}
 
-	public Path getTextDefinitionPath() {
-		return textDefinitionPath;
+	public void addRefsetPath(Path file) {
+		refsetPaths.add(file);
 	}
 
-	public void setTextDefinitionPath(Path textDefinitionPath) {
-		this.textDefinitionPath = textDefinitionPath;
+	public List<Path> getConceptPaths() {
+		return conceptPaths;
 	}
 
-	public Path getRelationshipPath() {
-		return relationshipPath;
+	public List<Path> getDescriptionPaths() {
+		return descriptionPaths;
 	}
 
-	public void setRelationshipPath(Path relationshipPath) {
-		this.relationshipPath = relationshipPath;
+	public List<Path> getTextDefinitionPaths() {
+		return textDefinitionPaths;
 	}
 
-	public Path getStatedRelationshipPath() {
-		return statedRelationshipPath;
+	public List<Path> getRelationshipPaths() {
+		return relationshipPaths;
 	}
 
-	public void setStatedRelationshipPath(Path statedRelationshipPath) {
-		this.statedRelationshipPath = statedRelationshipPath;
+	public List<Path> getStatedRelationshipPaths() {
+		return statedRelationshipPaths;
 	}
 
 	public List<Path> getRefsetPaths() {
 		return refsetPaths;
 	}
 
-	public void setRefsetPaths(List<Path> refsetPaths) {
-		this.refsetPaths = refsetPaths;
-	}
-
 	public void assertFullSet(LoadingProfile loadingProfile) throws FileNotFoundException {
 		if (!loadingProfile.isJustRefsets()) {
-			if (conceptPath == null) {
-				throw new FileNotFoundException("Concept RF2 file not found.");
-			} else if (loadingProfile.isDescriptions() && descriptionPath == null) {
-				throw new FileNotFoundException("Description RF2 file not found.");
-			} else if (relationshipPath == null) {
-				throw new FileNotFoundException("Relationship RF2 file not found.");
+			if (conceptPaths.isEmpty()) {
+				throw new FileNotFoundException("No Concept RF2 file found.");
+			} else if (loadingProfile.isDescriptions() && descriptionPaths.isEmpty()) {
+				throw new FileNotFoundException("No Description RF2 file found.");
+			} else if (relationshipPaths.isEmpty()) {
+				throw new FileNotFoundException("No Relationship RF2 file found.");
 			}
 		}
 	}
@@ -83,11 +79,11 @@ class ReleaseFiles {
 	@Override
 	public String toString() {
 		return "ReleaseFiles{" +
-				"conceptPath=" + conceptPath +
-				", descriptionPath=" + descriptionPath +
-				", textDefinitionPath=" + textDefinitionPath +
-				", relationshipPath=" + relationshipPath +
-				", statedRelationshipPath=" + statedRelationshipPath +
+				"conceptPaths=" + conceptPaths +
+				", descriptionPaths=" + descriptionPaths +
+				", textDefinitionPaths=" + textDefinitionPaths +
+				", relationshipPaths=" + relationshipPaths +
+				", statedRelationshipPaths=" + statedRelationshipPaths +
 				", refsetPaths=" + refsetPaths +
 				'}';
 	}

@@ -3,6 +3,7 @@ package org.ihtsdo.otf.snomedboot;
 import org.ihtsdo.otf.snomedboot.domain.Concept;
 import org.ihtsdo.otf.snomedboot.factory.LoadingProfile;
 import org.ihtsdo.otf.snomedboot.factory.implementation.standard.ComponentFactoryImpl;
+import org.ihtsdo.otf.snomedboot.factory.implementation.standard.ComponentStore;
 import org.junit.Assert;
 import org.junit.Test;
 

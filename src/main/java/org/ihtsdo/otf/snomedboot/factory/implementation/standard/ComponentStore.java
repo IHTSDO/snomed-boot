@@ -1,4 +1,4 @@
-package org.ihtsdo.otf.snomedboot;
+package org.ihtsdo.otf.snomedboot.factory.implementation.standard;
 
 import it.unimi.dsi.fastutil.longs.Long2ObjectMap;
 import it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap;

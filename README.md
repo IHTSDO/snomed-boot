@@ -4,6 +4,7 @@ An extensible Java framework for loading SNOMED CT RF2 content into any implemen
 ## Key Features
 - Extensible factory based design
 - Supports component streaming for better overall performance and less pressure on memory
+- Ability to load only the latest version of each component when using a collection of snapshot archives
 - Multithreaded
   - Concepts load first
   - Then Relationships and Descriptions load in parallel

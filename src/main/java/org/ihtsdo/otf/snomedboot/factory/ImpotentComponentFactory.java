@@ -1,6 +1,12 @@
 package org.ihtsdo.otf.snomedboot.factory;
 
 public class ImpotentComponentFactory implements ComponentFactory {
+
+	@Override
+	public void preprocessingContent() {
+
+	}
+
 	@Override
 	public void loadingComponentsStarting() {
 
