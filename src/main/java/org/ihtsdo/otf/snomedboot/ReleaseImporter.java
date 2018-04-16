@@ -182,7 +182,13 @@ public class ReleaseImporter {
 
 					// Multi-threading disabled to avoid the need to synchronize LatestEffectiveDateComponentFactory.
 					boolean multiThreaded = false;
-					loadAll(loadingProfile, releaseFiles, null, latestEffectiveDateComponentFactory, multiThreaded);
+
+					// Force loading inactive rows during this phase so we know if the latest state is inactive
+					LoadingProfile effectiveComponentLoadingProfile = loadingProfile
+							.withInactiveComponents()
+							.withInactiveRefsetMembers();
+
+					loadAll(effectiveComponentLoadingProfile, releaseFiles, null, latestEffectiveDateComponentFactory, multiThreaded);
 
 					// Wrap component factory to only let effective components through
 					runComponentFactory = new LatestEffectiveDateFilter(runComponentFactory, latestEffectiveDateComponentFactory);

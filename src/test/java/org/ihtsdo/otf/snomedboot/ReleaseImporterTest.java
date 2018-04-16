@@ -70,6 +70,17 @@ public class ReleaseImporterTest {
 		assertTrue("Description 754737012 is inactive in the effective release", testComponentFactory.getDescriptionLines().contains("754737012|20170231|0|100101001"));
 		assertTrue("Relationship 200007001 is inactive in the effective release", testComponentFactory.getRelationshipLines().contains("200007001|20170231|0|100101001"));
 		assertTrue("Stated Relationship 100007001 is inactive in the effective release", testComponentFactory.getRelationshipLines().contains("100007001|20170231|0|100101001"));
+
+
+		// Load effective components, exclude inactive
+		testComponentFactory = new TestComponentFactory();
+		// Exclude loading inactive concepts
+		LoadingProfile loadingProfile = LoadingProfile.complete.withoutInactiveConcepts();
+		releaseImporter.loadEffectiveSnapshotReleaseFileStreams(Sets.newHashSet(new FileInputStream(baseRF2SnapshotZip), new FileInputStream(extensionRF2SnapshotZip)), loadingProfile, testComponentFactory);
+
+		conceptLines = testComponentFactory.getConceptLines();
+		assertEquals("Only 10 concepts should be loaded. The later inactive concept row is used to block loading the earlier dated active row.",
+				10, conceptLines.size());
 	}
 
 }
