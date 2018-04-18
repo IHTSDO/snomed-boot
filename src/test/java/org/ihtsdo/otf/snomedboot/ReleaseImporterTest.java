@@ -1,6 +1,7 @@
 package org.ihtsdo.otf.snomedboot;
 
 import com.google.common.collect.Sets;
+import org.ihtsdo.otf.snomedboot.domain.ConceptConstants;
 import org.ihtsdo.otf.snomedboot.factory.LoadingProfile;
 import org.ihtsdo.otf.snomedboot.factory.TestComponentFactory;
 import org.junit.Test;
@@ -46,6 +47,15 @@ public class ReleaseImporterTest {
 		assertTrue("Concept 362969004 is inactive in the extension release", conceptLines.contains("362969004|20170231|0|100101001"));
 		assertTrue("Concept 73211009 is in the extension module in the base release", conceptLines.contains("73211009|20160231|1|100101001"));
 		assertTrue("Refset Member c69ad177-9756-4ad1-a8b3-02407ca95b36 is inactive in the base release", testComponentFactory.getRefsetMemberLines().contains("c69ad177-9756-4ad1-a8b3-02407ca95b36|20170231|0|100101001"));
+
+
+		// Load just the model module
+		testComponentFactory = new TestComponentFactory();
+		LoadingProfile loadingProfileWithModuleId = LoadingProfile.complete.withModuleIds(ConceptConstants.MODEL_MODULE);
+		releaseImporter.loadSnapshotReleaseFiles(new FileInputStream(baseRF2SnapshotZip), loadingProfileWithModuleId, testComponentFactory);
+
+		conceptLines = testComponentFactory.getConceptLines();
+		assertEquals(6, conceptLines.size());
 
 
 		// Load effective components

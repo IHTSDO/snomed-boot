@@ -47,6 +47,7 @@ public class LoadingProfile implements Cloneable {
 	private boolean justRefsets;
 	private Set<String> refsetIds = new HashSet<>();
 	private Set<String> includedReferenceSetFilenamePatterns = new HashSet<>();
+	private Set<String> moduleIds = new HashSet<>();
 
 	public LoadingProfile withSnapshotEffectiveComponentFilter() {
 		return this.cloneObject().setSnapshotEffectiveComponentFilter(true);
@@ -187,6 +188,26 @@ public class LoadingProfile implements Cloneable {
 		return clone;
 	}
 
+	public LoadingProfile withModuleIds(String... moduleIds) {
+		final LoadingProfile clone = this.cloneObject();
+		Collections.addAll(clone.getModuleIdsNoClone(), moduleIds);
+		return clone;
+	}
+
+	public LoadingProfile withoutModuleIds(String... moduleIds) {
+		final LoadingProfile clone = this.cloneObject();
+		for (String id : moduleIds) {
+			clone.getModuleIdsNoClone().remove(id);
+		}
+		return clone;
+	}
+
+	public LoadingProfile withoutAnyModuleIds() {
+		final LoadingProfile clone = this.cloneObject();
+		clone.moduleIds.clear();
+		return clone;
+	}
+
 	public boolean isSnapshotEffectiveComponentFilter() {
 		return snapshotEffectiveComponentFilter;
 	}
@@ -249,6 +270,10 @@ public class LoadingProfile implements Cloneable {
 
 	public ImmutableSet<String> getRefsetIds() {
 		return ImmutableSet.copyOf(refsetIds);
+	}
+
+	public Set<String> getModuleIds() {
+		return ImmutableSet.copyOf(moduleIds);
 	}
 
 	private LoadingProfile setSnapshotEffectiveComponentFilter(boolean snapshotEffectiveComponentFilter) {
@@ -335,8 +360,17 @@ public class LoadingProfile implements Cloneable {
 		return this;
 	}
 
+	private LoadingProfile setModuleIds(Set<String> moduleIds) {
+		this.moduleIds = moduleIds;
+		return this;
+	}
+
 	private Set<String> getRefsetIdsNoClone() {
 		return refsetIds;
+	}
+
+	private Set<String> getModuleIdsNoClone() {
+		return moduleIds;
 	}
 
 	private LoadingProfile cloneObject() {
@@ -356,6 +390,7 @@ public class LoadingProfile implements Cloneable {
 				.setFullRefsetMemberObjects(this.fullRefsetMemberObjects)
 				.setJustRefsets(this.justRefsets)
 				.setRefsetIds(new HashSet<>(this.refsetIds))
-				.setIncludedReferenceSetFilenamePatterns(new HashSet<>(this.includedReferenceSetFilenamePatterns));
+				.setIncludedReferenceSetFilenamePatterns(new HashSet<>(this.includedReferenceSetFilenamePatterns))
+				.setModuleIds(new HashSet<>(this.moduleIds));
 	}
 }

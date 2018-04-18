@@ -5,6 +5,7 @@ import org.ihtsdo.otf.snomedboot.domain.rf2.*;
 import org.ihtsdo.otf.snomedboot.factory.*;
 import org.ihtsdo.otf.snomedboot.factory.filter.LatestEffectiveDateComponentFactory;
 import org.ihtsdo.otf.snomedboot.factory.filter.LatestEffectiveDateFilter;
+import org.ihtsdo.otf.snomedboot.factory.filter.ModuleFilter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.util.FileSystemUtils;
@@ -175,23 +176,12 @@ public class ReleaseImporter {
 
 			try {
 
+				// Add any component loading filters
+				if (!loadingProfile.getModuleIds().isEmpty()) {
+					this.runComponentFactory = addModuleIdFilter(runComponentFactory, loadingProfile.getModuleIds());
+				}
 				if (loadingProfile.isSnapshotEffectiveComponentFilter()) {
-					logger.info("Gathering effective dates for effective component filtering.");
-					LatestEffectiveDateComponentFactory latestEffectiveDateComponentFactory = new LatestEffectiveDateComponentFactory();
-					runComponentFactory.preprocessingContent();
-
-					// Multi-threading disabled to avoid the need to synchronize LatestEffectiveDateComponentFactory.
-					boolean multiThreaded = false;
-
-					// Force loading inactive rows during this phase so we know if the latest state is inactive
-					LoadingProfile effectiveComponentLoadingProfile = loadingProfile
-							.withInactiveComponents()
-							.withInactiveRefsetMembers();
-
-					loadAll(effectiveComponentLoadingProfile, releaseFiles, null, latestEffectiveDateComponentFactory, multiThreaded);
-
-					// Wrap component factory to only let effective components through
-					runComponentFactory = new LatestEffectiveDateFilter(runComponentFactory, latestEffectiveDateComponentFactory);
+					this.runComponentFactory = addEffectiveComponentFilter(runComponentFactory, releaseFiles, loadingProfile);
 				}
 
 				runComponentFactory.loadingComponentsStarting();
@@ -215,6 +205,29 @@ public class ReleaseImporter {
 				throw new ReleaseImportException("Failed to load release files during release import process.", e);
 			}
 			executorService.shutdown();
+		}
+
+		private ComponentFactory addModuleIdFilter(ComponentFactory runComponentFactory, Set<String> moduleIds) {
+			return new ModuleFilter(runComponentFactory, moduleIds);
+		}
+
+		private ComponentFactory addEffectiveComponentFilter(ComponentFactory runComponentFactory, ReleaseFiles releaseFiles, LoadingProfile loadingProfile) throws IOException, InterruptedException {
+			logger.info("Gathering effective dates for effective component filtering.");
+			LatestEffectiveDateComponentFactory latestEffectiveDateComponentFactory = new LatestEffectiveDateComponentFactory();
+			runComponentFactory.preprocessingContent();
+
+			// Multi-threading disabled to avoid the need to synchronize LatestEffectiveDateComponentFactory.
+			boolean multiThreaded = false;
+
+			// Force loading inactive rows during this phase so we know if the latest state is inactive
+			LoadingProfile effectiveComponentLoadingProfile = loadingProfile
+					.withInactiveComponents()
+					.withInactiveRefsetMembers();
+
+			loadAll(effectiveComponentLoadingProfile, releaseFiles, null, latestEffectiveDateComponentFactory, multiThreaded);
+
+			// Wrap component factory to only let effective components through
+			return new LatestEffectiveDateFilter(this.runComponentFactory, latestEffectiveDateComponentFactory);
 		}
 
 		private void loadAll(LoadingProfile loadingProfile, ReleaseFiles releaseFiles, String releaseVersion, ComponentFactory componentFactory, boolean multiThreaded) throws IOException, InterruptedException {
