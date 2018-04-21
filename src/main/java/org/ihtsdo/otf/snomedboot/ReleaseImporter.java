@@ -244,7 +244,7 @@ public class ReleaseImporter {
 				
 				if (loadingProfile.isDescriptions() || loadingProfile.isFullDescriptionObjects()) {
 					coreComponentTasks.add(loadDescriptions(releaseFiles.getDescriptionPaths(), loadingProfile, releaseVersion, componentFactory));
-					if (releaseFiles.getTextDefinitionPaths().isEmpty()) {
+					if (!releaseFiles.getTextDefinitionPaths().isEmpty()) {
 						coreComponentTasks.add(loadDescriptions(releaseFiles.getTextDefinitionPaths(), loadingProfile, releaseVersion, componentFactory));
 					}
 				}

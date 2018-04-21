@@ -35,6 +35,7 @@ public class ReleaseImporterTest {
 		assertTrue("Concept 362969004 is active in the base release", conceptLines.contains("362969004|20170131|1|900000000000207008"));
 		assertTrue("Concept 73211009 is in the international module in the base release", conceptLines.contains("73211009|20170131|1|900000000000207008"));
 		assertTrue("Refset Member c69ad177-9756-4ad1-a8b3-02407ca95b36 is active in the base release", testComponentFactory.getRefsetMemberLines().contains("c69ad177-9756-4ad1-a8b3-02407ca95b36|20170131|1|900000000000012004"));
+		assertTrue("Text Definition 1228465017 is active", testComponentFactory.getDescriptionLines().contains("1228465017|20170731|1|900000000000207008"));
 
 
 		// Load extension release
