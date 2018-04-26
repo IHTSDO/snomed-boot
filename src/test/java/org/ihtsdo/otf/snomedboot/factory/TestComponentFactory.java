@@ -3,12 +3,13 @@ package org.ihtsdo.otf.snomedboot.factory;
 import java.util.ArrayList;
 import java.util.List;
 
-public class TestComponentFactory extends ImpotentComponentFactory {
+public class TestComponentFactory extends ImpotentHistoryAwareComponentFactory {
 
 	private List<String> conceptLines = new ArrayList<>();
 	private List<String> descriptionLines = new ArrayList<>();
 	private List<String> relationshipLines = new ArrayList<>();
 	private List<String> refsetMemberLines = new ArrayList<>();
+	private List<String> versionsLoaded = new ArrayList<>();
 
 	@Override
 	public void newConceptState(String conceptId, String effectiveTime, String active, String moduleId, String definitionStatusId) {
@@ -30,6 +31,11 @@ public class TestComponentFactory extends ImpotentComponentFactory {
 		refsetMemberLines.add(String.join("|", id, effectiveTime, active, moduleId));
 	}
 
+	@Override
+	public void loadingReleaseDeltaStarting(String releaseVersion) {
+		versionsLoaded.add(releaseVersion);
+	}
+
 	public List<String> getConceptLines() {
 		return conceptLines;
 	}
@@ -44,5 +50,9 @@ public class TestComponentFactory extends ImpotentComponentFactory {
 
 	public List<String> getRefsetMemberLines() {
 		return refsetMemberLines;
+	}
+
+	public List<String> getVersionsLoaded() {
+		return versionsLoaded;
 	}
 }

@@ -27,7 +27,9 @@ public class ReleaseImporterTest {
 
 		// Load base release
 		TestComponentFactory testComponentFactory = new TestComponentFactory();
-		releaseImporter.loadSnapshotReleaseFiles(new FileInputStream(baseRF2SnapshotZip), LoadingProfile.complete, testComponentFactory);
+		LoadingProfile complete = LoadingProfile.complete;
+		complete.getIncludedReferenceSetFilenamePatterns().add(".*Axiom.*");
+		releaseImporter.loadSnapshotReleaseFiles(new FileInputStream(baseRF2SnapshotZip), complete, testComponentFactory);
 
 		List<String> conceptLines = testComponentFactory.getConceptLines();
 		assertEquals(11, conceptLines.size());
@@ -92,6 +94,21 @@ public class ReleaseImporterTest {
 		conceptLines = testComponentFactory.getConceptLines();
 		assertEquals("Only 10 concepts should be loaded. The later inactive concept row is used to block loading the earlier dated active row.",
 				10, conceptLines.size());
+	}
+
+	@Test
+	public void testLoadFull() throws IOException, ReleaseImportException {
+		File baseRF2FullZip = ZipUtil.zipDirectoryRemovingCommentsAndBlankLines("src/test/resources/SnomedCT_MiniRF2_Base_full");
+
+		ReleaseImporter releaseImporter = new ReleaseImporter();
+		TestComponentFactory testComponentFactory = new TestComponentFactory();
+
+		releaseImporter.loadFullReleaseFiles(new FileInputStream(baseRF2FullZip), LoadingProfile.complete, testComponentFactory);
+
+		assertEquals(5, testComponentFactory.getVersionsLoaded().size());
+		assertEquals("[20020131, 20030731, 20170131, 20180131, 20180731]", testComponentFactory.getVersionsLoaded().toString());
+
+		assertEquals(11, testComponentFactory.getConceptLines().size());
 	}
 
 }
