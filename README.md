@@ -1,4 +1,6 @@
 # Snomed Boot
+[![Build Status](https://travis-ci.org/IHTSDO/snomed-boot.svg?branch=master)](https://travis-ci.org/IHTSDO/snomed-boot) [![codecov](https://codecov.io/gh/IHTSDO/snomed-boot/branch/master/graph/badge.svg)](https://codecov.io/gh/IHTSDO/snomed-boot)
+
 An extensible Java framework for loading SNOMED CT RF2 content into any implementation.
 
 ## Key Features
