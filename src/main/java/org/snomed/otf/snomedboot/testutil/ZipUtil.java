@@ -34,7 +34,7 @@ public class ZipUtil {
 		if (!directory.isDirectory()) {
 			throw new IllegalArgumentException("This is not a directory " + directory.getAbsolutePath());
 		}
-		Path zip = Files.createTempFile("zipped-directory_" + new Date().getTime(), "zip");
+		Path zip = Files.createTempFile("zipped-directory_" + new Date().getTime(), ".zip");
 		File zipFile = zip.toFile();
 		try (ZipOutputStream zipOutputStream = new ZipOutputStream(new FileOutputStream(zipFile))) {
 			BufferedWriter bufferedWriter = new BufferedWriter(new OutputStreamWriter(zipOutputStream));
