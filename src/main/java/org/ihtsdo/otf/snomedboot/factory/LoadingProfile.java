@@ -355,7 +355,12 @@ public class LoadingProfile implements Cloneable {
 		return this;
 	}
 
-	private LoadingProfile setIncludedReferenceSetFilenamePatterns(Set<String> includedReferenceSetFilenamePatterns) {
+	public LoadingProfile withIncludedReferenceSetFilenamePattern(String includedReferenceSetFilenamePattern) {
+		this.includedReferenceSetFilenamePatterns.add(includedReferenceSetFilenamePattern);
+		return this;
+	}
+
+	public LoadingProfile setIncludedReferenceSetFilenamePatterns(Set<String> includedReferenceSetFilenamePatterns) {
 		this.includedReferenceSetFilenamePatterns = includedReferenceSetFilenamePatterns;
 		return this;
 	}
