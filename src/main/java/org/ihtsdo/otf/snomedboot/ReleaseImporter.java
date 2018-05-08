@@ -251,25 +251,35 @@ public class ReleaseImporter {
 			}
 
 			List<Callable<String>> refsetTasks = new ArrayList<>();
-			if (loadingProfile.isAllRefsets() || !loadingProfile.getRefsetIds().isEmpty()) {
-				Set<String> includedReferenceSetFilenamePatterns = loadingProfile.getIncludedReferenceSetFilenamePatterns();
+			Set<String> includedReferenceSetFilenamePatterns = loadingProfile.getIncludedReferenceSetFilenamePatterns();
+			if (loadingProfile.isAllRefsets() || !loadingProfile.getRefsetIds().isEmpty() || !includedReferenceSetFilenamePatterns.isEmpty()) {
 				logger.info("includedReferenceSetPathPatterns: {}", includedReferenceSetFilenamePatterns);
 				final List<Path> refsetSnapshots = releaseFiles.getRefsetPaths();
+				Set<String> filenamesMatchedByPattern = new HashSet<>();
 				for (Path refsetSnapshot : refsetSnapshots) {
 					if (includedReferenceSetFilenamePatterns.isEmpty()) {
 						refsetTasks.add(loadRefsets(refsetSnapshot, loadingProfile, releaseVersion, componentFactory));
 					} else {
+						boolean patternMatch = false;
+						String filename = refsetSnapshot.getFileName().toString();
 						for (String pattern : includedReferenceSetFilenamePatterns) {
-							String filename = refsetSnapshot.getFileName().toString();
 							if (filename.matches(pattern)) {
 								logger.info("refset '{}' matches pattern '{}'", filename, pattern);
 								refsetTasks.add(loadRefsets(refsetSnapshot, loadingProfile, releaseVersion, componentFactory));
+								filenamesMatchedByPattern.add(filename);
+								patternMatch = true;
 								break;
-							} else {
-								logger.info("refset '{}' does not match any patterns", filename);
 							}
 						}
+						if (!patternMatch) {
+							logger.debug("refset '{}' does not match any patterns", filename);
+						}
 					}
+				}
+				if (includedReferenceSetFilenamePatterns.size() > filenamesMatchedByPattern.size()) {
+					logger.warn("{} reference set filename patterns provided but only {} file matches found. Patterns: {}, Matches: {}",
+							includedReferenceSetFilenamePatterns.size(), filenamesMatchedByPattern.size(),
+							includedReferenceSetFilenamePatterns, filenamesMatchedByPattern);
 				}
 			}
 
