@@ -85,7 +85,7 @@ public class ReleaseImporter {
 		FileSystemUtils.deleteRecursively(releaseDir);
 	}
 
-	private File unzipRelease(InputStream releaseZip, ImportType filenameFilter) throws ReleaseImportException {
+	public File unzipRelease(InputStream releaseZip, ImportType filenameFilter) throws ReleaseImportException {
 		return unzipRelease(releaseZip, filenameFilter, createTempDir());
 	}
 
@@ -125,7 +125,7 @@ public class ReleaseImporter {
 		}
 	}
 
-	private enum ImportType {
+	public enum ImportType {
 
 		DELTA("Delta"), SNAPSHOT("Snapshot"), FULL("Full");
 
