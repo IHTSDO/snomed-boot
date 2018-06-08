@@ -71,7 +71,7 @@ public class ReleaseImporter {
 		File tempDir = createTempDir();
 		int a = 1;
 		for (InputStream releaseZip : releaseZips) {
-			File releaseTempDir = new File(tempDir, a + "");
+			File releaseTempDir = new File(tempDir, a++ + "");
 			releaseTempDir.mkdirs();
 			unzipRelease(releaseZip, ImportType.SNAPSHOT, releaseTempDir);
 		}
@@ -112,6 +112,7 @@ public class ReleaseImporter {
 					if (zipEntryName.contains(filenameFilter.getFilenamePart())) {
 						// Create file without directory nesting
 						File file = new File(tempDir, new File(zipEntryName).getName());
+						LoggerFactory.getLogger(getClass()).info("Unzipping file to {}", file.getAbsolutePath());
 						file.createNewFile();
 						try (FileOutputStream entryOutputStream = new FileOutputStream(file)) {
 							StreamUtils.copy(zipInputStream, entryOutputStream);
