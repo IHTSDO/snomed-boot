@@ -258,14 +258,14 @@ public class ReleaseImporter {
 				Set<String> filenamesMatchedByPattern = new HashSet<>();
 				for (Path refsetSnapshot : refsetSnapshots) {
 					if (includedReferenceSetFilenamePatterns.isEmpty()) {
-						refsetTasks.add(loadRefsets(refsetSnapshot, loadingProfile, releaseVersion, componentFactory));
+						refsetTasks.add(loadRefsets(refsetSnapshot, loadingProfile, releaseVersion, componentFactory, false));
 					} else {
 						boolean patternMatch = false;
 						String filename = refsetSnapshot.getFileName().toString();
 						for (String pattern : includedReferenceSetFilenamePatterns) {
 							if (filename.matches(pattern)) {
 								logger.info("refset '{}' matches pattern '{}'", filename, pattern);
-								refsetTasks.add(loadRefsets(refsetSnapshot, loadingProfile, releaseVersion, componentFactory));
+								refsetTasks.add(loadRefsets(refsetSnapshot, loadingProfile, releaseVersion, componentFactory, true));
 								filenamesMatchedByPattern.add(filename);
 								patternMatch = true;
 								break;
@@ -427,11 +427,13 @@ public class ReleaseImporter {
 			}, "descriptions", releaseVersion);
 		}
 
-		private Callable<String> loadRefsets(Path rf2File, final LoadingProfile loadingProfile, String releaseVersion, ComponentFactory componentFactory) {
+		private Callable<String> loadRefsets(Path rf2File, final LoadingProfile loadingProfile, String releaseVersion,
+				ComponentFactory componentFactory, boolean filenamePatternMatch) {
+
 			return readLinesCallable(Collections.singletonList(rf2File), (FieldNamesAndValuesHandler) (fieldNames, values) -> {
 				if (loadingProfile.isInactiveRefsetMembers() || "1".equals(values[RefsetFieldIndexes.active])) {
 					final String refsetId = values[RefsetFieldIndexes.refsetId];
-					if (loadingProfile.isAllRefsets() || loadingProfile.isRefset(refsetId)) {
+					if (loadingProfile.isAllRefsets() || filenamePatternMatch || loadingProfile.isRefset(refsetId)) {
 						final String referencedComponentId = values[RefsetFieldIndexes.referencedComponentId];
 						if (FactoryUtils.isConceptId(referencedComponentId)) {
 							componentFactory.addConceptReferencedInRefsetId(refsetId, referencedComponentId);
