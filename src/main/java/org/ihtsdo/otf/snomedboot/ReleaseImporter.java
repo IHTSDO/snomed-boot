@@ -327,6 +327,8 @@ public class ReleaseImporter {
 								releaseFiles.addStatedRelationshipPath(file);
 							} else if (fileName.startsWith("sct2_sRefset_OWLAxiom" + fileType) || fileName.startsWith("xsct2_sRefset_OWLAxiom" + fileType)) {
 								releaseFiles.addRefsetPath(file);
+							} else if (fileName.startsWith("sct2_sRefset_OWLOntology" + fileType) || fileName.startsWith("xsct2_sRefset_OWLOntology" + fileType)) {
+								releaseFiles.addRefsetPath(file);
 							} else if (fileName.startsWith("der2_") && fileName.contains(fileType) || fileName.startsWith("xder2_") && fileName.contains(fileType)) {
 								releaseFiles.addRefsetPath(file);
 							}
