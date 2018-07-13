@@ -19,7 +19,7 @@ import org.ihtsdo.otf.snomedboot.factory.implementation.standard.HistoryAwareCom
 public class LoadReleaseWithExtension {
 
 	/**
-	 * @param args	list of 1..n release zip files
+	 * @param args	list of 1..n release directories
 	 */
 	public static void main(String[] args) {
 		if (args.length == 0) {
@@ -32,18 +32,17 @@ public class LoadReleaseWithExtension {
 		HistoryAwareComponentFactory componentFactory = new HistoryAwareComponentFactoryImpl(componentStore);
 
 		
-		for(String releaseZip : args) {
+		for(String releaseDir : args) {
 			try {
-				releaseImporter.loadFullReleaseFiles(new FileInputStream(releaseZip), completeProfile, componentFactory);
+				releaseImporter.loadFullReleaseFiles(releaseDir, completeProfile, componentFactory);
 			} catch (ReleaseImportException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			} catch (FileNotFoundException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 			
 		}
+		
+		int n = componentStore.getConcepts().;
 
 
 
