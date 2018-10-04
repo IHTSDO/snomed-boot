@@ -329,9 +329,9 @@ public class ReleaseImporter {
 			if (fileName.endsWith(".txt")) {
 				if (fileName.matches("x?sct2_Concept_[^_]*" + fileType + "_.*")) {
 					releaseFiles.addConceptPath(file);
-				} else if (fileName.matches("x?sct2_Description_[^_]*" + fileType + "-?[a-zA-Z]*_.*")) {
+				} else if (fileName.matches("x?sct2_Description_[^_]*" + fileType + "(-[a-zA-Z]*)?_.*")) {
 					releaseFiles.addDescriptionPath(file);
-				} else if (fileName.matches("x?sct2_TextDefinition_[^_]*" + fileType + "-?[a-zA-Z]*_.*")) {
+				} else if (fileName.matches("x?sct2_TextDefinition_[^_]*" + fileType + "(-[a-zA-Z]*)?_.*")) {
 					releaseFiles.addTextDefinitionPath(file);
 				} else if (fileName.matches("x?sct2_Relationship_[^_]*" + fileType + "_.*")) {
 					releaseFiles.addRelationshipPath(file);
@@ -341,7 +341,7 @@ public class ReleaseImporter {
 					releaseFiles.addRefsetPath(file);
 				} else if (fileName.matches("x?sct2_sRefset_OWLOntology[^_]*" + fileType + "_.*")) {
 					releaseFiles.addRefsetPath(file);
-				} else if (fileName.matches("x?der2_[sci]*Refset_[^_]*" + fileType + "_.*")) {
+				} else if (fileName.matches("x?der2_[sci]*Refset_[^_]*" + fileType + "(-[a-zA-Z]*)?_.*")) {
 					releaseFiles.addRefsetPath(file);
 				} else if (fileName.matches("x?der2_.*") || fileName.matches("x?sct2_.*")) {
 					logger.info("RF2 release filename not recognised '{}'. This file will not be loaded.", fileName);

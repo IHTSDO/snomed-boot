@@ -180,6 +180,10 @@ public class ReleaseImporterTest {
 		assertEquals(1, releaseFiles.getRefsetPaths().size());
 
 		releaseFiles = new ReleaseFiles();
+		ReleaseImporter.ImportRun.collectReleaseFile(new File("der2_cRefset_LanguageSpanishExtensionSnapshot-es_INT_20180430.txt").toPath(), "Snapshot", releaseFiles);
+		assertEquals(1, releaseFiles.getRefsetPaths().size());
+
+		releaseFiles = new ReleaseFiles();
 		ReleaseImporter.ImportRun.collectReleaseFile(new File("xder2_cisscczRefset_MRCMAttributeDomainXExtensionSnapshot_INT_20180731.txt").toPath(), "Snapshot", releaseFiles);
 		assertEquals("Should not match because of z in additional columns type list.", 0, releaseFiles.getRefsetPaths().size());
 
