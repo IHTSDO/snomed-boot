@@ -28,6 +28,7 @@ import java.util.zip.ZipInputStream;
 public class ReleaseImporter {
 
 	public static final Charset UTF_8 = Charset.forName("UTF-8");
+	private static final Logger logger = LoggerFactory.getLogger(ReleaseImporter.class);
 
 	public void loadFullReleaseFiles(String releaseDirPath, LoadingProfile loadingProfile, HistoryAwareComponentFactory componentFactory) throws ReleaseImportException {
 		new ImportRun(componentFactory).doLoadReleaseFiles(releaseDirPath, loadingProfile, ImportType.FULL);
@@ -112,7 +113,7 @@ public class ReleaseImporter {
 					if (zipEntryName.contains(filenameFilter.getFilenamePart())) {
 						// Create file without directory nesting
 						File file = new File(tempDir, new File(zipEntryName).getName());
-						LoggerFactory.getLogger(getClass()).info("Unzipping file to {}", file.getAbsolutePath());
+						logger.info("Unzipping file to {}", file.getAbsolutePath());
 						file.createNewFile();
 						try (FileOutputStream entryOutputStream = new FileOutputStream(file)) {
 							StreamUtils.copy(zipInputStream, entryOutputStream);
@@ -141,13 +142,12 @@ public class ReleaseImporter {
 		}
 	}
 
-	private static final class ImportRun {
+	static final class ImportRun {
 
 		private ComponentFactory runComponentFactory;
 
 		private final ExecutorService executorService;
 
-		private final Logger logger = LoggerFactory.getLogger(getClass());
 		private static final Pattern DATE_EXTRACT_PATTERN = Pattern.compile("[^\\t]*\\t([^\\t]*)\t");
 
 		private ImportRun(ComponentFactory componentFactory) {
@@ -312,27 +312,8 @@ public class ReleaseImporter {
 
 				Files.walkFileTree(releaseDir.toPath(), EnumSet.of(FileVisitOption.FOLLOW_LINKS), Integer.MAX_VALUE, new SimpleFileVisitor<Path>() {
 					@Override
-					public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
-						final String fileName = file.getFileName().toString();
-						if (fileName.endsWith(".txt")) {
-							if (fileName.startsWith("sct2_Concept_" + fileType) || fileName.startsWith("xsct2_Concept_" + fileType)) {
-								releaseFiles.addConceptPath(file);
-							} else if (fileName.startsWith("sct2_Description_" + fileType) || fileName.startsWith("xsct2_Description_" + fileType)) {
-								releaseFiles.addDescriptionPath(file);
-							} else if (fileName.startsWith("sct2_TextDefinition_" + fileType) || fileName.startsWith("xsct2_TextDefinition_" + fileType)) {
-								releaseFiles.addTextDefinitionPath(file);
-							} else if (fileName.startsWith("sct2_Relationship_" + fileType) || fileName.startsWith("xsct2_Relationship_" + fileType)) {
-								releaseFiles.addRelationshipPath(file);
-							} else if (fileName.startsWith("sct2_StatedRelationship_" + fileType) || fileName.startsWith("xsct2_StatedRelationship_" + fileType)) {
-								releaseFiles.addStatedRelationshipPath(file);
-							} else if (fileName.startsWith("sct2_sRefset_OWLAxiom" + fileType) || fileName.startsWith("xsct2_sRefset_OWLAxiom" + fileType)) {
-								releaseFiles.addRefsetPath(file);
-							} else if (fileName.startsWith("sct2_sRefset_OWLOntology" + fileType) || fileName.startsWith("xsct2_sRefset_OWLOntology" + fileType)) {
-								releaseFiles.addRefsetPath(file);
-							} else if (fileName.startsWith("der2_") && fileName.contains(fileType) || fileName.startsWith("xder2_") && fileName.contains(fileType)) {
-								releaseFiles.addRefsetPath(file);
-							}
-						}
+					public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) {
+						collectReleaseFile(file, fileType, releaseFiles);
 						return FileVisitResult.CONTINUE;
 					}
 				});
@@ -341,6 +322,31 @@ public class ReleaseImporter {
 			releaseFiles.assertFullSet(loadingProfile);
 
 			return releaseFiles;
+		}
+
+		static void collectReleaseFile(Path file, String fileType, ReleaseFiles releaseFiles) {
+			final String fileName = file.getFileName().toString();
+			if (fileName.endsWith(".txt")) {
+				if (fileName.matches("x?sct2_Concept_[^_]*" + fileType + "_.*")) {
+					releaseFiles.addConceptPath(file);
+				} else if (fileName.matches("x?sct2_Description_[^_]*" + fileType + "-?[a-zA-Z]*_.*")) {
+					releaseFiles.addDescriptionPath(file);
+				} else if (fileName.matches("x?sct2_TextDefinition_[^_]*" + fileType + "-?[a-zA-Z]*_.*")) {
+					releaseFiles.addTextDefinitionPath(file);
+				} else if (fileName.matches("x?sct2_Relationship_[^_]*" + fileType + "_.*")) {
+					releaseFiles.addRelationshipPath(file);
+				} else if (fileName.matches("x?sct2_StatedRelationship_[^_]*" + fileType + "_.*")) {
+					releaseFiles.addStatedRelationshipPath(file);
+				} else if (fileName.matches("x?sct2_sRefset_OWLAxiom[^_]*" + fileType + "_.*")) {
+					releaseFiles.addRefsetPath(file);
+				} else if (fileName.matches("x?sct2_sRefset_OWLOntology[^_]*" + fileType + "_.*")) {
+					releaseFiles.addRefsetPath(file);
+				} else if (fileName.matches("x?der2_[sci]*Refset_[^_]*" + fileType + "_.*")) {
+					releaseFiles.addRefsetPath(file);
+				} else if (fileName.matches("x?der2_.*") || fileName.matches("x?sct2_.*")) {
+					logger.info("RF2 release filename not recognised '{}'. This file will not be loaded.", fileName);
+				}
+			}
 		}
 
 		private void loadConcepts(List<Path> rf2Files, final LoadingProfile loadingProfile, final String releaseVersion, ComponentFactory componentFactory) throws IOException {

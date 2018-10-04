@@ -111,4 +111,82 @@ public class ReleaseImporterTest {
 		assertEquals(11, testComponentFactory.getConceptLines().size());
 	}
 
+	@Test
+	public void testCollectReleaseFile() {
+		ReleaseFiles releaseFiles = new ReleaseFiles();
+		ReleaseImporter.ImportRun.collectReleaseFile(new File("sct2_Concept_Snapshot_INT_20180731.txt").toPath(), "Snapshot", releaseFiles);
+		assertEquals(1, releaseFiles.getConceptPaths().size());
+
+		releaseFiles = new ReleaseFiles();
+		ReleaseImporter.ImportRun.collectReleaseFile(new File("xsct2_Concept_Snapshot_INT_20180731.txt").toPath(), "Snapshot", releaseFiles);
+		assertEquals(1, releaseFiles.getConceptPaths().size());
+
+		releaseFiles = new ReleaseFiles();
+		ReleaseImporter.ImportRun.collectReleaseFile(new File("sct2_Concept_XExtensionSnapshot_INT_20180731.txt").toPath(), "Snapshot", releaseFiles);
+		assertEquals(1, releaseFiles.getConceptPaths().size());
+
+		releaseFiles = new ReleaseFiles();
+		ReleaseImporter.ImportRun.collectReleaseFile(new File("xsct2_Concept_XExtensionSnapshot_INT_20180731.txt").toPath(), "Snapshot", releaseFiles);
+		assertEquals(1, releaseFiles.getConceptPaths().size());
+
+		releaseFiles = new ReleaseFiles();
+		ReleaseImporter.ImportRun.collectReleaseFile(new File("sct2_Concept_XExtension_Snapshot_INT_20180731.txt").toPath(), "Snapshot", releaseFiles);
+		assertEquals(0, releaseFiles.getConceptPaths().size());
+
+		releaseFiles = new ReleaseFiles();
+		ReleaseImporter.ImportRun.collectReleaseFile(new File("sct2_Concept_SnapshotXExtension_INT_20180731.txt").toPath(), "Snapshot", releaseFiles);
+		assertEquals(0, releaseFiles.getConceptPaths().size());
+
+		releaseFiles = new ReleaseFiles();
+		ReleaseImporter.ImportRun.collectReleaseFile(new File("sct2_ConceptXExtension_Snapshot_INT_20180731.txt").toPath(), "Snapshot", releaseFiles);
+		assertEquals(0, releaseFiles.getConceptPaths().size());
+
+
+		releaseFiles = new ReleaseFiles();
+		ReleaseImporter.ImportRun.collectReleaseFile(new File("sct2_Description_Snapshot_INT_20180731.txt").toPath(), "Snapshot", releaseFiles);
+		assertEquals(1, releaseFiles.getDescriptionPaths().size());
+
+		releaseFiles = new ReleaseFiles();
+		ReleaseImporter.ImportRun.collectReleaseFile(new File("sct2_Description_Snapshot-en_INT_20180731.txt").toPath(), "Snapshot", releaseFiles);
+		assertEquals(1, releaseFiles.getDescriptionPaths().size());
+
+		releaseFiles = new ReleaseFiles();
+		ReleaseImporter.ImportRun.collectReleaseFile(new File("xsct2_Description_Snapshot-EN_INT_20180731.txt").toPath(), "Snapshot", releaseFiles);
+		assertEquals(1, releaseFiles.getDescriptionPaths().size());
+
+		releaseFiles = new ReleaseFiles();
+		ReleaseImporter.ImportRun.collectReleaseFile(new File("sct2_Description_XExtensionSnapshot_INT_20180731.txt").toPath(), "Snapshot", releaseFiles);
+		assertEquals(1, releaseFiles.getDescriptionPaths().size());
+
+		releaseFiles = new ReleaseFiles();
+		ReleaseImporter.ImportRun.collectReleaseFile(new File("xsct2_Description_XExtensionSnapshot_INT_20180731.txt").toPath(), "Snapshot", releaseFiles);
+		assertEquals(1, releaseFiles.getDescriptionPaths().size());
+
+
+		releaseFiles = new ReleaseFiles();
+		ReleaseImporter.ImportRun.collectReleaseFile(new File("der2_Refset_SimpleSnapshot_INT_20180731.txt").toPath(), "Snapshot", releaseFiles);
+		assertEquals(1, releaseFiles.getRefsetPaths().size());
+
+		releaseFiles = new ReleaseFiles();
+		ReleaseImporter.ImportRun.collectReleaseFile(new File("der2_cissccRefset_MRCMAttributeDomainSnapshot_INT_20180731.txt").toPath(), "Snapshot", releaseFiles);
+		assertEquals(1, releaseFiles.getRefsetPaths().size());
+
+		releaseFiles = new ReleaseFiles();
+		ReleaseImporter.ImportRun.collectReleaseFile(new File("xder2_cissccRefset_MRCMAttributeDomainSnapshot_INT_20180731.txt").toPath(), "Snapshot", releaseFiles);
+		assertEquals(1, releaseFiles.getRefsetPaths().size());
+
+		releaseFiles = new ReleaseFiles();
+		ReleaseImporter.ImportRun.collectReleaseFile(new File("xder2_cissccRefset_MRCMAttributeDomainXExtensionSnapshot_INT_20180731.txt").toPath(), "Snapshot", releaseFiles);
+		assertEquals(1, releaseFiles.getRefsetPaths().size());
+
+		releaseFiles = new ReleaseFiles();
+		ReleaseImporter.ImportRun.collectReleaseFile(new File("xder2_cisscczRefset_MRCMAttributeDomainXExtensionSnapshot_INT_20180731.txt").toPath(), "Snapshot", releaseFiles);
+		assertEquals("Should not match because of z in additional columns type list.", 0, releaseFiles.getRefsetPaths().size());
+
+		releaseFiles = new ReleaseFiles();
+		ReleaseImporter.ImportRun.collectReleaseFile(new File("xder2_cissccRefset_MRCMAttributeDomainSnapshotXExtension_INT_20180731.txt").toPath(), "Snapshot", releaseFiles);
+		assertEquals("Should not match because no underscore after Snapshot.", 0, releaseFiles.getRefsetPaths().size());
+
+	}
+
 }
