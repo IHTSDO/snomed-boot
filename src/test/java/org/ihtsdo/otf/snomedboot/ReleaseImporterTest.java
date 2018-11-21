@@ -28,7 +28,7 @@ public class ReleaseImporterTest {
 		// Load base release
 		TestComponentFactory testComponentFactory = new TestComponentFactory();
 		LoadingProfile complete = LoadingProfile.complete;
-		complete.getIncludedReferenceSetFilenamePatterns().add(".*Axiom.*");
+		complete.getIncludedReferenceSetFilenamePatterns().add(".*OWL.*");
 		releaseImporter.loadSnapshotReleaseFiles(new FileInputStream(baseRF2SnapshotZip), complete, testComponentFactory);
 
 		List<String> conceptLines = testComponentFactory.getConceptLines();

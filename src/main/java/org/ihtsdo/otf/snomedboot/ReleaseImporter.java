@@ -337,9 +337,7 @@ public class ReleaseImporter {
 					releaseFiles.addRelationshipPath(file);
 				} else if (fileName.matches("x?sct2_StatedRelationship_[^_]*" + fileType + "_.*")) {
 					releaseFiles.addStatedRelationshipPath(file);
-				} else if (fileName.matches("x?sct2_sRefset_OWLAxiom[^_]*" + fileType + "_.*")) {
-					releaseFiles.addRefsetPath(file);
-				} else if (fileName.matches("x?sct2_sRefset_OWLOntology[^_]*" + fileType + "_.*")) {
+				} else if (fileName.matches("x?sct2_sRefset_OWL.*[^_]*" + fileType + "_.*")) {
 					releaseFiles.addRefsetPath(file);
 				} else if (fileName.matches("x?der2_[sci]*Refset_[^_]*" + fileType + "(-[a-zA-Z]*)?_.*")) {
 					releaseFiles.addRefsetPath(file);
