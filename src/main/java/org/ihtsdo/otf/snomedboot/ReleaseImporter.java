@@ -1,15 +1,18 @@
 package org.ihtsdo.otf.snomedboot;
 
+import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.IOUtils;
 import org.ihtsdo.otf.snomedboot.domain.ConceptConstants;
 import org.ihtsdo.otf.snomedboot.domain.rf2.*;
-import org.ihtsdo.otf.snomedboot.factory.*;
+import org.ihtsdo.otf.snomedboot.factory.ComponentFactory;
+import org.ihtsdo.otf.snomedboot.factory.FactoryUtils;
+import org.ihtsdo.otf.snomedboot.factory.HistoryAwareComponentFactory;
+import org.ihtsdo.otf.snomedboot.factory.LoadingProfile;
 import org.ihtsdo.otf.snomedboot.factory.filter.LatestEffectiveDateComponentFactory;
 import org.ihtsdo.otf.snomedboot.factory.filter.LatestEffectiveDateFilter;
 import org.ihtsdo.otf.snomedboot.factory.filter.ModuleFilter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.util.FileSystemUtils;
-import org.springframework.util.StreamUtils;
 
 import java.io.*;
 import java.nio.charset.Charset;
@@ -54,13 +57,13 @@ public class ReleaseImporter {
 	public void loadFullReleaseFiles(InputStream releaseZip, LoadingProfile loadingProfile, HistoryAwareComponentFactory componentFactory) throws ReleaseImportException {
 		File releaseDir = unzipRelease(releaseZip, ImportType.FULL);
 		loadFullReleaseFiles(releaseDir.getAbsolutePath(), loadingProfile, componentFactory);
-		FileSystemUtils.deleteRecursively(releaseDir);
+		deleteDirectory(releaseDir);
 	}
 
 	public void loadSnapshotReleaseFiles(InputStream releaseZip, LoadingProfile loadingProfile, ComponentFactory componentFactory) throws ReleaseImportException {
 		File releaseDir = unzipRelease(releaseZip, ImportType.SNAPSHOT);
 		loadSnapshotReleaseFiles(releaseDir.getAbsolutePath(), loadingProfile, componentFactory);
-		FileSystemUtils.deleteRecursively(releaseDir);
+		deleteDirectory(releaseDir);
 	}
 
 	/**
@@ -77,17 +80,25 @@ public class ReleaseImporter {
 			unzipRelease(releaseZip, ImportType.SNAPSHOT, releaseTempDir);
 		}
 		loadEffectiveSnapshotReleaseFiles(Collections.singleton(tempDir.getAbsolutePath()), loadingProfile, componentFactory);
-		FileSystemUtils.deleteRecursively(tempDir);
+		deleteDirectory(tempDir);
 	}
 
 	public void loadDeltaReleaseFiles(InputStream releaseZip, LoadingProfile loadingProfile, ComponentFactory componentFactory) throws ReleaseImportException {
 		File releaseDir = unzipRelease(releaseZip, ImportType.DELTA);
 		loadDeltaReleaseFiles(releaseDir.getAbsolutePath(), loadingProfile, componentFactory);
-		FileSystemUtils.deleteRecursively(releaseDir);
+		deleteDirectory(releaseDir);
 	}
 
 	public File unzipRelease(InputStream releaseZip, ImportType filenameFilter) throws ReleaseImportException {
 		return unzipRelease(releaseZip, filenameFilter, createTempDir());
+	}
+
+	private void deleteDirectory(File file) {
+		try {
+			FileUtils.deleteDirectory(file);
+		} catch (IOException e) {
+			logger.warn("Failed to remove directory {}", file.getAbsolutePath());
+		}
 	}
 
 	private File createTempDir() throws ReleaseImportException {
@@ -103,7 +114,7 @@ public class ReleaseImporter {
 			try (InputStream snomedReleaseZipStream = releaseZip) {
 				File zipFile = new File(tempDir, "release.zip");
 				try (FileOutputStream out = new FileOutputStream(zipFile)) {
-					StreamUtils.copy(snomedReleaseZipStream, out);
+					IOUtils.copy(snomedReleaseZipStream, out);
 				}
 
 				ZipInputStream zipInputStream = new ZipInputStream(new FileInputStream(zipFile));
@@ -116,7 +127,7 @@ public class ReleaseImporter {
 						logger.info("Unzipping file to {}", file.getAbsolutePath());
 						file.createNewFile();
 						try (FileOutputStream entryOutputStream = new FileOutputStream(file)) {
-							StreamUtils.copy(zipInputStream, entryOutputStream);
+							IOUtils.copy(zipInputStream, entryOutputStream);
 						}
 					}
 				}
