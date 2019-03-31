@@ -1,16 +1,5 @@
 package org.ihtsdo.otf.snomedboot;
 
-import org.ihtsdo.otf.snomedboot.domain.ConceptConstants;
-import org.ihtsdo.otf.snomedboot.domain.rf2.*;
-import org.ihtsdo.otf.snomedboot.factory.*;
-import org.ihtsdo.otf.snomedboot.factory.filter.LatestEffectiveDateComponentFactory;
-import org.ihtsdo.otf.snomedboot.factory.filter.LatestEffectiveDateFilter;
-import org.ihtsdo.otf.snomedboot.factory.filter.ModuleFilter;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.util.FileSystemUtils;
-import org.springframework.util.StreamUtils;
-
 import java.io.*;
 import java.nio.charset.Charset;
 import java.nio.file.*;
@@ -24,6 +13,17 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
+import org.ihtsdo.otf.snomedboot.domain.ConceptConstants;
+import org.ihtsdo.otf.snomedboot.domain.rf2.*;
+import org.ihtsdo.otf.snomedboot.factory.*;
+import org.ihtsdo.otf.snomedboot.factory.filter.LatestEffectiveDateComponentFactory;
+import org.ihtsdo.otf.snomedboot.factory.filter.LatestEffectiveDateFilter;
+import org.ihtsdo.otf.snomedboot.factory.filter.ModuleFilter;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.util.FileSystemUtils;
+import org.springframework.util.StreamUtils;
+
 
 public class ReleaseImporter {
 
@@ -329,9 +329,9 @@ public class ReleaseImporter {
 			if (fileName.endsWith(".txt")) {
 				if (fileName.matches("x?sct2_Concept_[^_]*" + fileType + "_.*")) {
 					releaseFiles.addConceptPath(file);
-				} else if (fileName.matches("x?sct2_Description_[^_]*" + fileType + "(-[a-zA-Z]*)?_.*")) {
+				} else if (fileName.matches("x?sct2_Description_[^_]*" + fileType + "(-[a-zA-Z]*?-?[a-zA-Z]*)?_.*")) {
 					releaseFiles.addDescriptionPath(file);
-				} else if (fileName.matches("x?sct2_TextDefinition_[^_]*" + fileType + "(-[a-zA-Z]*)?_.*")) {
+				} else if (fileName.matches("x?sct2_TextDefinition_[^_]*" + fileType + "(-[a-zA-Z]*?-?[a-zA-Z]*)?_.*")) {
 					releaseFiles.addTextDefinitionPath(file);
 				} else if (fileName.matches("x?sct2_Relationship_[^_]*" + fileType + "_.*")) {
 					releaseFiles.addRelationshipPath(file);
@@ -339,7 +339,7 @@ public class ReleaseImporter {
 					releaseFiles.addStatedRelationshipPath(file);
 				} else if (fileName.matches("x?sct2_sRefset_OWL.*[^_]*" + fileType + "_.*")) {
 					releaseFiles.addRefsetPath(file);
-				} else if (fileName.matches("x?der2_[sci]*Refset_[^_]*" + fileType + "(-[a-zA-Z]*)?_.*")) {
+				} else if (fileName.matches("x?der2_[sci]*Refset_[^_]*" + fileType + "(-[a-zA-Z]*?-?[a-zA-Z]*)?_.*")) {
 					releaseFiles.addRefsetPath(file);
 				} else if (fileName.matches("x?der2_.*") || fileName.matches("x?sct2_.*")) {
 					logger.info("RF2 release filename not recognised '{}'. This file will not be loaded.", fileName);
