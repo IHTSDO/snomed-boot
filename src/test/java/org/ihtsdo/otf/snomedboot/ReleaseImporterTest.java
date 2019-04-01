@@ -9,11 +9,11 @@ import org.snomed.otf.snomedboot.testutil.ZipUtil;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.List;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 public class ReleaseImporterTest {
 
@@ -204,4 +204,18 @@ public class ReleaseImporterTest {
 		assertEquals(1, releaseFiles.getTextDefinitionPaths().size());
 	}
 
+	@Test
+	public void testLoadInvalidRF2() throws IOException {
+		File baseRF2SnapshotZip = ZipUtil.zipDirectoryRemovingCommentsAndBlankLines("src/test/resources/SnomedCT_MiniRF2_Base_invalid_rf2");
+		ReleaseImporter releaseImporter = new ReleaseImporter();
+
+		TestComponentFactory testComponentFactory = new TestComponentFactory();
+		LoadingProfile complete = LoadingProfile.complete;
+		try {
+			releaseImporter.loadSnapshotReleaseFiles(new FileInputStream(baseRF2SnapshotZip), complete, testComponentFactory);
+			fail("Should throw exception because of bad file content.");
+		} catch (ReleaseImportException e) {
+			assertEquals("Invalid RF2 content. Less than five tab separated columns found in first line of sct2_Concept_Snapshot_INT_20170131.txt", e.getMessage());
+		}
+	}
 }

@@ -1,5 +1,5 @@
 #
 # Comments are removed by unit test
 #
-id	effectiveTime	active	moduleId	refsetId	referencedComponentId   owlExpression
+id	effectiveTime	active	moduleId	refsetId	referencedComponentId	owlExpression
 c69ad177-9756-4ad1-a8b3-02407ca95b36	20170131	1	900000000000012004	733073007	738774007	TransitiveObjectProperty(:738774007)

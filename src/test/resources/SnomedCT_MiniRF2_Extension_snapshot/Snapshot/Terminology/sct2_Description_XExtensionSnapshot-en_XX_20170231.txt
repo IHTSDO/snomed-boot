@@ -1,6 +1,6 @@
 #
 # Comments are removed by unit test
 #
-id      effectiveTime   active  moduleId        conceptId       languageCode    typeId  term    caseSignificanceId
+id	effectiveTime	active	moduleId	conceptId	languageCode	typeId	term	caseSignificanceId
 2638112015	20170231	0	100101001	113331007	en	900000000000003001	Structure of endocrine system (body structure)	900000000000448009
 754737012	20170231	0	100101001	362969004	en	900000000000003001	Disorder of endocrine system (disorder)	900000000000448009

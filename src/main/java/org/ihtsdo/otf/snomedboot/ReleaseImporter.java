@@ -223,7 +223,7 @@ public class ReleaseImporter {
 			return new ModuleFilter(runComponentFactory, moduleIds);
 		}
 
-		private ComponentFactory addEffectiveComponentFilter(ComponentFactory runComponentFactory, ReleaseFiles releaseFiles, LoadingProfile loadingProfile) throws IOException, InterruptedException {
+		private ComponentFactory addEffectiveComponentFilter(ComponentFactory runComponentFactory, ReleaseFiles releaseFiles, LoadingProfile loadingProfile) throws IOException, InterruptedException, ReleaseImportException {
 			logger.info("Gathering effective dates for effective component filtering.");
 			LatestEffectiveDateComponentFactory latestEffectiveDateComponentFactory = new LatestEffectiveDateComponentFactory();
 			runComponentFactory.preprocessingContent();
@@ -242,7 +242,7 @@ public class ReleaseImporter {
 			return new LatestEffectiveDateFilter(this.runComponentFactory, latestEffectiveDateComponentFactory);
 		}
 
-		private void loadAll(LoadingProfile loadingProfile, ReleaseFiles releaseFiles, String releaseVersion, ComponentFactory componentFactory, boolean multiThreaded) throws IOException, InterruptedException {
+		private void loadAll(LoadingProfile loadingProfile, ReleaseFiles releaseFiles, String releaseVersion, ComponentFactory componentFactory, boolean multiThreaded) throws IOException, InterruptedException, ReleaseImportException {
 			List<Callable<String>> coreComponentTasks = new ArrayList<>();
 			if (!loadingProfile.isJustRefsets()) {
 				loadConcepts(releaseFiles.getConceptPaths(), loadingProfile, releaseVersion, componentFactory);
@@ -358,7 +358,7 @@ public class ReleaseImporter {
 			}
 		}
 
-		private void loadConcepts(List<Path> rf2Files, final LoadingProfile loadingProfile, final String releaseVersion, ComponentFactory componentFactory) throws IOException {
+		private void loadConcepts(List<Path> rf2Files, final LoadingProfile loadingProfile, final String releaseVersion, ComponentFactory componentFactory) throws IOException, ReleaseImportException {
 			readLines(rf2Files, (ValuesHandler) values -> {
 				if (loadingProfile.isInactiveConcepts() || "1".equals(values[ConceptFieldIndexes.active])) {
 					String conceptId = values[ComponentFieldIndexes.id];
@@ -514,7 +514,7 @@ public class ReleaseImporter {
 			}
 		}
 
-		private void readLines(List<Path> rf2FilePaths, FileContentHandler contentHandler, String componentType, String releaseVersion) throws IOException {
+		private void readLines(List<Path> rf2FilePaths, FileContentHandler contentHandler, String componentType, String releaseVersion) throws IOException, ReleaseImportException {
 			if (releaseVersion != null) {
 				logger.info("Reading {} for release {}", componentType, releaseVersion);
 			} else {
@@ -530,6 +530,12 @@ public class ReleaseImporter {
 					String line;
 					final String header = reader.readLine();
 					final String[] fieldNames = header.split("\\t");
+					if (fieldNames.length < 5) {
+						throw new ReleaseImportException("Invalid RF2 content. Less than five tab separated columns found in first line of " + rf2FilePath.getFileName());
+					}
+					if (!fieldNames[0].equals("id")) {
+						throw new ReleaseImportException("Invalid RF2 content. 'id' not found as first value in tab separated first line of " + rf2FilePath.getFileName());
+					}
 					String[] values;
 					while ((line = reader.readLine()) != null) {
 						linesRead++;
