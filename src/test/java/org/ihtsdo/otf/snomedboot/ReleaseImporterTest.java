@@ -193,4 +193,15 @@ public class ReleaseImporterTest {
 
 	}
 
+	@Test
+	public void testCollectUKReleaseFile() {
+		ReleaseFiles releaseFiles = new ReleaseFiles();
+		ReleaseImporter.ImportRun.collectReleaseFile(new File("sct2_Description_Snapshot-en-GB_GB1000000_20181031.txt").toPath(), "Snapshot", releaseFiles);
+		assertEquals(1, releaseFiles.getDescriptionPaths().size());
+
+		releaseFiles = new ReleaseFiles();
+		ReleaseImporter.ImportRun.collectReleaseFile(new File("sct2_TextDefinition_Snapshot-en-GB_GB1000000_20181031.txt").toPath(), "Snapshot", releaseFiles);
+		assertEquals(1, releaseFiles.getTextDefinitionPaths().size());
+	}
+
 }
