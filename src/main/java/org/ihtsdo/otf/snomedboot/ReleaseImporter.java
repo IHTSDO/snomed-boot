@@ -25,6 +25,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
@@ -314,7 +315,7 @@ public class ReleaseImporter {
 
 		private ReleaseFiles findFiles(List<String> releaseDirPaths, final String fileType, LoadingProfile loadingProfile) throws IOException {
 			final ReleaseFiles releaseFiles = new ReleaseFiles();
-
+			
 			for (String releaseDirPath : releaseDirPaths) {
 				final File releaseDir = new File(releaseDirPath);
 				if (!releaseDir.isDirectory()) {
@@ -329,8 +330,9 @@ public class ReleaseImporter {
 					}
 				});
 			}
-
-			releaseFiles.assertFullSet(loadingProfile);
+			
+			String debugInfo = "looking recursively in: " + releaseDirPaths.stream().collect(Collectors.joining(", "));
+			releaseFiles.assertFullSet(loadingProfile, debugInfo);
 
 			return releaseFiles;
 		}
@@ -338,21 +340,21 @@ public class ReleaseImporter {
 		static void collectReleaseFile(Path file, String fileType, ReleaseFiles releaseFiles) {
 			final String fileName = file.getFileName().toString();
 			if (fileName.endsWith(".txt")) {
-				if (fileName.matches("x?sct2_Concept_[^_]*" + fileType + "_.*")) {
+				if (fileName.matches("x?(sct|rel)2_Concept_[^_]*" + fileType + "_.*")) {
 					releaseFiles.addConceptPath(file);
-				} else if (fileName.matches("x?sct2_Description_[^_]*" + fileType + "(-[a-zA-Z\\-]*)?_.*")) {
+				} else if (fileName.matches("x?(sct|rel)2_Description_[^_]*" + fileType + "(-[a-zA-Z\\-]*)?_.*")) {
 					releaseFiles.addDescriptionPath(file);
-				} else if (fileName.matches("x?sct2_TextDefinition_[^_]*" + fileType + "(-[a-zA-Z\\-]*)?_.*")) {
+				} else if (fileName.matches("x?(sct|rel)2_TextDefinition_[^_]*" + fileType + "(-[a-zA-Z\\-]*)?_.*")) {
 					releaseFiles.addTextDefinitionPath(file);
-				} else if (fileName.matches("x?sct2_Relationship_[^_]*" + fileType + "_.*")) {
+				} else if (fileName.matches("x?(sct|rel)2_Relationship_[^_]*" + fileType + "_.*")) {
 					releaseFiles.addRelationshipPath(file);
-				} else if (fileName.matches("x?sct2_StatedRelationship_[^_]*" + fileType + "_.*")) {
+				} else if (fileName.matches("x?(sct|rel)2_StatedRelationship_[^_]*" + fileType + "_.*")) {
 					releaseFiles.addStatedRelationshipPath(file);
-				} else if (fileName.matches("x?sct2_sRefset_OWL.*[^_]*" + fileType + "_.*")) {
+				} else if (fileName.matches("x?(sct|rel)2_sRefset_OWL.*[^_]*" + fileType + "_.*")) {
 					releaseFiles.addRefsetPath(file);
-				} else if (fileName.matches("x?der2_[sci]*Refset_[^_]*" + fileType + "(-[a-zA-Z\\-]*)?_.*")) {
+				} else if (fileName.matches("x?(der|rel)2_[sci]*Refset_[^_]*" + fileType + "(-[a-zA-Z\\-]*)?_.*")) {
 					releaseFiles.addRefsetPath(file);
-				} else if (fileName.matches("x?der2_.*") || fileName.matches("x?sct2_.*")) {
+				} else if (fileName.matches("x?der2_.*") || fileName.matches("x?(sct|rel)2_.*")) {
 					logger.info("RF2 release filename not recognised '{}'. This file will not be loaded.", fileName);
 				}
 			}
