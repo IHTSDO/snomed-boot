@@ -123,7 +123,7 @@ public class ReleaseImporter {
 				int filesUnzipped = 0;
 				while ((zipEntry = zipInputStream.getNextEntry()) != null) {
 					String zipEntryName = zipEntry.getName();
-					if (zipEntryName.contains(filenameFilter.getFilenamePart())) {
+					if (zipEntryName.contains(filenameFilter.getFilenamePart()) && !zipEntry.isDirectory()) {
 						// Create file without directory nesting
 						File file = new File(tempDir, new File(zipEntryName).getName());
 						logger.info("Unzipping file to {}", file.getAbsolutePath());
