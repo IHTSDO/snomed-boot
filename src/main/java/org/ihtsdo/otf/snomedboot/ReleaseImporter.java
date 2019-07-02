@@ -120,6 +120,7 @@ public class ReleaseImporter {
 
 				ZipInputStream zipInputStream = new ZipInputStream(new FileInputStream(zipFile));
 				ZipEntry zipEntry;
+				int filesUnzipped = 0;
 				while ((zipEntry = zipInputStream.getNextEntry()) != null) {
 					String zipEntryName = zipEntry.getName();
 					if (zipEntryName.contains(filenameFilter.getFilenamePart())) {
@@ -129,13 +130,17 @@ public class ReleaseImporter {
 						file.createNewFile();
 						try (FileOutputStream entryOutputStream = new FileOutputStream(file)) {
 							IOUtils.copy(zipInputStream, entryOutputStream);
+							filesUnzipped++;
 						}
 					}
+				}
+				if (filesUnzipped == 0) {
+					throw new IllegalStateException("No " + filenameFilter.getFilenamePart() + " files found in archive: " + zipFile.getAbsolutePath());
 				}
 			}
 			return tempDir;
 		} catch (IOException e) {
-			throw new ReleaseImportException("Failed to unzip Snomed release file.", e);
+			throw new ReleaseImportException("Failed to unzip Snomed " + filenameFilter.getFilenamePart()  + " release file.", e);
 		}
 	}
 
