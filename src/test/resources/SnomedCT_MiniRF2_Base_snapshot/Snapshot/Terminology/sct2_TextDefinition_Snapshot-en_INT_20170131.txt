@@ -1,5 +1,5 @@
 #
 # Comments are removed by unit test
 #
-id      effectiveTime   active  moduleId        conceptId       languageCode    typeId  term    caseSignificanceId
+id	effectiveTime	active	moduleId	conceptId	languageCode	typeId	term	caseSignificanceId
 1228465017	20170731	1	900000000000207008	362969004	en	900000000000550004	Endocrine system disease	900000000000448009

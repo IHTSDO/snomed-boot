@@ -1,8 +1,7 @@
 package org.ihtsdo.otf.snomedboot.domain;
 
-import org.springframework.util.MultiValueMap;
-
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 public interface Concept {
@@ -24,9 +23,9 @@ public interface Concept {
 
 	String getFsn();
 
-	MultiValueMap<String, String> getInferredAttributes();
+	Map<String, Set<String>> getInferredAttributes();
 
-	MultiValueMap<String, String> getStatedAttributes();
+	Map<String, Set<String>> getStatedAttributes();
 
 	List<Relationship> getRelationships();
 

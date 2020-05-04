@@ -9,11 +9,11 @@ import org.snomed.otf.snomedboot.testutil.ZipUtil;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.List;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 public class ReleaseImporterTest {
 
@@ -28,7 +28,7 @@ public class ReleaseImporterTest {
 		// Load base release
 		TestComponentFactory testComponentFactory = new TestComponentFactory();
 		LoadingProfile complete = LoadingProfile.complete;
-		complete.getIncludedReferenceSetFilenamePatterns().add(".*Axiom.*");
+		complete.getIncludedReferenceSetFilenamePatterns().add(".*OWL.*");
 		releaseImporter.loadSnapshotReleaseFiles(new FileInputStream(baseRF2SnapshotZip), complete, testComponentFactory);
 
 		List<String> conceptLines = testComponentFactory.getConceptLines();
@@ -111,4 +111,111 @@ public class ReleaseImporterTest {
 		assertEquals(11, testComponentFactory.getConceptLines().size());
 	}
 
+	@Test
+	public void testCollectReleaseFile() {
+		ReleaseFiles releaseFiles = new ReleaseFiles();
+		ReleaseImporter.ImportRun.collectReleaseFile(new File("sct2_Concept_Snapshot_INT_20180731.txt").toPath(), "Snapshot", releaseFiles);
+		assertEquals(1, releaseFiles.getConceptPaths().size());
+
+		releaseFiles = new ReleaseFiles();
+		ReleaseImporter.ImportRun.collectReleaseFile(new File("xsct2_Concept_Snapshot_INT_20180731.txt").toPath(), "Snapshot", releaseFiles);
+		assertEquals(1, releaseFiles.getConceptPaths().size());
+
+		releaseFiles = new ReleaseFiles();
+		ReleaseImporter.ImportRun.collectReleaseFile(new File("sct2_Concept_XExtensionSnapshot_INT_20180731.txt").toPath(), "Snapshot", releaseFiles);
+		assertEquals(1, releaseFiles.getConceptPaths().size());
+
+		releaseFiles = new ReleaseFiles();
+		ReleaseImporter.ImportRun.collectReleaseFile(new File("xsct2_Concept_XExtensionSnapshot_INT_20180731.txt").toPath(), "Snapshot", releaseFiles);
+		assertEquals(1, releaseFiles.getConceptPaths().size());
+
+		releaseFiles = new ReleaseFiles();
+		ReleaseImporter.ImportRun.collectReleaseFile(new File("sct2_Concept_XExtension_Snapshot_INT_20180731.txt").toPath(), "Snapshot", releaseFiles);
+		assertEquals(0, releaseFiles.getConceptPaths().size());
+
+		releaseFiles = new ReleaseFiles();
+		ReleaseImporter.ImportRun.collectReleaseFile(new File("sct2_Concept_SnapshotXExtension_INT_20180731.txt").toPath(), "Snapshot", releaseFiles);
+		assertEquals(0, releaseFiles.getConceptPaths().size());
+
+		releaseFiles = new ReleaseFiles();
+		ReleaseImporter.ImportRun.collectReleaseFile(new File("sct2_ConceptXExtension_Snapshot_INT_20180731.txt").toPath(), "Snapshot", releaseFiles);
+		assertEquals(0, releaseFiles.getConceptPaths().size());
+
+
+		releaseFiles = new ReleaseFiles();
+		ReleaseImporter.ImportRun.collectReleaseFile(new File("sct2_Description_Snapshot_INT_20180731.txt").toPath(), "Snapshot", releaseFiles);
+		assertEquals(1, releaseFiles.getDescriptionPaths().size());
+
+		releaseFiles = new ReleaseFiles();
+		ReleaseImporter.ImportRun.collectReleaseFile(new File("sct2_Description_Snapshot-en_INT_20180731.txt").toPath(), "Snapshot", releaseFiles);
+		assertEquals(1, releaseFiles.getDescriptionPaths().size());
+
+		releaseFiles = new ReleaseFiles();
+		ReleaseImporter.ImportRun.collectReleaseFile(new File("xsct2_Description_Snapshot-EN_INT_20180731.txt").toPath(), "Snapshot", releaseFiles);
+		assertEquals(1, releaseFiles.getDescriptionPaths().size());
+
+		releaseFiles = new ReleaseFiles();
+		ReleaseImporter.ImportRun.collectReleaseFile(new File("sct2_Description_XExtensionSnapshot_INT_20180731.txt").toPath(), "Snapshot", releaseFiles);
+		assertEquals(1, releaseFiles.getDescriptionPaths().size());
+
+		releaseFiles = new ReleaseFiles();
+		ReleaseImporter.ImportRun.collectReleaseFile(new File("xsct2_Description_XExtensionSnapshot_INT_20180731.txt").toPath(), "Snapshot", releaseFiles);
+		assertEquals(1, releaseFiles.getDescriptionPaths().size());
+
+
+		releaseFiles = new ReleaseFiles();
+		ReleaseImporter.ImportRun.collectReleaseFile(new File("der2_Refset_SimpleSnapshot_INT_20180731.txt").toPath(), "Snapshot", releaseFiles);
+		assertEquals(1, releaseFiles.getRefsetPaths().size());
+
+		releaseFiles = new ReleaseFiles();
+		ReleaseImporter.ImportRun.collectReleaseFile(new File("der2_cissccRefset_MRCMAttributeDomainSnapshot_INT_20180731.txt").toPath(), "Snapshot", releaseFiles);
+		assertEquals(1, releaseFiles.getRefsetPaths().size());
+
+		releaseFiles = new ReleaseFiles();
+		ReleaseImporter.ImportRun.collectReleaseFile(new File("xder2_cissccRefset_MRCMAttributeDomainSnapshot_INT_20180731.txt").toPath(), "Snapshot", releaseFiles);
+		assertEquals(1, releaseFiles.getRefsetPaths().size());
+
+		releaseFiles = new ReleaseFiles();
+		ReleaseImporter.ImportRun.collectReleaseFile(new File("xder2_cissccRefset_MRCMAttributeDomainXExtensionSnapshot_INT_20180731.txt").toPath(), "Snapshot", releaseFiles);
+		assertEquals(1, releaseFiles.getRefsetPaths().size());
+
+		releaseFiles = new ReleaseFiles();
+		ReleaseImporter.ImportRun.collectReleaseFile(new File("der2_cRefset_LanguageSpanishExtensionSnapshot-es_INT_20180430.txt").toPath(), "Snapshot", releaseFiles);
+		assertEquals(1, releaseFiles.getRefsetPaths().size());
+
+		releaseFiles = new ReleaseFiles();
+		ReleaseImporter.ImportRun.collectReleaseFile(new File("xder2_cisscczRefset_MRCMAttributeDomainXExtensionSnapshot_INT_20180731.txt").toPath(), "Snapshot", releaseFiles);
+		assertEquals("Should not match because of z in additional columns type list.", 0, releaseFiles.getRefsetPaths().size());
+
+		releaseFiles = new ReleaseFiles();
+		ReleaseImporter.ImportRun.collectReleaseFile(new File("xder2_cissccRefset_MRCMAttributeDomainSnapshotXExtension_INT_20180731.txt").toPath(), "Snapshot", releaseFiles);
+		assertEquals("Should not match because no underscore after Snapshot.", 0, releaseFiles.getRefsetPaths().size());
+
+	}
+
+	@Test
+	public void testCollectUKReleaseFile() {
+		ReleaseFiles releaseFiles = new ReleaseFiles();
+		ReleaseImporter.ImportRun.collectReleaseFile(new File("sct2_Description_Snapshot-en-GB_GB1000000_20181031.txt").toPath(), "Snapshot", releaseFiles);
+		assertEquals(1, releaseFiles.getDescriptionPaths().size());
+
+		releaseFiles = new ReleaseFiles();
+		ReleaseImporter.ImportRun.collectReleaseFile(new File("sct2_TextDefinition_Snapshot-en-GB_GB1000000_20181031.txt").toPath(), "Snapshot", releaseFiles);
+		assertEquals(1, releaseFiles.getTextDefinitionPaths().size());
+	}
+
+	@Test
+	public void testLoadInvalidRF2() throws IOException {
+		File baseRF2SnapshotZip = ZipUtil.zipDirectoryRemovingCommentsAndBlankLines("src/test/resources/SnomedCT_MiniRF2_Base_invalid_rf2");
+		ReleaseImporter releaseImporter = new ReleaseImporter();
+
+		TestComponentFactory testComponentFactory = new TestComponentFactory();
+		LoadingProfile complete = LoadingProfile.complete;
+		try {
+			releaseImporter.loadSnapshotReleaseFiles(new FileInputStream(baseRF2SnapshotZip), complete, testComponentFactory);
+			fail("Should throw exception because of bad file content.");
+		} catch (ReleaseImportException e) {
+			assertEquals("Invalid RF2 content. Less than five tab separated columns found in first line of sct2_Concept_Snapshot_INT_20170131.txt", e.getMessage());
+		}
+	}
 }

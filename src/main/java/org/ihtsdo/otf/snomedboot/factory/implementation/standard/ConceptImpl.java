@@ -3,8 +3,6 @@ package org.ihtsdo.otf.snomedboot.factory.implementation.standard;
 import org.ihtsdo.otf.snomedboot.domain.Concept;
 import org.ihtsdo.otf.snomedboot.domain.Description;
 import org.ihtsdo.otf.snomedboot.domain.Relationship;
-import org.springframework.util.LinkedMultiValueMap;
-import org.springframework.util.MultiValueMap;
 
 import java.util.*;
 
@@ -16,8 +14,8 @@ public class ConceptImpl implements Concept {
 	private String moduleId;
 	private String definitionStatusId;
 	private String fsn;
-	private final MultiValueMap<String, String> inferredAttributes;
-	private final MultiValueMap<String, String> statedAttributes;
+	private final Map<String, Set<String>> inferredAttributes;
+	private final Map<String, Set<String>> statedAttributes;
 	private final Set<Concept> inferredParents;
 	private final Set<Concept> statedParents;
 	private final Set<Concept> inferredChildren;
@@ -28,8 +26,8 @@ public class ConceptImpl implements Concept {
 
 	public ConceptImpl(String id) {
 		this.id = Long.parseLong(id);
-		inferredAttributes = new LinkedMultiValueMap<>();
-		statedAttributes = new LinkedMultiValueMap<>();
+		inferredAttributes = new HashMap<>();
+		statedAttributes = new HashMap<>();
 		inferredParents = new HashSet<>();
 		statedParents = new HashSet<>();
 		inferredChildren = new HashSet<>();
@@ -203,21 +201,21 @@ public class ConceptImpl implements Concept {
 	}
 
 	@Override
-	public MultiValueMap<String, String> getInferredAttributes() {
+	public Map<String, Set<String>> getInferredAttributes() {
 		return inferredAttributes;
 	}
 
 	public void addInferredAttribute(String type, String value) {
-		inferredAttributes.add(type, value);
+		inferredAttributes.computeIfAbsent(type, t -> new HashSet<>()).add(value);
 	}
 
 	@Override
-	public MultiValueMap<String, String> getStatedAttributes() {
+	public Map<String, Set<String>> getStatedAttributes() {
 		return statedAttributes;
 	}
 
 	public void addStatedAttribute(String type, String value) {
-		statedAttributes.add(type, value);
+		statedAttributes.computeIfAbsent(type, t -> new HashSet<>()).add(value);
 	}
 
 	public void addRelationship(Relationship relationship) {

@@ -1,15 +1,18 @@
 package org.ihtsdo.otf.snomedboot;
 
+import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.IOUtils;
 import org.ihtsdo.otf.snomedboot.domain.ConceptConstants;
 import org.ihtsdo.otf.snomedboot.domain.rf2.*;
-import org.ihtsdo.otf.snomedboot.factory.*;
+import org.ihtsdo.otf.snomedboot.factory.ComponentFactory;
+import org.ihtsdo.otf.snomedboot.factory.FactoryUtils;
+import org.ihtsdo.otf.snomedboot.factory.HistoryAwareComponentFactory;
+import org.ihtsdo.otf.snomedboot.factory.LoadingProfile;
 import org.ihtsdo.otf.snomedboot.factory.filter.LatestEffectiveDateComponentFactory;
 import org.ihtsdo.otf.snomedboot.factory.filter.LatestEffectiveDateFilter;
 import org.ihtsdo.otf.snomedboot.factory.filter.ModuleFilter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.util.FileSystemUtils;
-import org.springframework.util.StreamUtils;
 
 import java.io.*;
 import java.nio.charset.Charset;
@@ -22,12 +25,14 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
 public class ReleaseImporter {
 
 	public static final Charset UTF_8 = Charset.forName("UTF-8");
+	private static final Logger logger = LoggerFactory.getLogger(ReleaseImporter.class);
 
 	public void loadFullReleaseFiles(String releaseDirPath, LoadingProfile loadingProfile, HistoryAwareComponentFactory componentFactory) throws ReleaseImportException {
 		new ImportRun(componentFactory).doLoadReleaseFiles(releaseDirPath, loadingProfile, ImportType.FULL);
@@ -53,13 +58,13 @@ public class ReleaseImporter {
 	public void loadFullReleaseFiles(InputStream releaseZip, LoadingProfile loadingProfile, HistoryAwareComponentFactory componentFactory) throws ReleaseImportException {
 		File releaseDir = unzipRelease(releaseZip, ImportType.FULL);
 		loadFullReleaseFiles(releaseDir.getAbsolutePath(), loadingProfile, componentFactory);
-		FileSystemUtils.deleteRecursively(releaseDir);
+		deleteDirectory(releaseDir);
 	}
 
 	public void loadSnapshotReleaseFiles(InputStream releaseZip, LoadingProfile loadingProfile, ComponentFactory componentFactory) throws ReleaseImportException {
 		File releaseDir = unzipRelease(releaseZip, ImportType.SNAPSHOT);
 		loadSnapshotReleaseFiles(releaseDir.getAbsolutePath(), loadingProfile, componentFactory);
-		FileSystemUtils.deleteRecursively(releaseDir);
+		deleteDirectory(releaseDir);
 	}
 
 	/**
@@ -76,17 +81,25 @@ public class ReleaseImporter {
 			unzipRelease(releaseZip, ImportType.SNAPSHOT, releaseTempDir);
 		}
 		loadEffectiveSnapshotReleaseFiles(Collections.singleton(tempDir.getAbsolutePath()), loadingProfile, componentFactory);
-		FileSystemUtils.deleteRecursively(tempDir);
+		deleteDirectory(tempDir);
 	}
 
 	public void loadDeltaReleaseFiles(InputStream releaseZip, LoadingProfile loadingProfile, ComponentFactory componentFactory) throws ReleaseImportException {
 		File releaseDir = unzipRelease(releaseZip, ImportType.DELTA);
 		loadDeltaReleaseFiles(releaseDir.getAbsolutePath(), loadingProfile, componentFactory);
-		FileSystemUtils.deleteRecursively(releaseDir);
+		deleteDirectory(releaseDir);
 	}
 
 	public File unzipRelease(InputStream releaseZip, ImportType filenameFilter) throws ReleaseImportException {
 		return unzipRelease(releaseZip, filenameFilter, createTempDir());
+	}
+
+	private void deleteDirectory(File file) {
+		try {
+			FileUtils.deleteDirectory(file);
+		} catch (IOException e) {
+			logger.warn("Failed to remove directory {}", file.getAbsolutePath());
+		}
 	}
 
 	private File createTempDir() throws ReleaseImportException {
@@ -102,27 +115,32 @@ public class ReleaseImporter {
 			try (InputStream snomedReleaseZipStream = releaseZip) {
 				File zipFile = new File(tempDir, "release.zip");
 				try (FileOutputStream out = new FileOutputStream(zipFile)) {
-					StreamUtils.copy(snomedReleaseZipStream, out);
+					IOUtils.copy(snomedReleaseZipStream, out);
 				}
 
 				ZipInputStream zipInputStream = new ZipInputStream(new FileInputStream(zipFile));
 				ZipEntry zipEntry;
+				int filesUnzipped = 0;
 				while ((zipEntry = zipInputStream.getNextEntry()) != null) {
 					String zipEntryName = zipEntry.getName();
-					if (zipEntryName.contains(filenameFilter.getFilenamePart())) {
+					if (zipEntryName.contains(filenameFilter.getFilenamePart()) && !zipEntry.isDirectory()) {
 						// Create file without directory nesting
 						File file = new File(tempDir, new File(zipEntryName).getName());
-						LoggerFactory.getLogger(getClass()).info("Unzipping file to {}", file.getAbsolutePath());
+						logger.info("Unzipping file to {}", file.getAbsolutePath());
 						file.createNewFile();
 						try (FileOutputStream entryOutputStream = new FileOutputStream(file)) {
-							StreamUtils.copy(zipInputStream, entryOutputStream);
+							IOUtils.copy(zipInputStream, entryOutputStream);
+							filesUnzipped++;
 						}
 					}
+				}
+				if (filesUnzipped == 0) {
+					throw new IllegalStateException("No " + filenameFilter.getFilenamePart() + " files found in archive: " + zipFile.getAbsolutePath());
 				}
 			}
 			return tempDir;
 		} catch (IOException e) {
-			throw new ReleaseImportException("Failed to unzip Snomed release file.", e);
+			throw new ReleaseImportException("Failed to unzip Snomed " + filenameFilter.getFilenamePart()  + " release file.", e);
 		}
 	}
 
@@ -141,13 +159,12 @@ public class ReleaseImporter {
 		}
 	}
 
-	private static final class ImportRun {
+	static final class ImportRun {
 
 		private ComponentFactory runComponentFactory;
 
 		private final ExecutorService executorService;
 
-		private final Logger logger = LoggerFactory.getLogger(getClass());
 		private static final Pattern DATE_EXTRACT_PATTERN = Pattern.compile("[^\\t]*\\t([^\\t]*)\t");
 
 		private ImportRun(ComponentFactory componentFactory) {
@@ -212,7 +229,7 @@ public class ReleaseImporter {
 			return new ModuleFilter(runComponentFactory, moduleIds);
 		}
 
-		private ComponentFactory addEffectiveComponentFilter(ComponentFactory runComponentFactory, ReleaseFiles releaseFiles, LoadingProfile loadingProfile) throws IOException, InterruptedException {
+		private ComponentFactory addEffectiveComponentFilter(ComponentFactory runComponentFactory, ReleaseFiles releaseFiles, LoadingProfile loadingProfile) throws IOException, InterruptedException, ReleaseImportException {
 			logger.info("Gathering effective dates for effective component filtering.");
 			LatestEffectiveDateComponentFactory latestEffectiveDateComponentFactory = new LatestEffectiveDateComponentFactory();
 			runComponentFactory.preprocessingContent();
@@ -231,7 +248,7 @@ public class ReleaseImporter {
 			return new LatestEffectiveDateFilter(this.runComponentFactory, latestEffectiveDateComponentFactory);
 		}
 
-		private void loadAll(LoadingProfile loadingProfile, ReleaseFiles releaseFiles, String releaseVersion, ComponentFactory componentFactory, boolean multiThreaded) throws IOException, InterruptedException {
+		private void loadAll(LoadingProfile loadingProfile, ReleaseFiles releaseFiles, String releaseVersion, ComponentFactory componentFactory, boolean multiThreaded) throws IOException, InterruptedException, ReleaseImportException {
 			List<Callable<String>> coreComponentTasks = new ArrayList<>();
 			if (!loadingProfile.isJustRefsets()) {
 				loadConcepts(releaseFiles.getConceptPaths(), loadingProfile, releaseVersion, componentFactory);
@@ -303,7 +320,7 @@ public class ReleaseImporter {
 
 		private ReleaseFiles findFiles(List<String> releaseDirPaths, final String fileType, LoadingProfile loadingProfile) throws IOException {
 			final ReleaseFiles releaseFiles = new ReleaseFiles();
-
+			
 			for (String releaseDirPath : releaseDirPaths) {
 				final File releaseDir = new File(releaseDirPath);
 				if (!releaseDir.isDirectory()) {
@@ -312,36 +329,43 @@ public class ReleaseImporter {
 
 				Files.walkFileTree(releaseDir.toPath(), EnumSet.of(FileVisitOption.FOLLOW_LINKS), Integer.MAX_VALUE, new SimpleFileVisitor<Path>() {
 					@Override
-					public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
-						final String fileName = file.getFileName().toString();
-						if (fileName.endsWith(".txt")) {
-							if (fileName.startsWith("sct2_Concept_" + fileType) || fileName.startsWith("xsct2_Concept_" + fileType)) {
-								releaseFiles.addConceptPath(file);
-							} else if (fileName.startsWith("sct2_Description_" + fileType) || fileName.startsWith("xsct2_Description_" + fileType)) {
-								releaseFiles.addDescriptionPath(file);
-							} else if (fileName.startsWith("sct2_TextDefinition_" + fileType) || fileName.startsWith("xsct2_TextDefinition_" + fileType)) {
-								releaseFiles.addTextDefinitionPath(file);
-							} else if (fileName.startsWith("sct2_Relationship_" + fileType) || fileName.startsWith("xsct2_Relationship_" + fileType)) {
-								releaseFiles.addRelationshipPath(file);
-							} else if (fileName.startsWith("sct2_StatedRelationship_" + fileType) || fileName.startsWith("xsct2_StatedRelationship_" + fileType)) {
-								releaseFiles.addStatedRelationshipPath(file);
-							} else if (fileName.startsWith("sct2_sRefset_OWLAxiom" + fileType) || fileName.startsWith("xsct2_sRefset_OWLAxiom" + fileType)) {
-								releaseFiles.addRefsetPath(file);
-							} else if (fileName.startsWith("der2_") && fileName.contains(fileType) || fileName.startsWith("xder2_") && fileName.contains(fileType)) {
-								releaseFiles.addRefsetPath(file);
-							}
-						}
+					public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) {
+						collectReleaseFile(file, fileType, releaseFiles);
 						return FileVisitResult.CONTINUE;
 					}
 				});
 			}
-
-			releaseFiles.assertFullSet(loadingProfile);
+			
+			String debugInfo = "looking recursively in: " + releaseDirPaths.stream().collect(Collectors.joining(", "));
+			releaseFiles.assertFullSet(loadingProfile, debugInfo);
 
 			return releaseFiles;
 		}
 
-		private void loadConcepts(List<Path> rf2Files, final LoadingProfile loadingProfile, final String releaseVersion, ComponentFactory componentFactory) throws IOException {
+		static void collectReleaseFile(Path file, String fileType, ReleaseFiles releaseFiles) {
+			final String fileName = file.getFileName().toString();
+			if (fileName.endsWith(".txt")) {
+				if (fileName.matches("x?(sct|rel)2_Concept_[^_]*" + fileType + "_.*")) {
+					releaseFiles.addConceptPath(file);
+				} else if (fileName.matches("x?(sct|rel)2_Description_[^_]*" + fileType + "(-[a-zA-Z\\-]*)?_.*")) {
+					releaseFiles.addDescriptionPath(file);
+				} else if (fileName.matches("x?(sct|rel)2_TextDefinition_[^_]*" + fileType + "(-[a-zA-Z\\-]*)?_.*")) {
+					releaseFiles.addTextDefinitionPath(file);
+				} else if (fileName.matches("x?(sct|rel)2_Relationship_[^_]*" + fileType + "_.*")) {
+					releaseFiles.addRelationshipPath(file);
+				} else if (fileName.matches("x?(sct|rel)2_StatedRelationship_[^_]*" + fileType + "_.*")) {
+					releaseFiles.addStatedRelationshipPath(file);
+				} else if (fileName.matches("x?(sct|rel)2_sRefset_OWL.*[^_]*" + fileType + "_.*")) {
+					releaseFiles.addRefsetPath(file);
+				} else if (fileName.matches("x?(der|rel)2_[sci]*Refset_[^_]*" + fileType + "(-[a-zA-Z\\-]*)?_.*")) {
+					releaseFiles.addRefsetPath(file);
+				} else if (fileName.matches("x?der2_.*") || fileName.matches("x?(sct|rel)2_.*")) {
+					logger.info("RF2 release filename not recognised '{}'. This file will not be loaded.", fileName);
+				}
+			}
+		}
+
+		private void loadConcepts(List<Path> rf2Files, final LoadingProfile loadingProfile, final String releaseVersion, ComponentFactory componentFactory) throws IOException, ReleaseImportException {
 			readLines(rf2Files, (ValuesHandler) values -> {
 				if (loadingProfile.isInactiveConcepts() || "1".equals(values[ConceptFieldIndexes.active])) {
 					String conceptId = values[ComponentFieldIndexes.id];
@@ -497,7 +521,7 @@ public class ReleaseImporter {
 			}
 		}
 
-		private void readLines(List<Path> rf2FilePaths, FileContentHandler contentHandler, String componentType, String releaseVersion) throws IOException {
+		private void readLines(List<Path> rf2FilePaths, FileContentHandler contentHandler, String componentType, String releaseVersion) throws IOException, ReleaseImportException {
 			if (releaseVersion != null) {
 				logger.info("Reading {} for release {}", componentType, releaseVersion);
 			} else {
@@ -513,6 +537,12 @@ public class ReleaseImporter {
 					String line;
 					final String header = reader.readLine();
 					final String[] fieldNames = header.split("\\t");
+					if (fieldNames.length < 5) {
+						throw new ReleaseImportException("Invalid RF2 content. Less than five tab separated columns found in first line of " + rf2FilePath.getFileName());
+					}
+					if (!fieldNames[0].equals("id")) {
+						throw new ReleaseImportException("Invalid RF2 content. 'id' not found as first value in tab separated first line of " + rf2FilePath.getFileName());
+					}
 					String[] values;
 					while ((line = reader.readLine()) != null) {
 						linesRead++;
