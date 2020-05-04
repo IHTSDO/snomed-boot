@@ -42,7 +42,8 @@ public class LoadReleaseWithExtension {
 			
 		}
 		
-		int n = componentStore.getConcepts().;
+		// DK: Work in progress?
+		//int n = componentStore.getConcepts().;
 
 
 

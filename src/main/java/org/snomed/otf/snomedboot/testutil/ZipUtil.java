@@ -46,7 +46,9 @@ public class ZipUtil {
 					try (BufferedReader bufferedReader = new BufferedReader(new FileReader(file))) {
 						String line;
 						while ((line = bufferedReader.readLine()) != null) {
-							if (!line.isEmpty() && !line.startsWith("#")) {
+							if ( // DK: removed this line to test empty lines
+								//!line.isEmpty() && 
+								!line.startsWith("#")) {
 								bufferedWriter.write(line);
 								bufferedWriter.newLine();
 							}
