@@ -215,7 +215,7 @@ public class ReleaseImporterTest {
 			releaseImporter.loadSnapshotReleaseFiles(new FileInputStream(baseRF2SnapshotZip), complete, testComponentFactory);
 			fail("Should throw exception because of bad file content.");
 		} catch (ReleaseImportException e) {
-			assertEquals("Invalid RF2 content. Less than five tab separated columns found in first line of sct2_Concept_Snapshot_INT_20170131.txt", e.getMessage());
+			assertEquals("Invalid RF2 content. Less than five tab separated columns found in first line of sct2_Concept_Snapshot_INT_20170131.txt.", e.getMessage());
 		}
 	}
 }

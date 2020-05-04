@@ -29,6 +29,8 @@ import java.util.stream.Collectors;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
+import static java.lang.String.format;
+
 public class ReleaseImporter {
 
 	public static final Charset UTF_8 = Charset.forName("UTF-8");
@@ -540,21 +542,22 @@ public class ReleaseImporter {
 					final String[] fieldNames = header.split("\\t");
 					final int columns = fieldNames.length;
 					if (columns < 5) {
-						throw new ReleaseImportException("Invalid RF2 content. Less than five tab separated columns found in first line of " + rf2FilePath.getFileName());
+						throw new ReleaseImportException(format("Invalid RF2 content. Less than five tab separated columns found in first line of %s.", rf2FilePath.getFileName()));
 					}
 					if (!fieldNames[0].equals("id")) {
-						throw new ReleaseImportException("Invalid RF2 content. 'id' not found as first value in tab separated first line of " + rf2FilePath.getFileName());
+						throw new ReleaseImportException(format("Invalid RF2 content. 'id' not found as first value in tab separated first line of %s.", rf2FilePath.getFileName()));
 					}
 					String[] values;
 					while ((line = reader.readLine()) != null) {
 						linesRead++;
 						if (line.isEmpty()) {
-							logger.info("Skipping empty line (" + (linesRead + 1) + ") in RF2 file " + rf2FilePath.getFileName());
+							logger.info("Skipping empty line {} in RF2 file {}.", linesRead + 1, rf2FilePath.getFileName());
 							continue;
 						}
 						values = line.split("\\t");
 						if (values.length != columns) {
-							throw new ReleaseImportException("Invalid RF2 content. Wrong number of columns in line " + (linesRead + 1) + " of file " + rf2FilePath.getFileName());
+							throw new ReleaseImportException(format("Invalid RF2 content. Wrong number of columns in line %s of file %s. Expected %s columns, found %s.",
+									linesRead + 1, rf2FilePath.getFileName(), columns, values.length));
 						}
 						if (releaseVersion == null || releaseVersion.equals(values[ComponentFieldIndexes.effectiveTime])) {
 							if (valuesHandler != null) {
