@@ -537,7 +537,8 @@ public class ReleaseImporter {
 					String line;
 					final String header = reader.readLine();
 					final String[] fieldNames = header.split("\\t");
-					if (fieldNames.length < 5) {
+					final int columns = fieldNames.length;
+					if (columns < 5) {
 						throw new ReleaseImportException("Invalid RF2 content. Less than five tab separated columns found in first line of " + rf2FilePath.getFileName());
 					}
 					if (!fieldNames[0].equals("id")) {
@@ -546,7 +547,14 @@ public class ReleaseImporter {
 					String[] values;
 					while ((line = reader.readLine()) != null) {
 						linesRead++;
+						if (line.isEmpty()) {
+							logger.info("Skipping empty line (" + (linesRead + 1) + ") in RF2 file " + rf2FilePath.getFileName());
+							continue;
+						}
 						values = line.split("\\t");
+						if (values.length != columns) {
+							throw new ReleaseImportException("Invalid RF2 content. Wrong number of columns in line " + (linesRead + 1) + " of file " + rf2FilePath.getFileName());
+						}
 						if (releaseVersion == null || releaseVersion.equals(values[ComponentFieldIndexes.effectiveTime])) {
 							if (valuesHandler != null) {
 								valuesHandler.handle(values);
