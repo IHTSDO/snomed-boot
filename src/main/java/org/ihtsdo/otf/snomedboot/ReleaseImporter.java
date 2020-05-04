@@ -165,7 +165,7 @@ public class ReleaseImporter {
 
 		private final ExecutorService executorService;
 
-		private static final Pattern DATE_EXTRACT_PATTERN = Pattern.compile("[^\\t]*\\t([^\\t]*)\t");
+		private static final Pattern DATE_EXTRACT_PATTERN = Pattern.compile("[^\\t]*\\t([^\\t]*)\t.*");
 
 		private ImportRun(ComponentFactory componentFactory) {
 			executorService = Executors.newCachedThreadPool();
@@ -514,8 +514,9 @@ public class ReleaseImporter {
 					Matcher matcher;
 					while ((line = reader.readLine()) != null) {
 						matcher = DATE_EXTRACT_PATTERN.matcher(line);
-						matcher.find();
-						versions.add(matcher.group(1));
+						if (matcher.matches()) {
+							versions.add(matcher.group(1));
+						}
 					}
 				}
 			}
