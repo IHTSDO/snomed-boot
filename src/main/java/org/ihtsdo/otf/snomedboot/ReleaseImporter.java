@@ -536,37 +536,41 @@ public class ReleaseImporter {
 
 			for (Path rf2FilePath : rf2FilePaths) {
 				long linesRead = 0L;
+				Path fileName = rf2FilePath.getFileName();
 				try (final BufferedReader reader = Files.newBufferedReader(rf2FilePath, UTF_8)) {
 					String line;
 					final String header = reader.readLine();
 					final String[] fieldNames = header.split("\\t");
 					final int columns = fieldNames.length;
 					// Allow refsets to have empty values in last columns. "line.split" does not return the empty values so we need a minColumns.
-					final Integer minColumns = componentType.contains("Refset_") ? 6 : null;
+					final Integer minColumns = fileName.toString().contains("Refset_") ? 6 : null;
 					if (columns < 5) {
-						throw new ReleaseImportException(format("Invalid RF2 content. Less than five tab separated columns found in first line of %s.", rf2FilePath.getFileName()));
+						throw new ReleaseImportException(format("Invalid RF2 content. Less than five tab separated columns found in first line of %s.", fileName));
 					}
 					if (!fieldNames[0].equals("id")) {
-						throw new ReleaseImportException(format("Invalid RF2 content. 'id' not found as first value in tab separated first line of %s.", rf2FilePath.getFileName()));
+						throw new ReleaseImportException(format("Invalid RF2 content. 'id' not found as first value in tab separated first line of %s.", fileName));
 					}
 					String[] values;
 					while ((line = reader.readLine()) != null) {
 						linesRead++;
 						if (line.isEmpty()) {
-							logger.info("Skipping empty line {} in RF2 file {}.", linesRead + 1, rf2FilePath.getFileName());
+							logger.info("Skipping empty line {} in RF2 file {}.", linesRead + 1, fileName);
 							continue;
 						}
 						values = line.split("\\t");
-						if (minColumns == null) {
-							if (values.length != columns) {
+						if (values.length != columns) {
+							if (minColumns == null) {
 								throw new ReleaseImportException(format("Invalid RF2 content. Wrong number of columns in line %s of file %s. Expected %s columns, found %s.",
-										linesRead + 1, rf2FilePath.getFileName(), columns, values.length));
+										linesRead + 1, fileName, columns, values.length));
+							} else if (values.length < minColumns) {
+								throw new ReleaseImportException(format("Invalid RF2 content. Less than minimum number of columns in line %s of file %s. Expected at least %s columns, found %s.",
+										linesRead + 1, fileName, minColumns, values.length));
+							} else {
+								logger.warn(format("Wrong number of columns in line %s of file %s. Expected exactly %s columns, found %s. " +
+												"This could be caused by empty values in last columns of the refset member, will attempt to load.",
+										linesRead + 1, fileName, columns, values.length));
 							}
-						} else if (values.length < minColumns) {
-							throw new ReleaseImportException(format("Invalid RF2 content. Wrong number of columns in line %s of file %s. Expected at least %s columns, found %s.",
-									linesRead + 1, rf2FilePath.getFileName(), columns, values.length));
 						}
-
 						if (releaseVersion == null || releaseVersion.equals(values[ComponentFieldIndexes.effectiveTime])) {
 							if (valuesHandler != null) {
 								valuesHandler.handle(values);
@@ -576,7 +580,7 @@ public class ReleaseImporter {
 						}
 					}
 				}
-				logger.info("{} {} read from {}", linesRead, componentType, rf2FilePath.getFileName().toString());
+				logger.info("{} {} read from {}", linesRead, componentType, fileName.toString());
 			}
 		}
 
