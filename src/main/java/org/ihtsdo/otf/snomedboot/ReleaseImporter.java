@@ -166,12 +166,14 @@ public class ReleaseImporter {
 		private ComponentFactory runComponentFactory;
 
 		private final ExecutorService executorService;
+		private final List<Exception> loadingExceptions;
 
 		private static final Pattern DATE_EXTRACT_PATTERN = Pattern.compile("[^\\t]*\\t([^\\t]*)\t.*");
 
 		private ImportRun(ComponentFactory componentFactory) {
 			executorService = Executors.newCachedThreadPool();
 			this.runComponentFactory = componentFactory;
+			loadingExceptions = new ArrayList<>();
 		}
 
 		private void doLoadReleaseFiles(String releaseDirPath, LoadingProfile loadingProfile, ImportType importType) throws ReleaseImportException {
@@ -216,6 +218,11 @@ public class ReleaseImporter {
 					}
 				} else {
 					loadAll(loadingProfile, releaseFiles, null, runComponentFactory, true);
+				}
+				if (!loadingExceptions.isEmpty()) {
+					Exception firstException = loadingExceptions.get(0);
+					throw new ReleaseImportException(String.format("Failed to load release files during release import process. " +
+							"%s exceptions caught in threads. First exception: %s", loadingExceptions.size(), firstException.getMessage()), firstException);
 				}
 
 				runComponentFactory.loadingComponentsCompleted();
@@ -519,8 +526,8 @@ public class ReleaseImporter {
 				try {
 					readLines(rf2FilePaths, contentHandler, componentType, releaseVersion);
 				} catch (Exception e) {
-					// TODO: Logging this is not enough. IOExceptions should be collected from task threads and rethrown once the executors are complete.
 					logger.error("Failed to read or process lines.", e);
+					loadingExceptions.add(e);
 				}
 				return null;
 			};

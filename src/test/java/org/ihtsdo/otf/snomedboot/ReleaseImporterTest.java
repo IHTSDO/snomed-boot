@@ -232,7 +232,7 @@ public class ReleaseImporterTest {
 	}
 
 	@Test
-	public void testLoadInvalidRF2() throws IOException {
+	public void testLoadInvalidConceptRF2() throws IOException {
 		File baseRF2SnapshotZip = ZipUtil.zipDirectoryRemovingCommentsAndBlankLines("src/test/resources/SnomedCT_MiniRF2_Base_invalid_rf2");
 		ReleaseImporter releaseImporter = new ReleaseImporter();
 
@@ -243,6 +243,22 @@ public class ReleaseImporterTest {
 			fail("Should throw exception because of bad file content.");
 		} catch (ReleaseImportException e) {
 			assertEquals("Invalid RF2 content. Less than five tab separated columns found in first line of sct2_Concept_Snapshot_INT_20170131.txt.", e.getMessage());
+		}
+	}
+
+	@Test
+	public void testLoadInvalidRF2LoadedInThreads() throws IOException {
+		File baseRF2SnapshotZip = ZipUtil.zipDirectoryRemovingCommentsAndBlankLines("src/test/resources/SnomedCT_MiniRF2_Base_invalid_description_rf2");
+		ReleaseImporter releaseImporter = new ReleaseImporter();
+
+		TestComponentFactory testComponentFactory = new TestComponentFactory();
+		LoadingProfile complete = LoadingProfile.complete;
+		try {
+			releaseImporter.loadSnapshotReleaseFiles(new FileInputStream(baseRF2SnapshotZip), complete, testComponentFactory);
+			fail("Should throw exception because of bad file content.");
+		} catch (ReleaseImportException e) {
+			assertEquals("Failed to load release files during release import process. 1 exceptions caught in threads. " +
+					"First exception: Invalid RF2 content. 'id' not found as first value in tab separated first line of sct2_Description_Snapshot-en_INT_20170131.txt.", e.getMessage());
 		}
 	}
 }
