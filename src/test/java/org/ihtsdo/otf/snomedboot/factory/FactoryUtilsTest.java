@@ -2,11 +2,12 @@ package org.ihtsdo.otf.snomedboot.factory;
 
 import org.junit.Test;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
 public class FactoryUtilsTest {
 	@Test
-	public void isConceptId() throws Exception {
+	public void isConceptId() {
 		assertTrue(FactoryUtils.isConceptId("138875005"));
 		assertTrue(FactoryUtils.isConceptId("900000000000441003"));
 		assertTrue(FactoryUtils.isConceptId("32570731000036101"));
@@ -15,7 +16,7 @@ public class FactoryUtilsTest {
 	}
 
 	@Test
-	public void isDescriptionId() throws Exception {
+	public void isDescriptionId() {
 		assertTrue(FactoryUtils.isDescriptionId("517382016"));
 		assertTrue(FactoryUtils.isDescriptionId("108645021000036118"));
 		assertFalse(FactoryUtils.isDescriptionId("138875005"));

@@ -1,6 +1,7 @@
 package org.ihtsdo.otf.snomedboot.factory.implementation.standard;
 
 import org.ihtsdo.otf.snomedboot.domain.Concept;
+import org.ihtsdo.otf.snomedboot.domain.ConcreteRelationship;
 import org.ihtsdo.otf.snomedboot.domain.Description;
 import org.ihtsdo.otf.snomedboot.domain.Relationship;
 
@@ -15,6 +16,7 @@ public class ConceptImpl implements Concept {
 	private String definitionStatusId;
 	private String fsn;
 	private final Map<String, Set<String>> inferredAttributes;
+	private final Map<String, Set<String>> inferredConcreteAttributes;
 	private final Map<String, Set<String>> statedAttributes;
 	private final Set<Concept> inferredParents;
 	private final Set<Concept> statedParents;
@@ -22,11 +24,13 @@ public class ConceptImpl implements Concept {
 	private final Set<Concept> statedChildren;
 	private final Set<Long> memberOfRefsetIds;
 	private final List<Relationship> relationships;
+	private final List<ConcreteRelationship> concreteRelationships;
 	private final List<Description> descriptions;
 
 	public ConceptImpl(String id) {
 		this.id = Long.parseLong(id);
 		inferredAttributes = new HashMap<>();
+		inferredConcreteAttributes = new HashMap<>();
 		statedAttributes = new HashMap<>();
 		inferredParents = new HashSet<>();
 		statedParents = new HashSet<>();
@@ -34,6 +38,7 @@ public class ConceptImpl implements Concept {
 		statedChildren = new HashSet<>();
 		memberOfRefsetIds = new HashSet<>();
 		relationships = new ArrayList<>();
+		concreteRelationships = new ArrayList<>();
 		descriptions = new ArrayList<>();
 	}
 
@@ -210,6 +215,15 @@ public class ConceptImpl implements Concept {
 	}
 
 	@Override
+	public Map<String, Set<String>> getInferredConcreteAttributes() {
+		return inferredConcreteAttributes;
+	}
+
+	public void addInferredConcreteAttribute(String type, String value) {
+		inferredConcreteAttributes.computeIfAbsent(type, t -> new HashSet<>()).add(value);
+	}
+
+	@Override
 	public Map<String, Set<String>> getStatedAttributes() {
 		return statedAttributes;
 	}
@@ -222,9 +236,17 @@ public class ConceptImpl implements Concept {
 		relationships.add(relationship);
 	}
 
+	public void addConcreteRelationship(ConcreteRelationship relationship) {
+		concreteRelationships.add(relationship);
+	}
+
 	@Override
 	public List<Relationship> getRelationships() {
 		return relationships;
+	}
+
+	public List<ConcreteRelationship> getConcreteRelationships() {
+		return concreteRelationships;
 	}
 
 	public void addDescription(Description description) {

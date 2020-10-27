@@ -8,6 +8,7 @@ public class TestComponentFactory extends ImpotentHistoryAwareComponentFactory {
 	private List<String> conceptLines = new ArrayList<>();
 	private List<String> descriptionLines = new ArrayList<>();
 	private List<String> relationshipLines = new ArrayList<>();
+	private List<String> concreteRelationshipLines = new ArrayList<>();
 	private List<String> refsetMemberLines = new ArrayList<>();
 	private List<String> versionsLoaded = new ArrayList<>();
 
@@ -24,6 +25,11 @@ public class TestComponentFactory extends ImpotentHistoryAwareComponentFactory {
 	@Override
 	public void newRelationshipState(String id, String effectiveTime, String active, String moduleId, String sourceId, String destinationId, String relationshipGroup, String typeId, String characteristicTypeId, String modifierId) {
 		relationshipLines.add(String.join("|", id, effectiveTime, active, moduleId));
+	}
+
+	@Override
+	public void newConcreteRelationshipState(String id, String effectiveTime, String active, String moduleId, String sourceId, String value, String relationshipGroup, String typeId, String characteristicTypeId, String modifierId) {
+		concreteRelationshipLines.add(String.join("|", id, effectiveTime, active, moduleId));
 	}
 
 	@Override
@@ -46,6 +52,10 @@ public class TestComponentFactory extends ImpotentHistoryAwareComponentFactory {
 
 	public List<String> getRelationshipLines() {
 		return relationshipLines;
+	}
+
+	public List<String> getConcreteRelationshipLines() {
+		return concreteRelationshipLines;
 	}
 
 	public List<String> getRefsetMemberLines() {

@@ -30,6 +30,14 @@ public class ComponentFactoryImpl extends ImpotentComponentFactory {
 	}
 
 	@Override
+	public void newConcreteRelationshipState(String id, String effectiveTime, String active, String moduleId, String sourceId, String value, String relationshipGroup,
+			String typeId, String characteristicTypeId, String modifierId) {
+
+		getConceptForReference(sourceId).addConcreteRelationship(new ConcreteRelationshipImpl(id, effectiveTime, active, moduleId, sourceId,
+				value, relationshipGroup, typeId, characteristicTypeId, modifierId));
+	}
+
+	@Override
 	public void addConceptFSN(String conceptId, String term) {
 		getConceptForReference(conceptId).setFsn(term);
 	}
@@ -77,6 +85,11 @@ public class ComponentFactoryImpl extends ImpotentComponentFactory {
 	@Override
 	public void addInferredConceptAttribute(String sourceId, String typeId, String valueId) {
 		getConceptForReference(sourceId).addInferredAttribute(typeId, valueId);
+	}
+
+	@Override
+	public void addInferredConceptConcreteAttribute(String sourceId, String typeId, String value) {
+		getConceptForReference(sourceId).addInferredConcreteAttribute(typeId, value);
 	}
 
 	@Override

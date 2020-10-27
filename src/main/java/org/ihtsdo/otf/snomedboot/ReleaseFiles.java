@@ -13,6 +13,7 @@ class ReleaseFiles {
 	private final List<Path> descriptionPaths = new ArrayList<>();
 	private final List<Path> textDefinitionPaths = new ArrayList<>();
 	private final List<Path> relationshipPaths = new ArrayList<>();
+	private final List<Path> concreteRelationshipPaths = new ArrayList<>();
 	private final List<Path> statedRelationshipPaths = new ArrayList<>();
 	private final List<Path> refsetPaths = new ArrayList<>();
 
@@ -30,6 +31,10 @@ class ReleaseFiles {
 
 	public void addRelationshipPath(Path file) {
 		relationshipPaths.add(file);
+	}
+
+	public void addConcreteRelationshipPath(Path file) {
+		concreteRelationshipPaths.add(file);
 	}
 
 	public void addStatedRelationshipPath(Path file) {
@@ -54,6 +59,10 @@ class ReleaseFiles {
 
 	public List<Path> getRelationshipPaths() {
 		return relationshipPaths;
+	}
+
+	public List<Path> getConcreteRelationshipPaths() {
+		return concreteRelationshipPaths;
 	}
 
 	public List<Path> getStatedRelationshipPaths() {
@@ -83,6 +92,7 @@ class ReleaseFiles {
 				", descriptionPaths=" + descriptionPaths +
 				", textDefinitionPaths=" + textDefinitionPaths +
 				", relationshipPaths=" + relationshipPaths +
+				", concreteRelationshipPaths=" + concreteRelationshipPaths +
 				", statedRelationshipPaths=" + statedRelationshipPaths +
 				", refsetPaths=" + refsetPaths +
 				'}';

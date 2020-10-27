@@ -50,6 +50,13 @@ public class LatestEffectiveDateFilter extends ImpotentComponentFactory {
 	}
 
 	@Override
+	public void newConcreteRelationshipState(String id, String effectiveTime, String active, String moduleId, String sourceId, String value, String relationshipGroup, String typeId, String characteristicTypeId, String modifierId) {
+		if (effectiveDateHolder.isCoreComponentVersionInEffect(id, effectiveTime)) {
+			delegateComponentFactory.newConcreteRelationshipState(id, effectiveTime, active, moduleId, sourceId, value, relationshipGroup, typeId, characteristicTypeId, modifierId);
+		}
+	}
+
+	@Override
 	public void newReferenceSetMemberState(String[] fieldNames, String id, String effectiveTime, String active, String moduleId, String refsetId, String referencedComponentId, String... otherValues) {
 		if (effectiveDateHolder.isReferenceSetMemberVersionInEffect(id, effectiveTime)) {
 			delegateComponentFactory.newReferenceSetMemberState(fieldNames, id, effectiveTime, active, moduleId, refsetId, referencedComponentId, otherValues);

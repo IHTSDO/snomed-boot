@@ -15,6 +15,9 @@ public interface ComponentFactory {
 	void newRelationshipState(String id, String effectiveTime, String active, String moduleId, String sourceId,
 							  String destinationId, String relationshipGroup, String typeId, String characteristicTypeId, String modifierId);
 
+	void newConcreteRelationshipState(String id, String effectiveTime, String active, String moduleId, String sourceId,
+							  String value, String relationshipGroup, String typeId, String characteristicTypeId, String modifierId);
+
 	void newReferenceSetMemberState(String[] fieldNames, String id, String effectiveTime, String active, String moduleId, String refsetId, String referencedComponentId, String... otherValues);
 
 	void addConceptFSN(String conceptId, String term);
@@ -28,6 +31,8 @@ public interface ComponentFactory {
 	void removeStatedConceptParent(String sourceId, String destinationId);
 
 	void addInferredConceptAttribute(String sourceId, String typeId, String valueId);
+
+	void addInferredConceptConcreteAttribute(String sourceId, String typeId, String value);
 
 	void addStatedConceptAttribute(String sourceId, String typeId, String valueId);
 

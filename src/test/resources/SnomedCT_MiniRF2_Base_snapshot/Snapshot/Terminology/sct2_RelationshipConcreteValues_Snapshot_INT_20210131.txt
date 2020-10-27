@@ -1,0 +1,7 @@
+#
+# Comments are removed by unit test
+#
+id	effectiveTime	active	moduleId	sourceId	value	relationshipGroup	typeId	characteristicTypeId	modifierId
+
+# Disorder of endocrine system - Finding site - 3 ... junk relationship for unit test
+222010001	20210131	1	900000000000207008	362969004	3	0	363698007	900000000000011006	900000000000451002

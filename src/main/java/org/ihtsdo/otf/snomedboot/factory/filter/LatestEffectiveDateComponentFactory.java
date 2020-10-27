@@ -30,6 +30,11 @@ public class LatestEffectiveDateComponentFactory extends ImpotentComponentFactor
 	}
 
 	@Override
+	public void newConcreteRelationshipState(String id, String effectiveTime, String active, String moduleId, String sourceId, String value, String relationshipGroup, String typeId, String characteristicTypeId, String modifierId) {
+		storeLatestDate(id, effectiveTime);
+	}
+
+	@Override
 	public void newReferenceSetMemberState(String[] fieldNames, String id, String effectiveTime, String active, String moduleId, String refsetId, String referencedComponentId, String... otherValues) {
 		storeLatestDateMember(id, effectiveTime);
 	}

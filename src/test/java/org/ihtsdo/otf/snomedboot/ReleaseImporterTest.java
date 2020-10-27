@@ -82,6 +82,7 @@ public class ReleaseImporterTest {
 		assertTrue("Description 2638112015 is inactive in the effective release", testComponentFactory.getDescriptionLines().contains("2638112015|20170231|0|100101001"));
 		assertTrue("Description 754737012 is inactive in the effective release", testComponentFactory.getDescriptionLines().contains("754737012|20170231|0|100101001"));
 		assertTrue("Relationship 200007001 is inactive in the effective release", testComponentFactory.getRelationshipLines().contains("200007001|20170231|0|100101001"));
+		assertTrue("Concrete Relationship 222010001 is active in the effective release", testComponentFactory.getConcreteRelationshipLines().contains("222010001|20210131|1|900000000000207008"));
 		assertTrue("Stated Relationship 100007001 is inactive in the effective release", testComponentFactory.getRelationshipLines().contains("100007001|20170231|0|100101001"));
 
 
@@ -161,6 +162,32 @@ public class ReleaseImporterTest {
 		releaseFiles = new ReleaseFiles();
 		ReleaseImporter.ImportRun.collectReleaseFile(new File("xsct2_Description_XExtensionSnapshot_INT_20180731.txt").toPath(), "Snapshot", releaseFiles);
 		assertEquals(1, releaseFiles.getDescriptionPaths().size());
+
+
+		releaseFiles = new ReleaseFiles();
+		ReleaseImporter.ImportRun.collectReleaseFile(new File("sct2_Relationship_Snapshot_INT_20180731.txt").toPath(), "Snapshot", releaseFiles);
+		assertEquals(1, releaseFiles.getRelationshipPaths().size());
+
+		releaseFiles = new ReleaseFiles();
+		ReleaseImporter.ImportRun.collectReleaseFile(new File("sct2_Relationship_XExtensionSnapshot_INT_20180731.txt").toPath(), "Snapshot", releaseFiles);
+		assertEquals(1, releaseFiles.getRelationshipPaths().size());
+
+		releaseFiles = new ReleaseFiles();
+		ReleaseImporter.ImportRun.collectReleaseFile(new File("xsct2_Relationship_XExtensionSnapshot_INT_20180731.txt").toPath(), "Snapshot", releaseFiles);
+		assertEquals(1, releaseFiles.getRelationshipPaths().size());
+
+
+		releaseFiles = new ReleaseFiles();
+		ReleaseImporter.ImportRun.collectReleaseFile(new File("sct2_RelationshipConcreteValues_Snapshot_INT_20180731.txt").toPath(), "Snapshot", releaseFiles);
+		assertEquals(1, releaseFiles.getConcreteRelationshipPaths().size());
+
+		releaseFiles = new ReleaseFiles();
+		ReleaseImporter.ImportRun.collectReleaseFile(new File("sct2_RelationshipConcreteValues_XExtensionSnapshot_INT_20180731.txt").toPath(), "Snapshot", releaseFiles);
+		assertEquals(1, releaseFiles.getConcreteRelationshipPaths().size());
+
+		releaseFiles = new ReleaseFiles();
+		ReleaseImporter.ImportRun.collectReleaseFile(new File("xsct2_RelationshipConcreteValues_XExtensionSnapshot_INT_20180731.txt").toPath(), "Snapshot", releaseFiles);
+		assertEquals(1, releaseFiles.getConcreteRelationshipPaths().size());
 
 
 		releaseFiles = new ReleaseFiles();

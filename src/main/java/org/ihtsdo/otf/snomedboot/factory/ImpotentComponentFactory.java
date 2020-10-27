@@ -33,6 +33,11 @@ public class ImpotentComponentFactory implements ComponentFactory {
 	}
 
 	@Override
+	public void newConcreteRelationshipState(String id, String effectiveTime, String active, String moduleId, String sourceId, String value, String relationshipGroup, String typeId, String characteristicTypeId, String modifierId) {
+
+	}
+
+	@Override
 	public void newReferenceSetMemberState(String[] fieldNames, String id, String effectiveTime, String active, String moduleId, String refsetId, String referencedComponentId, String... otherValues) {
 
 	}
@@ -44,6 +49,11 @@ public class ImpotentComponentFactory implements ComponentFactory {
 
 	@Override
 	public void addInferredConceptParent(String sourceId, String parentId) {
+
+	}
+
+	@Override
+	public void addInferredConceptConcreteAttribute(String sourceId, String typeId, String value) {
 
 	}
 

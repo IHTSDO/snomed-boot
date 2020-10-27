@@ -23,6 +23,7 @@ public class LoadingProfile implements Cloneable {
 		complete.statedRelationships = true;
 		complete.fullDescriptionObjects = true;
 		complete.fullRelationshipObjects = true;
+		complete.fullConcreteRelationshipObjects = true;
 		complete.inactiveConcepts = true;
 		complete.inactiveDescriptions = true;
 		complete.inactiveRelationships = true;
@@ -38,6 +39,7 @@ public class LoadingProfile implements Cloneable {
 	private boolean descriptions;
 	private boolean fullDescriptionObjects;
 	private boolean fullRelationshipObjects;
+	private boolean fullConcreteRelationshipObjects;
 	private boolean inactiveConcepts;
 	private boolean inactiveDescriptions;
 	private boolean inactiveRelationships;
@@ -99,6 +101,14 @@ public class LoadingProfile implements Cloneable {
 
 	public LoadingProfile withoutFullRelationshipObjects() {
 		return this.cloneObject().setFullRelationshipObjects(false);
+	}
+
+	public LoadingProfile withFullConcreteRelationshipObjects() {
+		return this.cloneObject().setFullConcreteRelationshipObjects(true);
+	}
+
+	public LoadingProfile withoutFullConcreteRelationshipObjects() {
+		return this.cloneObject().setFullConcreteRelationshipObjects(false);
 	}
 
 	public LoadingProfile withInactiveComponents() {
@@ -236,6 +246,10 @@ public class LoadingProfile implements Cloneable {
 		return fullRelationshipObjects;
 	}
 
+	public boolean isFullConcreteRelationshipObjects() {
+		return fullConcreteRelationshipObjects;
+	}
+
 	public boolean isInactiveConcepts() {
 		return inactiveConcepts;
 	}
@@ -308,6 +322,11 @@ public class LoadingProfile implements Cloneable {
 
 	private LoadingProfile setFullRelationshipObjects(boolean fullRelationshipObjects) {
 		this.fullRelationshipObjects = fullRelationshipObjects;
+		return this;
+	}
+
+	public LoadingProfile setFullConcreteRelationshipObjects(boolean fullConcreteRelationshipObjects) {
+		this.fullConcreteRelationshipObjects = fullConcreteRelationshipObjects;
 		return this;
 	}
 
@@ -387,6 +406,7 @@ public class LoadingProfile implements Cloneable {
 				.setDescriptions(this.descriptions)
 				.setFullDescriptionObjects(this.fullDescriptionObjects)
 				.setFullRelationshipObjects(this.fullRelationshipObjects)
+				.setFullConcreteRelationshipObjects(this.fullConcreteRelationshipObjects)
 				.setInactiveConcepts(this.inactiveConcepts)
 				.setInactiveDescriptions(this.inactiveDescriptions)
 				.setInactiveRelationships(this.inactiveRelationships)

@@ -11,7 +11,7 @@ public class FactoryUtils {
 	public static boolean isConceptId(String componentId) {
 		if (componentId != null) {
 			final int length = componentId.length();
-			return length > 3 && componentId.substring(length - 2, length - 1).equals("0");
+			return length > 3 && componentId.charAt(length - 2) == '0';
 		}
 		return false;
 	}
@@ -19,7 +19,7 @@ public class FactoryUtils {
 	public static boolean isDescriptionId(String componentId) {
 		if (componentId != null) {
 			final int length = componentId.length();
-			return length > 3 && componentId.substring(length - 2, length - 1).equals("1");
+			return length > 3 && componentId.charAt(length - 2) == '1';
 		}
 		return false;
 	}

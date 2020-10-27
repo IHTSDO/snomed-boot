@@ -25,9 +25,13 @@ public interface Concept {
 
 	Map<String, Set<String>> getInferredAttributes();
 
+	Map<String, Set<String>> getInferredConcreteAttributes();
+
 	Map<String, Set<String>> getStatedAttributes();
 
 	List<Relationship> getRelationships();
+
+	List<ConcreteRelationship> getConcreteRelationships();
 
 	List<Description> getDescriptions();
 

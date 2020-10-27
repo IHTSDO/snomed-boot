@@ -16,6 +16,7 @@ import org.slf4j.LoggerFactory;
 
 import java.io.*;
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.*;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.text.NumberFormat;
@@ -25,7 +26,6 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import java.util.stream.Collectors;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
@@ -33,7 +33,7 @@ import static java.lang.String.format;
 
 public class ReleaseImporter {
 
-	public static final Charset UTF_8 = Charset.forName("UTF-8");
+	public static final Charset UTF_8 = StandardCharsets.UTF_8;
 	private static final Logger logger = LoggerFactory.getLogger(ReleaseImporter.class);
 
 	public void loadFullReleaseFiles(String releaseDirPath, LoadingProfile loadingProfile, HistoryAwareComponentFactory componentFactory) throws ReleaseImportException {
@@ -256,6 +256,7 @@ public class ReleaseImporter {
 				loadConcepts(releaseFiles.getConceptPaths(), loadingProfile, releaseVersion, componentFactory);
 
 				coreComponentTasks.add(loadRelationships(releaseFiles.getRelationshipPaths(), loadingProfile, releaseVersion, componentFactory));
+				coreComponentTasks.add(loadConcreteRelationships(releaseFiles.getConcreteRelationshipPaths(), loadingProfile, releaseVersion, componentFactory));
 				if (loadingProfile.isStatedRelationships()) {
 					if (!releaseFiles.getStatedRelationshipPaths().isEmpty()) {
 						coreComponentTasks.add(loadRelationships(releaseFiles.getStatedRelationshipPaths(), loadingProfile, releaseVersion, componentFactory));
@@ -337,9 +338,8 @@ public class ReleaseImporter {
 					}
 				});
 			}
-			
-			String debugInfo = "looking recursively in: " + releaseDirPaths.stream().collect(Collectors.joining(", "));
-			releaseFiles.assertFullSet(loadingProfile, debugInfo);
+
+			releaseFiles.assertFullSet(loadingProfile, "looking recursively in: " + String.join(", ", releaseDirPaths));
 
 			return releaseFiles;
 		}
@@ -355,6 +355,8 @@ public class ReleaseImporter {
 					releaseFiles.addTextDefinitionPath(file);
 				} else if (fileName.matches("x?(sct|rel)2_Relationship_[^_]*" + fileType + "_.*")) {
 					releaseFiles.addRelationshipPath(file);
+				} else if (fileName.matches("x?(sct|rel)2_RelationshipConcreteValues_[^_]*" + fileType + "_.*")) {
+					releaseFiles.addConcreteRelationshipPath(file);
 				} else if (fileName.matches("x?(sct|rel)2_StatedRelationship_[^_]*" + fileType + "_.*")) {
 					releaseFiles.addStatedRelationshipPath(file);
 				} else if (fileName.matches("x?(sct|rel)2_sRefset_OWL.*[^_]*" + fileType + "_.*")) {
@@ -429,6 +431,34 @@ public class ReleaseImporter {
 					}
 				}
 			}, "relationships", releaseVersion);
+		}
+
+		private Callable<String> loadConcreteRelationships(List<Path> rf2Files, final LoadingProfile loadingProfile, String releaseVersion, ComponentFactory componentFactory) {
+			return readLinesCallable(rf2Files, (ValuesHandler) values -> {
+				final boolean active = "1".equals(values[ConcreteRelationshipFieldIndexes.active]);
+				if (loadingProfile.isInactiveRelationships() || active) {
+					if (loadingProfile.isInferredAttributeMapOnConcept()) {
+						final String sourceId = values[ConcreteRelationshipFieldIndexes.sourceId];
+						final String type = values[ConcreteRelationshipFieldIndexes.typeId];
+						final String value = values[ConcreteRelationshipFieldIndexes.value];
+						componentFactory.addInferredConceptConcreteAttribute(sourceId, type, value);
+					}
+					if (loadingProfile.isFullConcreteRelationshipObjects()) {
+						componentFactory.newConcreteRelationshipState(
+								values[ConcreteRelationshipFieldIndexes.id],
+								values[ConcreteRelationshipFieldIndexes.effectiveTime],
+								values[ConcreteRelationshipFieldIndexes.active],
+								values[ConcreteRelationshipFieldIndexes.moduleId],
+								values[ConcreteRelationshipFieldIndexes.sourceId],
+								values[ConcreteRelationshipFieldIndexes.value],
+								values[ConcreteRelationshipFieldIndexes.relationshipGroup],
+								values[ConcreteRelationshipFieldIndexes.typeId],
+								values[ConcreteRelationshipFieldIndexes.characteristicTypeId],
+								values[ConcreteRelationshipFieldIndexes.modifierId]
+						);
+					}
+				}
+			}, "concrete relationships", releaseVersion);
 		}
 
 		private Callable<String> loadDescriptions(List<Path> rf2File, final LoadingProfile loadingProfile, String releaseVersion, ComponentFactory componentFactory) {
