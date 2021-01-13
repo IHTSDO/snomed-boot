@@ -617,7 +617,7 @@ public class ReleaseImporter {
 						}
 					}
 				}
-				logger.info("{} {} read from {}", linesRead, componentType, fileName.toString());
+				logger.info("{} {} read from {}", linesRead - 1, componentType, fileName.toString());
 			}
 		}
 
