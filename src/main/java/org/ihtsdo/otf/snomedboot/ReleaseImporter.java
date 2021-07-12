@@ -38,12 +38,12 @@ public class ReleaseImporter {
 	public static final Charset UTF_8 = StandardCharsets.UTF_8;
 	private static final Logger logger = LoggerFactory.getLogger(ReleaseImporter.class);
 
-	public void loadFullReleaseFiles(String releaseDirPath, LoadingProfile loadingProfile, HistoryAwareComponentFactory componentFactory) throws ReleaseImportException {
-		new ImportRun(componentFactory).doLoadReleaseFiles(releaseDirPath, loadingProfile, ImportType.FULL);
+	public void loadFullReleaseFiles(String releaseDirPath, LoadingProfile loadingProfile, HistoryAwareComponentFactory componentFactory, boolean multiThreaded) throws ReleaseImportException {
+		new ImportRun(componentFactory).doLoadReleaseFiles(releaseDirPath, loadingProfile, ImportType.FULL, multiThreaded);
 	}
 
-	public void loadSnapshotReleaseFiles(String releaseDirPath, LoadingProfile loadingProfile, ComponentFactory componentFactory) throws ReleaseImportException {
-		new ImportRun(componentFactory).doLoadReleaseFiles(releaseDirPath, loadingProfile, ImportType.SNAPSHOT);
+	public void loadSnapshotReleaseFiles(String releaseDirPath, LoadingProfile loadingProfile, ComponentFactory componentFactory, boolean multiThreaded) throws ReleaseImportException {
+		new ImportRun(componentFactory).doLoadReleaseFiles(releaseDirPath, loadingProfile, ImportType.SNAPSHOT, multiThreaded);
 	}
 
 	/**
@@ -51,12 +51,12 @@ public class ReleaseImporter {
 	 * This is achieved by gathering the latest effectiveTime for each component and using this information within a content filter.
 	 * This is useful when loading Extension archives in combination with the International Edition.
 	 */
-	public void loadEffectiveSnapshotReleaseFiles(Set<String> releaseDirPaths, LoadingProfile loadingProfile, ComponentFactory componentFactory) throws ReleaseImportException {
-		new ImportRun(componentFactory).doLoadReleaseFiles(new ArrayList<>(releaseDirPaths), loadingProfile.withEffectiveComponentFilter(), ImportType.SNAPSHOT);
+	public void loadEffectiveSnapshotReleaseFiles(Set<String> releaseDirPaths, LoadingProfile loadingProfile, ComponentFactory componentFactory, boolean multiThreaded) throws ReleaseImportException {
+		new ImportRun(componentFactory).doLoadReleaseFiles(new ArrayList<>(releaseDirPaths), loadingProfile.withEffectiveComponentFilter(), ImportType.SNAPSHOT, multiThreaded);
 	}
 
 	public void loadDeltaReleaseFiles(String releaseDirPath, LoadingProfile loadingProfile, ComponentFactory componentFactory) throws ReleaseImportException {
-		new ImportRun(componentFactory).doLoadReleaseFiles(releaseDirPath, loadingProfile, ImportType.DELTA);
+		new ImportRun(componentFactory).doLoadReleaseFiles(releaseDirPath, loadingProfile, ImportType.DELTA, true);
 	}
 
 	/**
@@ -65,19 +65,19 @@ public class ReleaseImporter {
 	 * Any blank effectiveTimes will be considered the latest. These are often used in unpublished deltas.
 	 * This is useful when loading Extension archives in combination with the International Edition.
 	 */
-	public void loadEffectiveSnapshotAndDeltaReleaseFiles(Set<String> releaseDirPaths, LoadingProfile loadingProfile, ComponentFactory componentFactory) throws ReleaseImportException {
-		new ImportRun(componentFactory).doLoadReleaseFiles(new ArrayList<>(releaseDirPaths), loadingProfile.withEffectiveComponentFilter(), ImportType.SNAPSHOT_AND_DELTA);
+	public void loadEffectiveSnapshotAndDeltaReleaseFiles(Set<String> releaseDirPaths, LoadingProfile loadingProfile, ComponentFactory componentFactory, boolean multiThreaded) throws ReleaseImportException {
+		new ImportRun(componentFactory).doLoadReleaseFiles(new ArrayList<>(releaseDirPaths), loadingProfile.withEffectiveComponentFilter(), ImportType.SNAPSHOT_AND_DELTA, multiThreaded);
 	}
 
 	public void loadFullReleaseFiles(InputStream releaseZip, LoadingProfile loadingProfile, HistoryAwareComponentFactory componentFactory) throws ReleaseImportException {
 		File releaseDir = unzipRelease(releaseZip, ImportType.FULL);
-		loadFullReleaseFiles(releaseDir.getAbsolutePath(), loadingProfile, componentFactory);
+		loadFullReleaseFiles(releaseDir.getAbsolutePath(), loadingProfile, componentFactory, true);
 		deleteDirectory(releaseDir);
 	}
 
 	public void loadSnapshotReleaseFiles(InputStream releaseZip, LoadingProfile loadingProfile, ComponentFactory componentFactory) throws ReleaseImportException {
 		File releaseDir = unzipRelease(releaseZip, ImportType.SNAPSHOT);
-		loadSnapshotReleaseFiles(releaseDir.getAbsolutePath(), loadingProfile, componentFactory);
+		loadSnapshotReleaseFiles(releaseDir.getAbsolutePath(), loadingProfile, componentFactory, true);
 		deleteDirectory(releaseDir);
 	}
 
@@ -94,7 +94,7 @@ public class ReleaseImporter {
 			releaseTempDir.mkdirs();
 			unzipRelease(releaseZip, ImportType.SNAPSHOT, releaseTempDir);
 		}
-		loadEffectiveSnapshotReleaseFiles(Collections.singleton(tempDir.getAbsolutePath()), loadingProfile, componentFactory);
+		loadEffectiveSnapshotReleaseFiles(Collections.singleton(tempDir.getAbsolutePath()), loadingProfile, componentFactory, true);
 		deleteDirectory(tempDir);
 	}
 
@@ -198,11 +198,11 @@ public class ReleaseImporter {
 			loadingExceptions = new ArrayList<>();
 		}
 
-		private void doLoadReleaseFiles(String releaseDirPath, LoadingProfile loadingProfile, ImportType importType) throws ReleaseImportException {
-			doLoadReleaseFiles(Collections.singletonList(releaseDirPath), loadingProfile, importType);
+		private void doLoadReleaseFiles(String releaseDirPath, LoadingProfile loadingProfile, ImportType importType, boolean multiThreaded) throws ReleaseImportException {
+			doLoadReleaseFiles(Collections.singletonList(releaseDirPath), loadingProfile, importType, multiThreaded);
 		}
 
-		private void doLoadReleaseFiles(List<String> releaseDirPaths, LoadingProfile loadingProfile, ImportType importType) throws ReleaseImportException {
+		private void doLoadReleaseFiles(List<String> releaseDirPaths, LoadingProfile loadingProfile, ImportType importType, boolean multiThreaded) throws ReleaseImportException {
 			// Configuration Validation
 			if (loadingProfile.isEffectiveComponentFilter() && (importType == ImportType.DELTA || importType == ImportType.FULL)) {
 				throw new ReleaseImportException("Configuration error. EffectiveComponentFilter can only be used when loading Snapshots, or Snapshots and Delta.");
@@ -235,11 +235,11 @@ public class ReleaseImporter {
 					for (String releaseVersion : releaseVersions) {
 						((HistoryAwareComponentFactory) runComponentFactory).loadingReleaseDeltaStarting(releaseVersion);
 						logger.info("Loading release delta {}", releaseVersion);
-						loadAll(loadingProfile, combinedReleaseFiles, releaseVersion, runComponentFactory, true);
+						loadAll(loadingProfile, combinedReleaseFiles, releaseVersion, runComponentFactory, multiThreaded);
 						((HistoryAwareComponentFactory) runComponentFactory).loadingReleaseDeltaFinished(releaseVersion);
 					}
 				} else {
-					loadAll(loadingProfile, combinedReleaseFiles, null, runComponentFactory, true);
+					loadAll(loadingProfile, combinedReleaseFiles, null, runComponentFactory, multiThreaded);
 				}
 				if (!loadingExceptions.isEmpty()) {
 					Exception firstException = loadingExceptions.get(0);
