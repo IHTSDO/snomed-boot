@@ -1,18 +1,19 @@
 package org.ihtsdo.otf.snomedboot.factory.filter;
 
+import com.google.common.base.Strings;
 import it.unimi.dsi.fastutil.longs.Long2IntOpenHashMap;
 import org.ihtsdo.otf.snomedboot.factory.ImpotentComponentFactory;
 
 import java.util.HashMap;
 import java.util.Map;
 
-import static java.lang.Integer.parseInt;
 import static java.lang.Long.parseLong;
 
 public class LatestEffectiveDateComponentFactory extends ImpotentComponentFactory {
 
-	private Map<Long, Integer> latestCoreComponentEffectiveDates = new Long2IntOpenHashMap();
-	private Map<String, Integer> latestRefsetMemberEffectiveDates = new HashMap<>();
+	public static final int FAR_FUTURE = 30000101;
+	private final Map<Long, Integer> latestCoreComponentEffectiveDates = new Long2IntOpenHashMap();
+	private final Map<String, Integer> latestRefsetMemberEffectiveDates = new HashMap<>();
 
 	@Override
 	public void newConceptState(String conceptId, String effectiveTime, String active, String moduleId, String definitionStatusId) {
@@ -39,7 +40,7 @@ public class LatestEffectiveDateComponentFactory extends ImpotentComponentFactor
 		storeLatestDateMember(id, effectiveTime);
 	}
 
-	private void storeLatestDate(String componentId, String effectiveTime) {
+	private synchronized void storeLatestDate(String componentId, String effectiveTime) {
 		long id = parseLong(componentId);
 		int newDate = parseInt(effectiveTime);
 		if (newDateGreater(newDate, latestCoreComponentEffectiveDates.get(id))) {
@@ -47,22 +48,26 @@ public class LatestEffectiveDateComponentFactory extends ImpotentComponentFactor
 		}
 	}
 
-	private void storeLatestDateMember(String id, String effectiveTime) {
+	private synchronized void storeLatestDateMember(String id, String effectiveTime) {
 		int newDate = parseInt(effectiveTime);
 		if (newDateGreater(newDate, latestRefsetMemberEffectiveDates.get(id))) {
 			latestRefsetMemberEffectiveDates.put(id, newDate);
 		}
 	}
 
+	private int parseInt(String effectiveTime) {
+		return Strings.isNullOrEmpty(effectiveTime) ? FAR_FUTURE : Integer.parseInt(effectiveTime);
+	}
+
 	private boolean newDateGreater(int newDate, Integer existingDate) {
 		return existingDate == null || newDate > existingDate;
 	}
 
-	public boolean isCoreComponentVersionInEffect(String componentId, String effectiveTime) {
+	public synchronized boolean isCoreComponentVersionInEffect(String componentId, String effectiveTime) {
 		return latestCoreComponentEffectiveDates.getOrDefault(parseLong(componentId), Integer.MIN_VALUE).equals(parseInt(effectiveTime));
 	}
 
-	public boolean isReferenceSetMemberVersionInEffect(String memberId, String effectiveTime) {
+	public synchronized boolean isReferenceSetMemberVersionInEffect(String memberId, String effectiveTime) {
 		return latestRefsetMemberEffectiveDates.getOrDefault(memberId, Integer.MIN_VALUE).equals(parseInt(effectiveTime));
 	}
 }

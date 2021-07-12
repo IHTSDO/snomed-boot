@@ -17,6 +17,16 @@ class ReleaseFiles {
 	private final List<Path> statedRelationshipPaths = new ArrayList<>();
 	private final List<Path> refsetPaths = new ArrayList<>();
 
+	public void addAll(ReleaseFiles releaseFiles) {
+		conceptPaths.addAll(releaseFiles.getConceptPaths());
+		descriptionPaths.addAll(releaseFiles.getDescriptionPaths());
+		textDefinitionPaths.addAll(releaseFiles.getTextDefinitionPaths());
+		relationshipPaths.addAll(releaseFiles.getRelationshipPaths());
+		concreteRelationshipPaths.addAll(releaseFiles.getConcreteRelationshipPaths());
+		statedRelationshipPaths.addAll(releaseFiles.getStatedRelationshipPaths());
+		refsetPaths.addAll(releaseFiles.getRefsetPaths());
+	}
+
 	public void addConceptPath(Path file) {
 		conceptPaths.add(file);
 	}

@@ -32,7 +32,7 @@ public class LoadingProfile implements Cloneable {
 		complete.fullRefsetMemberObjects = true;
 	}
 
-	private boolean snapshotEffectiveComponentFilter;
+	private boolean effectiveComponentFilter;
 	private boolean inferredAttributeMapOnConcept;
 	private boolean statedAttributeMapOnConcept;
 	private boolean statedRelationships;
@@ -51,12 +51,12 @@ public class LoadingProfile implements Cloneable {
 	private Set<String> includedReferenceSetFilenamePatterns = new HashSet<>();
 	private Set<String> moduleIds = new HashSet<>();
 
-	public LoadingProfile withSnapshotEffectiveComponentFilter() {
-		return this.cloneObject().setSnapshotEffectiveComponentFilter(true);
+	public LoadingProfile withEffectiveComponentFilter() {
+		return this.cloneObject().setEffectiveComponentFilter(true);
 	}
 
-	public LoadingProfile withoutSnapshotEffectiveComponentFilter() {
-		return this.cloneObject().setSnapshotEffectiveComponentFilter(false);
+	public LoadingProfile withoutEffectiveComponentFilter() {
+		return this.cloneObject().setEffectiveComponentFilter(false);
 	}
 
 	public LoadingProfile withInferredAttributeMapOnConcept() {
@@ -218,8 +218,8 @@ public class LoadingProfile implements Cloneable {
 		return clone;
 	}
 
-	public boolean isSnapshotEffectiveComponentFilter() {
-		return snapshotEffectiveComponentFilter;
+	public boolean isEffectiveComponentFilter() {
+		return effectiveComponentFilter;
 	}
 
 	public boolean isInferredAttributeMapOnConcept() {
@@ -290,8 +290,8 @@ public class LoadingProfile implements Cloneable {
 		return ImmutableSet.copyOf(moduleIds);
 	}
 
-	private LoadingProfile setSnapshotEffectiveComponentFilter(boolean snapshotEffectiveComponentFilter) {
-		this.snapshotEffectiveComponentFilter = snapshotEffectiveComponentFilter;
+	public LoadingProfile setEffectiveComponentFilter(boolean effectiveComponentFilter) {
+		this.effectiveComponentFilter = effectiveComponentFilter;
 		return this;
 	}
 
@@ -399,7 +399,7 @@ public class LoadingProfile implements Cloneable {
 
 	private LoadingProfile cloneObject() {
 		return new LoadingProfile()
-				.setSnapshotEffectiveComponentFilter(this.snapshotEffectiveComponentFilter)
+				.setEffectiveComponentFilter(this.effectiveComponentFilter)
 				.setInferredAttributeMapOnConcept(this.inferredAttributeMapOnConcept)
 				.setStatedAttributeMapOnConcept(this.statedAttributeMapOnConcept)
 				.setStatedRelationships(this.statedRelationships)

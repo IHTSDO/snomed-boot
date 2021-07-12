@@ -1,5 +1,6 @@
 package org.ihtsdo.otf.snomedboot;
 
+import com.google.common.collect.Lists;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.ihtsdo.otf.snomedboot.domain.ConceptConstants;
@@ -24,6 +25,7 @@ import java.util.*;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.zip.ZipEntry;
@@ -50,11 +52,21 @@ public class ReleaseImporter {
 	 * This is useful when loading Extension archives in combination with the International Edition.
 	 */
 	public void loadEffectiveSnapshotReleaseFiles(Set<String> releaseDirPaths, LoadingProfile loadingProfile, ComponentFactory componentFactory) throws ReleaseImportException {
-		new ImportRun(componentFactory).doLoadReleaseFiles(new ArrayList<>(releaseDirPaths), loadingProfile.withSnapshotEffectiveComponentFilter(), ImportType.SNAPSHOT);
+		new ImportRun(componentFactory).doLoadReleaseFiles(new ArrayList<>(releaseDirPaths), loadingProfile.withEffectiveComponentFilter(), ImportType.SNAPSHOT);
 	}
 
 	public void loadDeltaReleaseFiles(String releaseDirPath, LoadingProfile loadingProfile, ComponentFactory componentFactory) throws ReleaseImportException {
 		new ImportRun(componentFactory).doLoadReleaseFiles(releaseDirPath, loadingProfile, ImportType.DELTA);
+	}
+
+	/**
+	 * Load only the effective components from multiple snapshots and a set of delta archives.
+	 * This is achieved by gathering the latest effectiveTime for each component and using this information within a content filter.
+	 * Any blank effectiveTimes will be considered the latest. These are often used in unpublished deltas.
+	 * This is useful when loading Extension archives in combination with the International Edition.
+	 */
+	public void loadEffectiveSnapshotAndDeltaReleaseFiles(Set<String> releaseDirPaths, LoadingProfile loadingProfile, ComponentFactory componentFactory) throws ReleaseImportException {
+		new ImportRun(componentFactory).doLoadReleaseFiles(new ArrayList<>(releaseDirPaths), loadingProfile.withEffectiveComponentFilter(), ImportType.SNAPSHOT_AND_DELTA);
 	}
 
 	public void loadFullReleaseFiles(InputStream releaseZip, LoadingProfile loadingProfile, HistoryAwareComponentFactory componentFactory) throws ReleaseImportException {
@@ -120,24 +132,27 @@ public class ReleaseImporter {
 					IOUtils.copy(snomedReleaseZipStream, out);
 				}
 
-				ZipInputStream zipInputStream = new ZipInputStream(new FileInputStream(zipFile));
-				ZipEntry zipEntry;
-				int filesUnzipped = 0;
-				while ((zipEntry = zipInputStream.getNextEntry()) != null) {
-					String zipEntryName = zipEntry.getName();
-					if (zipEntryName.contains(filenameFilter.getFilenamePart()) && !zipEntry.isDirectory()) {
-						// Create file without directory nesting
-						File file = new File(tempDir, new File(zipEntryName).getName());
-						logger.info("Unzipping file to {}", file.getAbsolutePath());
-						file.createNewFile();
-						try (FileOutputStream entryOutputStream = new FileOutputStream(file)) {
-							IOUtils.copy(zipInputStream, entryOutputStream);
-							filesUnzipped++;
+				try (ZipInputStream zipInputStream = new ZipInputStream(new FileInputStream(zipFile))) {
+					ZipEntry zipEntry;
+					int filesUnzipped = 0;
+					while ((zipEntry = zipInputStream.getNextEntry()) != null) {
+						String zipEntryName = zipEntry.getName();
+						if (zipEntryName.contains(filenameFilter.getFilenamePart()) && !zipEntry.isDirectory()) {
+							// Create file without directory nesting
+							File file = new File(tempDir, new File(zipEntryName).getName());
+							logger.info("Unzipping file to {}", file.getAbsolutePath());
+							if (!file.createNewFile()) {
+								logger.error("Failed to create file {}", file.getAbsolutePath());
+							}
+							try (FileOutputStream entryOutputStream = new FileOutputStream(file)) {
+								IOUtils.copy(zipInputStream, entryOutputStream);
+								filesUnzipped++;
+							}
 						}
 					}
-				}
-				if (filesUnzipped == 0) {
-					throw new IllegalStateException("No " + filenameFilter.getFilenamePart() + " files found in archive: " + zipFile.getAbsolutePath());
+					if (filesUnzipped == 0) {
+						throw new IllegalStateException("No " + filenameFilter.getFilenamePart() + " files found in archive: " + zipFile.getAbsolutePath());
+					}
 				}
 			}
 			return tempDir;
@@ -148,7 +163,7 @@ public class ReleaseImporter {
 
 	public enum ImportType {
 
-		DELTA("Delta"), SNAPSHOT("Snapshot"), FULL("Full");
+		DELTA("Delta"), SNAPSHOT("Snapshot"), FULL("Full"), SNAPSHOT_AND_DELTA(null);
 
 		private String filenamePart;
 
@@ -158,6 +173,13 @@ public class ReleaseImporter {
 
 		public String getFilenamePart() {
 			return filenamePart;
+		}
+
+		public List<String> getFilenameParts() {
+			if (this == SNAPSHOT_AND_DELTA) {
+				return Lists.newArrayList(SNAPSHOT.getFilenamePart(), DELTA.getFilenamePart());
+			}
+			return Collections.singletonList(this.getFilenamePart());
 		}
 	}
 
@@ -182,19 +204,19 @@ public class ReleaseImporter {
 
 		private void doLoadReleaseFiles(List<String> releaseDirPaths, LoadingProfile loadingProfile, ImportType importType) throws ReleaseImportException {
 			// Configuration Validation
-			if (loadingProfile.isSnapshotEffectiveComponentFilter() && importType != ImportType.SNAPSHOT) {
-				throw new ReleaseImportException("Configuration error. SnapshotEffectiveComponentFilter can only be used when loading a Snapshot.");
+			if (loadingProfile.isEffectiveComponentFilter() && (importType == ImportType.DELTA || importType == ImportType.FULL)) {
+				throw new ReleaseImportException("Configuration error. EffectiveComponentFilter can only be used when loading Snapshots, or Snapshots and Delta.");
 			}
 
 			// Input Validation
-			ReleaseFiles releaseFiles;
+			ReleaseFiles combinedReleaseFiles;
 			try {
-				releaseFiles = findFiles(releaseDirPaths, importType.getFilenamePart(), loadingProfile);
+				combinedReleaseFiles = findFiles(releaseDirPaths, importType, loadingProfile);
 			} catch (IOException e) {
 				throw new ReleaseImportException("Failed to find release files during release import process.", e);
 			}
 
-			logger.info("Loading {} release files {}", importType, releaseFiles);
+			logger.info("Loading {} release files {}", importType, combinedReleaseFiles);
 
 			try {
 
@@ -202,22 +224,22 @@ public class ReleaseImporter {
 				if (!loadingProfile.getModuleIds().isEmpty()) {
 					this.runComponentFactory = addModuleIdFilter(runComponentFactory, loadingProfile.getModuleIds());
 				}
-				if (loadingProfile.isSnapshotEffectiveComponentFilter()) {
-					this.runComponentFactory = addEffectiveComponentFilter(runComponentFactory, releaseFiles, loadingProfile);
+				if (loadingProfile.isEffectiveComponentFilter()) {
+					this.runComponentFactory = addEffectiveComponentFilter(runComponentFactory, combinedReleaseFiles, loadingProfile);
 				}
 
 				runComponentFactory.loadingComponentsStarting();
 
 				if (importType == ImportType.FULL) {
-					final Set<String> releaseVersions = gatherVersions(releaseFiles);
+					final Set<String> releaseVersions = gatherVersions(combinedReleaseFiles);
 					for (String releaseVersion : releaseVersions) {
 						((HistoryAwareComponentFactory) runComponentFactory).loadingReleaseDeltaStarting(releaseVersion);
 						logger.info("Loading release delta {}", releaseVersion);
-						loadAll(loadingProfile, releaseFiles, releaseVersion, runComponentFactory, true);
+						loadAll(loadingProfile, combinedReleaseFiles, releaseVersion, runComponentFactory, true);
 						((HistoryAwareComponentFactory) runComponentFactory).loadingReleaseDeltaFinished(releaseVersion);
 					}
 				} else {
-					loadAll(loadingProfile, releaseFiles, null, runComponentFactory, true);
+					loadAll(loadingProfile, combinedReleaseFiles, null, runComponentFactory, true);
 				}
 				if (!loadingExceptions.isEmpty()) {
 					Exception firstException = loadingExceptions.get(0);
@@ -311,44 +333,58 @@ public class ReleaseImporter {
 				}
 			}
 
-			if (multiThreaded) {
-				executorService.invokeAll(coreComponentTasks);
-				executorService.invokeAll(refsetTasks);
-			} else {
-				try {
+			try {
+				if (multiThreaded) {
+					final List<Future<String>> futures = executorService.invokeAll(coreComponentTasks);
+					// Use Future.get() to trigger exceptions being thrown
+					for (Future<String> future : futures) {
+						future.get();
+					}
+					final List<Future<String>> refsetFutures = executorService.invokeAll(refsetTasks);
+					// Use Future.get() to trigger exceptions being thrown
+					for (Future<String> refsetFuture : refsetFutures) {
+						refsetFuture.get();
+					}
+				} else {
 					for (Callable<String> coreComponentTask : coreComponentTasks) {
 						coreComponentTask.call();
 					}
 					for (Callable<String> refsetTask : refsetTasks) {
 						refsetTask.call();
 					}
-				} catch (Exception e) {
-					logger.error("Snomed content loading task failed.", e);
 				}
+			} catch (InterruptedException e) {
+				throw e;
+			} catch (Exception e) {
+				throw new ReleaseImportException("Failed to load all files.", e);
 			}
 		}
 
-		private ReleaseFiles findFiles(List<String> releaseDirPaths, final String fileType, LoadingProfile loadingProfile) throws IOException {
-			final ReleaseFiles releaseFiles = new ReleaseFiles();
-			
-			for (String releaseDirPath : releaseDirPaths) {
-				final File releaseDir = new File(releaseDirPath);
-				if (!releaseDir.isDirectory()) {
-					throw new FileNotFoundException("Could not find release directory '" + releaseDirPath + "'");
+		private ReleaseFiles findFiles(List<String> releaseDirPaths, ImportType importType, LoadingProfile loadingProfile) throws IOException {
+			ReleaseFiles combinedReleaseFiles = new ReleaseFiles();
+
+			for (String filenamePart : importType.getFilenameParts()) {
+				final ReleaseFiles releaseFiles = new ReleaseFiles();
+				for (String releaseDirPath : releaseDirPaths) {
+					final File releaseDir = new File(releaseDirPath);
+					if (!releaseDir.isDirectory()) {
+						throw new FileNotFoundException("Could not find release directory '" + releaseDirPath + "'");
+					}
+
+					Files.walkFileTree(releaseDir.toPath(), EnumSet.of(FileVisitOption.FOLLOW_LINKS), Integer.MAX_VALUE, new SimpleFileVisitor<Path>() {
+						@Override
+						public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) {
+							collectReleaseFile(file, filenamePart, releaseFiles);
+							return FileVisitResult.CONTINUE;
+						}
+					});
 				}
 
-				Files.walkFileTree(releaseDir.toPath(), EnumSet.of(FileVisitOption.FOLLOW_LINKS), Integer.MAX_VALUE, new SimpleFileVisitor<Path>() {
-					@Override
-					public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) {
-						collectReleaseFile(file, fileType, releaseFiles);
-						return FileVisitResult.CONTINUE;
-					}
-				});
+				releaseFiles.assertFullSet(loadingProfile, "looking recursively in: " + String.join(", ", releaseDirPaths));
+				combinedReleaseFiles.addAll(releaseFiles);
 			}
 
-			releaseFiles.assertFullSet(loadingProfile, "looking recursively in: " + String.join(", ", releaseDirPaths));
-
-			return releaseFiles;
+			return combinedReleaseFiles;
 		}
 
 		static void collectReleaseFile(Path file, String fileType, ReleaseFiles releaseFiles) {
@@ -366,11 +402,13 @@ public class ReleaseImporter {
 					releaseFiles.addConcreteRelationshipPath(file);
 				} else if (fileName.matches("x?(sct|rel)2_StatedRelationship_[^_]*" + fileType + "_.*")) {
 					releaseFiles.addStatedRelationshipPath(file);
+				} else if (fileName.matches("x?(sct|rel)2_Identifier_[^_]*" + fileType + "_.*")) {
+					logger.debug("Identifier file is ignored.");// In the last 20 years it has never been used.
 				} else if (fileName.matches("x?(sct|rel)2_sRefset_OWL.*[^_]*" + fileType + "_.*")) {
 					releaseFiles.addRefsetPath(file);
 				} else if (fileName.matches("x?(der|rel)2_[sci]*Refset_[^_]*" + fileType + "(-[a-zA-Z\\-]*)?_.*")) {
 					releaseFiles.addRefsetPath(file);
-				} else if (fileName.matches("x?der2_.*") || fileName.matches("x?(sct|rel)2_.*")) {
+				} else if ((fileName.matches("x?der2_.*") || fileName.matches("x?(sct|rel)2_.*")) && fileName.contains(fileType)) {
 					logger.info("RF2 release filename not recognised '{}'. This file will not be loaded.", fileName);
 				}
 			}
@@ -526,6 +564,7 @@ public class ReleaseImporter {
 				try {
 					readLines(rf2FilePaths, contentHandler, componentType, releaseVersion);
 				} catch (Exception e) {
+					// Refactor opportunity; use futures to handle exceptions instead of capturing them manually.
 					logger.error("Failed to read or process lines.", e);
 					loadingExceptions.add(e);
 				}
