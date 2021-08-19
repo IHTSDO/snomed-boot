@@ -292,7 +292,7 @@ public class ReleaseImporter {
 					}
 				}
 				
-				if (loadingProfile.isDescriptions() || loadingProfile.isFullDescriptionObjects()) {
+				if (loadingProfile.isDescriptions()) {
 					coreComponentTasks.add(loadDescriptions(releaseFiles.getDescriptionPaths(), loadingProfile, releaseVersion, componentFactory));
 					if (!releaseFiles.getTextDefinitionPaths().isEmpty()) {
 						coreComponentTasks.add(loadDescriptions(releaseFiles.getTextDefinitionPaths(), loadingProfile, releaseVersion, componentFactory));
@@ -428,51 +428,21 @@ public class ReleaseImporter {
 			return readLinesCallable(rf2Files, (ValuesHandler) values -> {
 				final boolean active = "1".equals(values[RelationshipFieldIndexes.active]);
 				if (loadingProfile.isInactiveRelationships() || active) {
-					final String sourceId = values[RelationshipFieldIndexes.sourceId];
-					final String type = values[RelationshipFieldIndexes.typeId];
 					final String characteristicType = values[RelationshipFieldIndexes.characteristicTypeId];
-					final String destinationId = values[RelationshipFieldIndexes.destinationId];
 					boolean inferred = ConceptConstants.INFERRED_RELATIONSHIP.equals(characteristicType);
-					if (!inferred && loadingProfile.isStatedAttributeMapOnConcept()) {
-						componentFactory.addStatedConceptAttribute(sourceId, type, destinationId);
-					} else if (inferred && loadingProfile.isInferredAttributeMapOnConcept()) {
-						componentFactory.addInferredConceptAttribute(sourceId, type, destinationId);
-					}
 					if (inferred || loadingProfile.isStatedRelationships()) {
-						if (type.equals(ConceptConstants.isA)) {
-							if (active) {
-								if (inferred) {
-									componentFactory.addInferredConceptParent(sourceId, destinationId);
-									componentFactory.addInferredConceptChild(sourceId, destinationId);
-								} else {
-									componentFactory.addStatedConceptParent(sourceId, destinationId);
-									componentFactory.addStatedConceptChild(sourceId, destinationId);
-								}
-							} else {
-								if (inferred) {
-									componentFactory.removeInferredConceptParent(sourceId, destinationId);
-									componentFactory.removeInferredConceptChild(sourceId, destinationId);
-								} else {
-									componentFactory.removeStatedConceptParent(sourceId, destinationId);
-									componentFactory.removeStatedConceptChild(sourceId, destinationId);
-								}
-							}
-						}
-
-						if (loadingProfile.isFullRelationshipObjects()) {
-							componentFactory.newRelationshipState(
-									values[RelationshipFieldIndexes.id],
-									values[RelationshipFieldIndexes.effectiveTime],
-									values[RelationshipFieldIndexes.active],
-									values[RelationshipFieldIndexes.moduleId],
-									values[RelationshipFieldIndexes.sourceId],
-									values[RelationshipFieldIndexes.destinationId],
-									values[RelationshipFieldIndexes.relationshipGroup],
-									values[RelationshipFieldIndexes.typeId],
-									values[RelationshipFieldIndexes.characteristicTypeId],
-									values[RelationshipFieldIndexes.modifierId]
-							);
-						}
+						componentFactory.newRelationshipState(
+								values[RelationshipFieldIndexes.id],
+								values[RelationshipFieldIndexes.effectiveTime],
+								values[RelationshipFieldIndexes.active],
+								values[RelationshipFieldIndexes.moduleId],
+								values[RelationshipFieldIndexes.sourceId],
+								values[RelationshipFieldIndexes.destinationId],
+								values[RelationshipFieldIndexes.relationshipGroup],
+								values[RelationshipFieldIndexes.typeId],
+								values[RelationshipFieldIndexes.characteristicTypeId],
+								values[RelationshipFieldIndexes.modifierId]
+						);
 					}
 				}
 			}, "relationships", releaseVersion);
@@ -482,26 +452,18 @@ public class ReleaseImporter {
 			return readLinesCallable(rf2Files, (ValuesHandler) values -> {
 				final boolean active = "1".equals(values[ConcreteRelationshipFieldIndexes.active]);
 				if (loadingProfile.isInactiveRelationships() || active) {
-					if (loadingProfile.isInferredAttributeMapOnConcept()) {
-						final String sourceId = values[ConcreteRelationshipFieldIndexes.sourceId];
-						final String type = values[ConcreteRelationshipFieldIndexes.typeId];
-						final String value = values[ConcreteRelationshipFieldIndexes.value];
-						componentFactory.addInferredConceptConcreteAttribute(sourceId, type, value);
-					}
-					if (loadingProfile.isFullConcreteRelationshipObjects()) {
-						componentFactory.newConcreteRelationshipState(
-								values[ConcreteRelationshipFieldIndexes.id],
-								values[ConcreteRelationshipFieldIndexes.effectiveTime],
-								values[ConcreteRelationshipFieldIndexes.active],
-								values[ConcreteRelationshipFieldIndexes.moduleId],
-								values[ConcreteRelationshipFieldIndexes.sourceId],
-								values[ConcreteRelationshipFieldIndexes.value],
-								values[ConcreteRelationshipFieldIndexes.relationshipGroup],
-								values[ConcreteRelationshipFieldIndexes.typeId],
-								values[ConcreteRelationshipFieldIndexes.characteristicTypeId],
-								values[ConcreteRelationshipFieldIndexes.modifierId]
-						);
-					}
+					componentFactory.newConcreteRelationshipState(
+							values[ConcreteRelationshipFieldIndexes.id],
+							values[ConcreteRelationshipFieldIndexes.effectiveTime],
+							values[ConcreteRelationshipFieldIndexes.active],
+							values[ConcreteRelationshipFieldIndexes.moduleId],
+							values[ConcreteRelationshipFieldIndexes.sourceId],
+							values[ConcreteRelationshipFieldIndexes.value],
+							values[ConcreteRelationshipFieldIndexes.relationshipGroup],
+							values[ConcreteRelationshipFieldIndexes.typeId],
+							values[ConcreteRelationshipFieldIndexes.characteristicTypeId],
+							values[ConcreteRelationshipFieldIndexes.modifierId]
+					);
 				}
 			}, "concrete relationships", releaseVersion);
 		}
@@ -509,24 +471,17 @@ public class ReleaseImporter {
 		private Callable<String> loadDescriptions(List<Path> rf2File, final LoadingProfile loadingProfile, String releaseVersion, ComponentFactory componentFactory) {
 			return readLinesCallable(rf2File, (ValuesHandler) values -> {
 				if (loadingProfile.isInactiveDescriptions() || "1".equals(values[DescriptionFieldIndexes.active])) {
-					final String conceptId = values[DescriptionFieldIndexes.conceptId];
-					final String value = values[DescriptionFieldIndexes.typeId];
-					if (ConceptConstants.FSN.equals(value)) {
-						componentFactory.addConceptFSN(conceptId, values[DescriptionFieldIndexes.term]);
-					}
-					if (loadingProfile.isFullDescriptionObjects()) {
-						componentFactory.newDescriptionState(
-								values[DescriptionFieldIndexes.id],
-								values[DescriptionFieldIndexes.effectiveTime],
-								values[DescriptionFieldIndexes.active],
-								values[DescriptionFieldIndexes.moduleId],
-								values[DescriptionFieldIndexes.conceptId],
-								values[DescriptionFieldIndexes.languageCode],
-								values[DescriptionFieldIndexes.typeId],
-								values[DescriptionFieldIndexes.term],
-								values[DescriptionFieldIndexes.caseSignificanceId]
-						);
-					}
+					componentFactory.newDescriptionState(
+							values[DescriptionFieldIndexes.id],
+							values[DescriptionFieldIndexes.effectiveTime],
+							values[DescriptionFieldIndexes.active],
+							values[DescriptionFieldIndexes.moduleId],
+							values[DescriptionFieldIndexes.conceptId],
+							values[DescriptionFieldIndexes.languageCode],
+							values[DescriptionFieldIndexes.typeId],
+							values[DescriptionFieldIndexes.term],
+							values[DescriptionFieldIndexes.caseSignificanceId]
+					);
 				}
 			}, "descriptions", releaseVersion);
 		}
@@ -538,22 +493,16 @@ public class ReleaseImporter {
 				if (loadingProfile.isInactiveRefsetMembers() || "1".equals(values[RefsetFieldIndexes.active])) {
 					final String refsetId = values[RefsetFieldIndexes.refsetId];
 					if (loadingProfile.isAllRefsets() || filenamePatternMatch || loadingProfile.isRefset(refsetId)) {
-						final String referencedComponentId = values[RefsetFieldIndexes.referencedComponentId];
-						if (FactoryUtils.isConceptId(referencedComponentId)) {
-							componentFactory.addConceptReferencedInRefsetId(refsetId, referencedComponentId);
-						}
-						if (loadingProfile.isFullRefsetMemberObjects()) {
-							componentFactory.newReferenceSetMemberState(
-									fieldNames,
-									values[RefsetFieldIndexes.id],
-									values[RefsetFieldIndexes.effectiveTime],
-									values[RefsetFieldIndexes.active],
-									values[RefsetFieldIndexes.moduleId],
-									values[RefsetFieldIndexes.refsetId],
-									values[RefsetFieldIndexes.referencedComponentId],
-									Arrays.copyOfRange(values, RefsetFieldIndexes.referencedComponentId + 1, values.length)
-							);
-						}
+						componentFactory.newReferenceSetMemberState(
+								fieldNames,
+								values[RefsetFieldIndexes.id],
+								values[RefsetFieldIndexes.effectiveTime],
+								values[RefsetFieldIndexes.active],
+								values[RefsetFieldIndexes.moduleId],
+								values[RefsetFieldIndexes.refsetId],
+								values[RefsetFieldIndexes.referencedComponentId],
+								Arrays.copyOfRange(values, RefsetFieldIndexes.referencedComponentId + 1, values.length)
+						);
 					}
 				}
 			}, "reference set members", releaseVersion);

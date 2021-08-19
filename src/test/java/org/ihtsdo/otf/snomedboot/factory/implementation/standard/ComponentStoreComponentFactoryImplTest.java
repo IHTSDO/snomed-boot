@@ -1,10 +1,10 @@
 package org.ihtsdo.otf.snomedboot.factory.implementation.standard;
 
 import com.google.common.collect.Sets;
-import it.unimi.dsi.fastutil.longs.Long2ObjectMap;
 import org.ihtsdo.otf.snomedboot.ReleaseImportException;
 import org.ihtsdo.otf.snomedboot.ReleaseImporter;
 import org.ihtsdo.otf.snomedboot.factory.LoadingProfile;
+import org.ihtsdo.otf.snomedboot.factory.implementation.HighLevelComponentFactoryAdapterImpl;
 import org.junit.Test;
 import org.snomed.otf.snomedboot.testutil.ZipUtil;
 
@@ -15,7 +15,7 @@ import java.util.Map;
 
 import static org.junit.Assert.assertEquals;
 
-public class ComponentFactoryImplTest {
+public class ComponentStoreComponentFactoryImplTest {
 
 	@Test
 	public void test() throws IOException, ReleaseImportException {
@@ -23,15 +23,17 @@ public class ComponentFactoryImplTest {
 
 		ReleaseImporter releaseImporter = new ReleaseImporter();
 		ComponentStore componentStore = new ComponentStore();
-		ComponentFactoryImpl componentFactory = new ComponentFactoryImpl(componentStore);
-
-		releaseImporter.loadSnapshotReleaseFiles(new FileInputStream(baseRF2SnapshotZip), LoadingProfile.complete, componentFactory);
+		final LoadingProfile loadingProfile = LoadingProfile.complete;
+		ComponentStoreComponentFactoryImpl componentFactory = new ComponentStoreComponentFactoryImpl(componentStore);
+		releaseImporter.loadSnapshotReleaseFiles(new FileInputStream(baseRF2SnapshotZip), loadingProfile,
+				new HighLevelComponentFactoryAdapterImpl(loadingProfile, componentFactory, componentFactory));
 
 		Map<Long, ConceptImpl> concepts = componentStore.getConcepts();
 		assertEquals(12, concepts.size());
 
 		ConceptImpl findingSite = concepts.get(363698007L);
 		assertEquals("Finding site (attribute)", findingSite.getDescriptions().get(0).getTerm());
+		assertEquals("Finding site (attribute)", findingSite.getFsn());
 		assertEquals("20170131", findingSite.getEffectiveTime());
 
 		ConceptImpl disorderOfEndocrineSystem = concepts.get(362969004L);

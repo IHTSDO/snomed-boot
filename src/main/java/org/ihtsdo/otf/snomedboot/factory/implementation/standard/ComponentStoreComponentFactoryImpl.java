@@ -1,14 +1,14 @@
 package org.ihtsdo.otf.snomedboot.factory.implementation.standard;
 
-import org.ihtsdo.otf.snomedboot.factory.ComponentFactory;
 import org.ihtsdo.otf.snomedboot.factory.FactoryUtils;
+import org.ihtsdo.otf.snomedboot.factory.HighLevelComponentFactory;
 import org.ihtsdo.otf.snomedboot.factory.ImpotentComponentFactory;
 
-public class ComponentFactoryImpl extends ImpotentComponentFactory {
+public class ComponentStoreComponentFactoryImpl extends ImpotentComponentFactory implements HighLevelComponentFactory {
 
 	private final ComponentStore componentStore;
 
-	public ComponentFactoryImpl(ComponentStore componentStore) {
+	public ComponentStoreComponentFactoryImpl(ComponentStore componentStore) {
 		this.componentStore = componentStore;
 	}
 
