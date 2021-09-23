@@ -9,7 +9,6 @@ import org.snomed.otf.snomedboot.testutil.ZipUtil;
 
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.List;
 
@@ -29,7 +28,7 @@ public class ReleaseImporterTest {
 		TestComponentFactory testComponentFactory = new TestComponentFactory();
 		LoadingProfile complete = LoadingProfile.complete;
 		complete.getIncludedReferenceSetFilenamePatterns().add(".*OWL.*");
-		releaseImporter.loadSnapshotReleaseFiles(new FileInputStream(baseRF2SnapshotZip), complete, testComponentFactory);
+		releaseImporter.loadSnapshotReleaseFiles(new FileInputStream(baseRF2SnapshotZip), complete, testComponentFactory, true);
 
 		List<String> conceptLines = testComponentFactory.getConceptLines();
 		assertEquals(11, conceptLines.size());
@@ -42,7 +41,7 @@ public class ReleaseImporterTest {
 
 		// Load extension release
 		testComponentFactory = new TestComponentFactory();
-		releaseImporter.loadSnapshotReleaseFiles(new FileInputStream(extensionRF2SnapshotZip), LoadingProfile.complete, testComponentFactory);
+		releaseImporter.loadSnapshotReleaseFiles(new FileInputStream(extensionRF2SnapshotZip), LoadingProfile.complete, testComponentFactory, true);
 
 		conceptLines = testComponentFactory.getConceptLines();
 		assertEquals(4, conceptLines.size());
@@ -55,7 +54,7 @@ public class ReleaseImporterTest {
 		// Load just the model module
 		testComponentFactory = new TestComponentFactory();
 		LoadingProfile loadingProfileWithModuleId = LoadingProfile.complete.withModuleIds(ConceptConstants.MODEL_MODULE);
-		releaseImporter.loadSnapshotReleaseFiles(new FileInputStream(baseRF2SnapshotZip), loadingProfileWithModuleId, testComponentFactory);
+		releaseImporter.loadSnapshotReleaseFiles(new FileInputStream(baseRF2SnapshotZip), loadingProfileWithModuleId, testComponentFactory, true);
 
 		conceptLines = testComponentFactory.getConceptLines();
 		assertEquals(6, conceptLines.size());
@@ -63,7 +62,7 @@ public class ReleaseImporterTest {
 
 		// Load effective components
 		testComponentFactory = new TestComponentFactory();
-		releaseImporter.loadEffectiveSnapshotReleaseFileStreams(Sets.newHashSet(new FileInputStream(baseRF2SnapshotZip), new FileInputStream(extensionRF2SnapshotZip)), LoadingProfile.complete, testComponentFactory);
+		releaseImporter.loadEffectiveSnapshotReleaseFileStreams(Sets.newHashSet(new FileInputStream(baseRF2SnapshotZip), new FileInputStream(extensionRF2SnapshotZip)), LoadingProfile.complete, testComponentFactory, true);
 
 		conceptLines = testComponentFactory.getConceptLines();
 		assertEquals(12, conceptLines.size());
@@ -90,7 +89,7 @@ public class ReleaseImporterTest {
 		testComponentFactory = new TestComponentFactory();
 		// Exclude loading inactive concepts
 		LoadingProfile loadingProfile = LoadingProfile.complete.withoutInactiveConcepts();
-		releaseImporter.loadEffectiveSnapshotReleaseFileStreams(Sets.newHashSet(new FileInputStream(baseRF2SnapshotZip), new FileInputStream(extensionRF2SnapshotZip)), loadingProfile, testComponentFactory);
+		releaseImporter.loadEffectiveSnapshotReleaseFileStreams(Sets.newHashSet(new FileInputStream(baseRF2SnapshotZip), new FileInputStream(extensionRF2SnapshotZip)), loadingProfile, testComponentFactory, true);
 
 		conceptLines = testComponentFactory.getConceptLines();
 		assertEquals("Only 10 concepts should be loaded. The later inactive concept row is used to block loading the earlier dated active row.",
@@ -104,7 +103,7 @@ public class ReleaseImporterTest {
 		ReleaseImporter releaseImporter = new ReleaseImporter();
 		TestComponentFactory testComponentFactory = new TestComponentFactory();
 
-		releaseImporter.loadFullReleaseFiles(new FileInputStream(baseRF2FullZip), LoadingProfile.complete, testComponentFactory);
+		releaseImporter.loadFullReleaseFiles(new FileInputStream(baseRF2FullZip), LoadingProfile.complete, testComponentFactory, true);
 
 		assertEquals(5, testComponentFactory.getVersionsLoaded().size());
 		assertEquals("[20020131, 20030731, 20170131, 20180131, 20180731]", testComponentFactory.getVersionsLoaded().toString());
@@ -239,7 +238,7 @@ public class ReleaseImporterTest {
 		TestComponentFactory testComponentFactory = new TestComponentFactory();
 		LoadingProfile complete = LoadingProfile.complete;
 		try {
-			releaseImporter.loadSnapshotReleaseFiles(new FileInputStream(baseRF2SnapshotZip), complete, testComponentFactory);
+			releaseImporter.loadSnapshotReleaseFiles(new FileInputStream(baseRF2SnapshotZip), complete, testComponentFactory, true);
 			fail("Should throw exception because of bad file content.");
 		} catch (ReleaseImportException e) {
 			assertEquals("Invalid RF2 content. Less than five tab separated columns found in first line of sct2_Concept_Snapshot_INT_20170131.txt.", e.getMessage());
@@ -254,7 +253,7 @@ public class ReleaseImporterTest {
 		TestComponentFactory testComponentFactory = new TestComponentFactory();
 		LoadingProfile complete = LoadingProfile.complete;
 		try {
-			releaseImporter.loadSnapshotReleaseFiles(new FileInputStream(baseRF2SnapshotZip), complete, testComponentFactory);
+			releaseImporter.loadSnapshotReleaseFiles(new FileInputStream(baseRF2SnapshotZip), complete, testComponentFactory, true);
 			fail("Should throw exception because of bad file content.");
 		} catch (ReleaseImportException e) {
 			assertEquals("Failed to load release files during release import process. 1 exceptions caught in threads. " +
