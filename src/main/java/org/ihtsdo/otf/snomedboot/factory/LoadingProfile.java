@@ -75,6 +75,10 @@ public class LoadingProfile implements Cloneable {
 		return this.cloneObject().setStatedRelationships(false);
 	}
 
+	public LoadingProfile withDescriptions() {
+		return this.cloneObject().setDescriptions(true);
+	}
+
 	public LoadingProfile withoutDescriptions() {
 		return this.cloneObject().setDescriptions(false);
 	}
