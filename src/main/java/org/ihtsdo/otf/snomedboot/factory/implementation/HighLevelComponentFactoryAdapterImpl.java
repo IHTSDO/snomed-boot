@@ -94,6 +94,11 @@ public class HighLevelComponentFactoryAdapterImpl implements ComponentFactory {
 		delegateComponentFactory.newReferenceSetMemberState(fieldNames, id, effectiveTime, active, moduleId, refsetId, referencedComponentId, otherValues);
 	}
 
+	@Override
+	public void newIdentifierState(String alternateIdentifier, String effectiveTime, String active, String moduleId, String identifierSchemeId, String referencedComponentId) {
+		delegateComponentFactory.newIdentifierState(alternateIdentifier, effectiveTime, active, moduleId, identifierSchemeId, referencedComponentId);
+	}
+
 	private boolean isActive(String active) {
 		return "1".equals(active);
 	}

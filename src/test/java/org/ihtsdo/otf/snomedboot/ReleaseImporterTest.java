@@ -109,6 +109,7 @@ public class ReleaseImporterTest {
 		assertEquals("[20020131, 20030731, 20170131, 20180131, 20180731]", testComponentFactory.getVersionsLoaded().toString());
 
 		assertEquals(11, testComponentFactory.getConceptLines().size());
+		assertEquals(1, testComponentFactory.getIdentifierLines().size());
 	}
 
 	@Test

@@ -40,6 +40,11 @@ public class LatestEffectiveDateComponentFactory extends ImpotentComponentFactor
 		storeLatestDateMember(id, effectiveTime);
 	}
 
+	@Override
+	public void newIdentifierState(String alternateIdentifier, String effectiveTime, String active, String moduleId, String identifierSchemeId, String referencedComponentId) {
+		storeLatestDate(alternateIdentifier + "-" + identifierSchemeId, effectiveTime);
+	}
+
 	private synchronized void storeLatestDate(String componentId, String effectiveTime) {
 		long id = parseLong(componentId);
 		int newDate = parseInt(effectiveTime);

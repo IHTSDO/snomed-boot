@@ -9,6 +9,7 @@ public class TestComponentFactory extends ImpotentHistoryAwareComponentFactory {
 	private List<String> descriptionLines = new ArrayList<>();
 	private List<String> relationshipLines = new ArrayList<>();
 	private List<String> concreteRelationshipLines = new ArrayList<>();
+	private List<String> identifierLines = new ArrayList<>();
 	private List<String> refsetMemberLines = new ArrayList<>();
 	private List<String> versionsLoaded = new ArrayList<>();
 
@@ -38,6 +39,11 @@ public class TestComponentFactory extends ImpotentHistoryAwareComponentFactory {
 	}
 
 	@Override
+	public void newIdentifierState(String alternateIdentifier, String effectiveTime, String active, String moduleId, String identifierSchemeId, String referencedComponentId) {
+		identifierLines.add(String.join("|", alternateIdentifier, effectiveTime, active, moduleId, identifierSchemeId, referencedComponentId));
+	}
+
+	@Override
 	public void loadingReleaseDeltaStarting(String releaseVersion) {
 		versionsLoaded.add(releaseVersion);
 	}
@@ -56,6 +62,10 @@ public class TestComponentFactory extends ImpotentHistoryAwareComponentFactory {
 
 	public List<String> getConcreteRelationshipLines() {
 		return concreteRelationshipLines;
+	}
+
+	public List<String> getIdentifierLines() {
+		return identifierLines;
 	}
 
 	public List<String> getRefsetMemberLines() {

@@ -42,4 +42,9 @@ public class ImpotentComponentFactory implements ComponentFactory {
 
 	}
 
+	@Override
+	public void newIdentifierState(String alternateIdentifier, String effectiveTime, String active, String moduleId, String identifierSchemeId, String referencedComponentId) {
+
+	}
+
 }

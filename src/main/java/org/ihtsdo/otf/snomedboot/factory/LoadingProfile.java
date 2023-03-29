@@ -24,6 +24,7 @@ public class LoadingProfile implements Cloneable {
 		complete.inactiveConcepts = true;
 		complete.inactiveDescriptions = true;
 		complete.inactiveRelationships = true;
+		complete.inactiveIdentifiers = true;
 		complete.inactiveRefsetMembers = true;
 		complete.allRefsets = true;
 	}
@@ -36,6 +37,7 @@ public class LoadingProfile implements Cloneable {
 	private boolean inactiveConcepts;
 	private boolean inactiveDescriptions;
 	private boolean inactiveRelationships;
+	private boolean inactiveIdentifiers;
 	private boolean inactiveRefsetMembers;
 	private boolean allRefsets;
 	private boolean justRefsets;
@@ -214,6 +216,10 @@ public class LoadingProfile implements Cloneable {
 		return inactiveRelationships;
 	}
 
+	public boolean isInactiveIdentifiers() {
+		return inactiveIdentifiers;
+	}
+
 	public boolean isInactiveRefsetMembers() {
 		return inactiveRefsetMembers;
 	}
@@ -275,6 +281,11 @@ public class LoadingProfile implements Cloneable {
 
 	private LoadingProfile setInactiveRelationships(boolean inactiveRelationships) {
 		this.inactiveRelationships = inactiveRelationships;
+		return this;
+	}
+
+	public LoadingProfile setInactiveIdentifiers(boolean inactiveIdentifiers) {
+		this.inactiveIdentifiers = inactiveIdentifiers;
 		return this;
 	}
 

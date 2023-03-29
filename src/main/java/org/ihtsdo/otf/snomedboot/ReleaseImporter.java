@@ -36,6 +36,7 @@ public class ReleaseImporter {
 
 	public static final Charset UTF_8 = StandardCharsets.UTF_8;
 	private static final Logger logger = LoggerFactory.getLogger(ReleaseImporter.class);
+	private static final String IDENTIFIERS_TYPE = "identifiers";
 
 	public void loadFullReleaseFiles(String releaseDirPath, LoadingProfile loadingProfile, HistoryAwareComponentFactory componentFactory, boolean multiThreaded) throws ReleaseImportException {
 		new ImportRun(componentFactory).doLoadReleaseFiles(releaseDirPath, loadingProfile, ImportType.FULL, multiThreaded);
@@ -190,6 +191,7 @@ public class ReleaseImporter {
 		private final List<Exception> loadingExceptions;
 
 		private static final Pattern DATE_EXTRACT_PATTERN = Pattern.compile("[^\\t]*\\t([^\\t]*)\t.*");
+		private static final Pattern LEGACY_IDENTIFIER_DATE_EXTRACT_PATTERN = Pattern.compile("[^\\t]*\\t[^\\t]*\\t([^\\t]*)\t.*");
 
 		private ImportRun(ComponentFactory componentFactory) {
 			executorService = Executors.newCachedThreadPool();
@@ -285,6 +287,7 @@ public class ReleaseImporter {
 
 				coreComponentTasks.add(loadRelationships(releaseFiles.getRelationshipPaths(), loadingProfile, releaseVersion, componentFactory));
 				coreComponentTasks.add(loadConcreteRelationships(releaseFiles.getConcreteRelationshipPaths(), loadingProfile, releaseVersion, componentFactory));
+				coreComponentTasks.add(loadIdentifiers(releaseFiles.getIdentifierPaths(), loadingProfile, releaseVersion, componentFactory));
 				if (loadingProfile.isStatedRelationships()) {
 					if (!releaseFiles.getStatedRelationshipPaths().isEmpty()) {
 						coreComponentTasks.add(loadRelationships(releaseFiles.getStatedRelationshipPaths(), loadingProfile, releaseVersion, componentFactory));
@@ -402,7 +405,7 @@ public class ReleaseImporter {
 				} else if (fileName.matches("x?(sct|rel)2_StatedRelationship_[^_]*" + fileType + "_.*")) {
 					releaseFiles.addStatedRelationshipPath(file);
 				} else if (fileName.matches("x?(sct|rel)2_Identifier_[^_]*" + fileType + "_.*")) {
-					logger.debug("Identifier file is ignored.");// In the last 20 years it has never been used.
+					releaseFiles.addIdentifierPath(file);
 				} else if (fileName.matches("x?(sct|rel)2_sRefset_OWL.*[^_]*" + fileType + "_.*")) {
 					releaseFiles.addRefsetPath(file);
 				} else if (fileName.matches("x?(der|rel)2_[sci]*Refset_[^_]*" + fileType + "(-[a-zA-Z\\-]*)?_.*")) {
@@ -414,7 +417,7 @@ public class ReleaseImporter {
 		}
 
 		private void loadConcepts(List<Path> rf2Files, final LoadingProfile loadingProfile, final String releaseVersion, ComponentFactory componentFactory) throws IOException, ReleaseImportException {
-			readLines(rf2Files, (ValuesHandler) values -> {
+			readLines(rf2Files, (ValuesHandler) (values, legacyPublishedFile) -> {
 				if (loadingProfile.isInactiveConcepts() || "1".equals(values[ConceptFieldIndexes.active])) {
 					String conceptId = values[ComponentFieldIndexes.id];
 					componentFactory.newConceptState(conceptId, values[ConceptFieldIndexes.effectiveTime], values[ConceptFieldIndexes.active],
@@ -424,7 +427,7 @@ public class ReleaseImporter {
 		}
 
 		private Callable<String> loadRelationships(List<Path> rf2Files, final LoadingProfile loadingProfile, String releaseVersion, ComponentFactory componentFactory) {
-			return readLinesCallable(rf2Files, (ValuesHandler) values -> {
+			return readLinesCallable(rf2Files, (ValuesHandler) (values, legacyPublishedFile) -> {
 				final boolean active = "1".equals(values[RelationshipFieldIndexes.active]);
 				if (loadingProfile.isInactiveRelationships() || active) {
 					final String characteristicType = values[RelationshipFieldIndexes.characteristicTypeId];
@@ -448,7 +451,7 @@ public class ReleaseImporter {
 		}
 
 		private Callable<String> loadConcreteRelationships(List<Path> rf2Files, final LoadingProfile loadingProfile, String releaseVersion, ComponentFactory componentFactory) {
-			return readLinesCallable(rf2Files, (ValuesHandler) values -> {
+			return readLinesCallable(rf2Files, (ValuesHandler) (values, legacyPublishedFile) -> {
 				final boolean active = "1".equals(values[ConcreteRelationshipFieldIndexes.active]);
 				if (loadingProfile.isInactiveRelationships() || active) {
 					componentFactory.newConcreteRelationshipState(
@@ -467,8 +470,24 @@ public class ReleaseImporter {
 			}, "concrete relationships", releaseVersion);
 		}
 
+		private Callable<String> loadIdentifiers(List<Path> rf2Files, final LoadingProfile loadingProfile, String releaseVersion, ComponentFactory componentFactory) {
+			return readLinesCallable(rf2Files, (ValuesHandler) (values, legacyPublishedFile) -> {
+				final boolean active = "1".equals(values[legacyPublishedFile ? IdentifierFieldIndexes.legacyActive : IdentifierFieldIndexes.active]);
+				if (loadingProfile.isInactiveIdentifiers() || active) {
+					componentFactory.newIdentifierState(
+							values[legacyPublishedFile ? IdentifierFieldIndexes.legacyAlternateIdentifier : IdentifierFieldIndexes.alternateIdentifier],
+							values[legacyPublishedFile ? IdentifierFieldIndexes.legacyEffectiveTime : IdentifierFieldIndexes.effectiveTime],
+							values[legacyPublishedFile ? IdentifierFieldIndexes.legacyActive : IdentifierFieldIndexes.active],
+							values[legacyPublishedFile ? IdentifierFieldIndexes.legacyModuleId : IdentifierFieldIndexes.moduleId],
+							values[legacyPublishedFile ? IdentifierFieldIndexes.legacyIdentifierSchemeId : IdentifierFieldIndexes.identifierSchemeId],
+							values[legacyPublishedFile ? IdentifierFieldIndexes.legacyReferencedComponentId : IdentifierFieldIndexes.referencedComponentId]
+					);
+				}
+			}, "identifiers", releaseVersion);
+		}
+
 		private Callable<String> loadDescriptions(List<Path> rf2File, final LoadingProfile loadingProfile, String releaseVersion, ComponentFactory componentFactory) {
-			return readLinesCallable(rf2File, (ValuesHandler) values -> {
+			return readLinesCallable(rf2File, (ValuesHandler) (values, legacyPublishedFile) -> {
 				if (loadingProfile.isInactiveDescriptions() || "1".equals(values[DescriptionFieldIndexes.active])) {
 					componentFactory.newDescriptionState(
 							values[DescriptionFieldIndexes.id],
@@ -488,7 +507,7 @@ public class ReleaseImporter {
 		private Callable<String> loadRefsets(Path rf2File, final LoadingProfile loadingProfile, String releaseVersion,
 				ComponentFactory componentFactory, boolean filenamePatternMatch) {
 
-			return readLinesCallable(Collections.singletonList(rf2File), (FieldNamesAndValuesHandler) (fieldNames, values) -> {
+			return readLinesCallable(Collections.singletonList(rf2File), (FieldNamesAndValuesHandler) (fieldNames, values, legacyPublishedFile) -> {
 				if (loadingProfile.isInactiveRefsetMembers() || "1".equals(values[RefsetFieldIndexes.active])) {
 					final String refsetId = values[RefsetFieldIndexes.refsetId];
 					if (loadingProfile.isAllRefsets() || filenamePatternMatch || loadingProfile.isRefset(refsetId)) {
@@ -528,6 +547,7 @@ public class ReleaseImporter {
 			gatherVersions(releaseFiles.getTextDefinitionPaths(), versions);
 			gatherVersions(releaseFiles.getRelationshipPaths(), versions);
 			gatherVersions(releaseFiles.getRefsetPaths(), versions);
+			gatherIdentifierVersions(releaseFiles.getIdentifierPaths(), versions);
 			logger.info("Release versions found: {}", versions);
 			return versions;
 		}
@@ -540,6 +560,27 @@ public class ReleaseImporter {
 					Matcher matcher;
 					while ((line = reader.readLine()) != null) {
 						matcher = DATE_EXTRACT_PATTERN.matcher(line);
+						if (matcher.matches()) {
+							versions.add(matcher.group(1));
+						}
+					}
+				}
+			}
+		}
+
+		private void gatherIdentifierVersions(List<Path> filePaths, Set<String> versions) throws IOException {
+			for (Path filePath : filePaths) {
+				try (final BufferedReader reader = Files.newBufferedReader(filePath, UTF_8)) {
+					String line;
+					String header = reader.readLine();
+					boolean isLegacyIdentifierFile = false;
+					final String[] fieldNames = header.split("\\t");
+					if (fieldNames[0].equals("identifierSchemeId")) {
+						isLegacyIdentifierFile = true;
+					}
+					Matcher matcher;
+					while ((line = reader.readLine()) != null) {
+						matcher = isLegacyIdentifierFile ? LEGACY_IDENTIFIER_DATE_EXTRACT_PATTERN.matcher(line) : DATE_EXTRACT_PATTERN.matcher(line);
 						if (matcher.matches()) {
 							versions.add(matcher.group(1));
 						}
@@ -571,7 +612,17 @@ public class ReleaseImporter {
 					if (columns < 5) {
 						throw new ReleaseImportException(format("Invalid RF2 content. Less than five tab separated columns found in first line of %s.", fileName));
 					}
-					if (!fieldNames[0].equals("id")) {
+					boolean legacyPublishedFile = false;
+					if (IDENTIFIERS_TYPE.equals(componentType)) {
+						if (!fieldNames[0].equals("alternateIdentifier") && !fieldNames[0].equals("identifierSchemeId")) {
+							throw new ReleaseImportException(format("Invalid RF2 content. 'alternateIdentifier' or 'identifierSchemeId' not found as first value in tab separated first line of %s.", fileName));
+						}
+						if (fieldNames[0].equals("identifierSchemeId")) {
+							legacyPublishedFile = true;
+						}
+					}
+
+					if (!IDENTIFIERS_TYPE.equals(componentType) && !fieldNames[0].equals("id")) {
 						throw new ReleaseImportException(format("Invalid RF2 content. 'id' not found as first value in tab separated first line of %s.", fileName));
 					}
 					String[] values;
@@ -595,11 +646,13 @@ public class ReleaseImporter {
 										linesRead + 1, fileName, columns, values.length));
 							}
 						}
-						if (releaseVersion == null || releaseVersion.equals(values[ComponentFieldIndexes.effectiveTime])) {
+						if (releaseVersion == null
+							|| (IDENTIFIERS_TYPE.equals(componentType) && legacyPublishedFile && releaseVersion.equals(values[IdentifierFieldIndexes.legacyEffectiveTime]))
+							|| releaseVersion.equals(values[ComponentFieldIndexes.effectiveTime])) {
 							if (valuesHandler != null) {
-								valuesHandler.handle(values);
+								valuesHandler.handle(values, legacyPublishedFile);
 							} else if (fieldNamesAndValuesHandler != null) {
-								fieldNamesAndValuesHandler.handle(fieldNames, values);
+								fieldNamesAndValuesHandler.handle(fieldNames, values, legacyPublishedFile);
 							}
 						}
 					}
@@ -616,11 +669,11 @@ public class ReleaseImporter {
 		}
 
 		private interface ValuesHandler extends FileContentHandler {
-			void handle(String[] values);
+			void handle(String[] values, boolean legacyPublishedFile);
 		}
 
 		private interface FieldNamesAndValuesHandler extends FileContentHandler {
-			void handle(String[] fieldNames, String[] values);
+			void handle(String[] fieldNames, String[] values, boolean legacyPublishedFile);
 		}
 	}
 

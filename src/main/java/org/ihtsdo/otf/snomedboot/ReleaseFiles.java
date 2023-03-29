@@ -15,6 +15,7 @@ class ReleaseFiles {
 	private final List<Path> relationshipPaths = new ArrayList<>();
 	private final List<Path> concreteRelationshipPaths = new ArrayList<>();
 	private final List<Path> statedRelationshipPaths = new ArrayList<>();
+	private final List<Path> identifierPaths = new ArrayList<>();
 	private final List<Path> refsetPaths = new ArrayList<>();
 
 	public void addAll(ReleaseFiles releaseFiles) {
@@ -24,6 +25,7 @@ class ReleaseFiles {
 		relationshipPaths.addAll(releaseFiles.getRelationshipPaths());
 		concreteRelationshipPaths.addAll(releaseFiles.getConcreteRelationshipPaths());
 		statedRelationshipPaths.addAll(releaseFiles.getStatedRelationshipPaths());
+		identifierPaths.addAll(releaseFiles.getIdentifierPaths());
 		refsetPaths.addAll(releaseFiles.getRefsetPaths());
 	}
 
@@ -49,6 +51,10 @@ class ReleaseFiles {
 
 	public void addStatedRelationshipPath(Path file) {
 		statedRelationshipPaths.add(file);
+	}
+
+	public void addIdentifierPath(Path file) {
+		identifierPaths.add(file);
 	}
 
 	public void addRefsetPath(Path file) {
@@ -79,6 +85,10 @@ class ReleaseFiles {
 		return statedRelationshipPaths;
 	}
 
+	public List<Path> getIdentifierPaths() {
+		return identifierPaths;
+	}
+
 	public List<Path> getRefsetPaths() {
 		return refsetPaths;
 	}
@@ -104,6 +114,7 @@ class ReleaseFiles {
 				", relationshipPaths=" + relationshipPaths +
 				", concreteRelationshipPaths=" + concreteRelationshipPaths +
 				", statedRelationshipPaths=" + statedRelationshipPaths +
+				", identifierPaths=" + identifierPaths +
 				", refsetPaths=" + refsetPaths +
 				'}';
 	}

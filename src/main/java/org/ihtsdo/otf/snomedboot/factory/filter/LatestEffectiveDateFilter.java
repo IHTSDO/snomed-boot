@@ -63,4 +63,10 @@ public class LatestEffectiveDateFilter extends ImpotentComponentFactory {
 		}
 	}
 
+	@Override
+	public void newIdentifierState(String alternateIdentifier, String effectiveTime, String active, String moduleId, String identifierSchemeId, String referencedComponentId) {
+		if (effectiveDateHolder.isCoreComponentVersionInEffect(alternateIdentifier + "-" + identifierSchemeId, effectiveTime)) {
+			delegateComponentFactory.newIdentifierState(alternateIdentifier, effectiveTime, active, moduleId, identifierSchemeId, referencedComponentId);
+		}
+	}
 }
