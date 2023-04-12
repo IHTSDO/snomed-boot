@@ -11,7 +11,7 @@
 
 	<groupId>org.snomed.otf</groupId>
 	<artifactId>snomed-boot</artifactId>
-	<version>4.0.3</version>
+	<version>4.0.4-SNAPSHOT</version>
 
 	<name>Snomed Boot</name>
 	<description>Load Snomed CT Release Content into Memory</description>
