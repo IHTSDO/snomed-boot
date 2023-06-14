@@ -14,6 +14,7 @@ public class LatestEffectiveDateComponentFactory extends ImpotentComponentFactor
 	public static final int FAR_FUTURE = 30000101;
 	private final Map<Long, Integer> latestCoreComponentEffectiveDates = new Long2IntOpenHashMap();
 	private final Map<String, Integer> latestRefsetMemberEffectiveDates = new HashMap<>();
+	private final Map<String, Integer> latestIdentifierEffectiveDates = new HashMap<>();
 
 	@Override
 	public void newConceptState(String conceptId, String effectiveTime, String active, String moduleId, String definitionStatusId) {
@@ -42,7 +43,7 @@ public class LatestEffectiveDateComponentFactory extends ImpotentComponentFactor
 
 	@Override
 	public void newIdentifierState(String alternateIdentifier, String effectiveTime, String active, String moduleId, String identifierSchemeId, String referencedComponentId) {
-		storeLatestDate(alternateIdentifier + "-" + identifierSchemeId, effectiveTime);
+		storeLatestDateIdentifier(alternateIdentifier + "-" + identifierSchemeId, effectiveTime);
 	}
 
 	private synchronized void storeLatestDate(String componentId, String effectiveTime) {
@@ -60,6 +61,13 @@ public class LatestEffectiveDateComponentFactory extends ImpotentComponentFactor
 		}
 	}
 
+	private synchronized void storeLatestDateIdentifier(String id, String effectiveTime) {
+		int newDate = parseInt(effectiveTime);
+		if (newDateGreater(newDate, latestIdentifierEffectiveDates.get(id))) {
+			latestIdentifierEffectiveDates.put(id, newDate);
+		}
+	}
+
 	private int parseInt(String effectiveTime) {
 		return Strings.isNullOrEmpty(effectiveTime) ? FAR_FUTURE : Integer.parseInt(effectiveTime);
 	}
@@ -70,6 +78,10 @@ public class LatestEffectiveDateComponentFactory extends ImpotentComponentFactor
 
 	public synchronized boolean isCoreComponentVersionInEffect(String componentId, String effectiveTime) {
 		return latestCoreComponentEffectiveDates.getOrDefault(parseLong(componentId), Integer.MIN_VALUE).equals(parseInt(effectiveTime));
+	}
+
+	public synchronized boolean isIdentifierVersionInEffect(String componentId, String effectiveTime) {
+		return latestIdentifierEffectiveDates.getOrDefault(componentId, Integer.MIN_VALUE).equals(parseInt(effectiveTime));
 	}
 
 	public synchronized boolean isReferenceSetMemberVersionInEffect(String memberId, String effectiveTime) {

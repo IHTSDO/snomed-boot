@@ -1,0 +1,2 @@
+alternateIdentifier	effectiveTime	active	moduleId	identifierSchemeId	referencedComponentId
+634-6	20180131	1	715515008	705114005	22071010000106

@@ -83,7 +83,7 @@ public class ReleaseImporterTest {
 		assertTrue("Relationship 200007001 is inactive in the effective release", testComponentFactory.getRelationshipLines().contains("200007001|20170231|0|100101001"));
 		assertTrue("Concrete Relationship 222010001 is active in the effective release", testComponentFactory.getConcreteRelationshipLines().contains("222010001|20210131|1|900000000000207008"));
 		assertTrue("Stated Relationship 100007001 is inactive in the effective release", testComponentFactory.getRelationshipLines().contains("100007001|20170231|0|100101001"));
-
+		assertTrue("Alternative Identifier 634-6 is active in the effective release", testComponentFactory.getIdentifierLines().contains("634-6|20180131|1|715515008|705114005|22071010000106"));
 
 		// Load effective components, exclude inactive
 		testComponentFactory = new TestComponentFactory();
