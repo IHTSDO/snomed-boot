@@ -38,7 +38,7 @@ public class ZipUtil {
 		File zipFile = zip.toFile();
 		try (ZipOutputStream zipOutputStream = new ZipOutputStream(new FileOutputStream(zipFile))) {
 			BufferedWriter bufferedWriter = new BufferedWriter(new OutputStreamWriter(zipOutputStream));
-			Files.walkFileTree(directory.toPath(), new SimpleFileVisitor<Path>() {
+			Files.walkFileTree(directory.toPath(), new SimpleFileVisitor<>() {
 				@Override
 				public FileVisitResult visitFile(Path path, BasicFileAttributes attrs) throws IOException {
 					File file = path.toFile();

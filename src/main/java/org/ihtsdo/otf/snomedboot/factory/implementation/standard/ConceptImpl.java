@@ -68,7 +68,7 @@ public class ConceptImpl implements Concept {
 	public Set<Long> getInferredAncestorIds() throws IllegalStateException {
 		final Stack<Long> stack = new Stack<>();
 		stack.push(id);
-		return collectParentIds(this, new HashSet<Long>(), stack, true);
+		return collectParentIds(this, new HashSet<>(), stack, true);
 	}
 
 	/**
@@ -80,7 +80,7 @@ public class ConceptImpl implements Concept {
 	public Set<Long> getStatedAncestorIds() throws IllegalStateException {
 		final Stack<Long> stack = new Stack<>();
 		stack.push(id);
-		return collectParentIds(this, new HashSet<Long>(), stack, false);
+		return collectParentIds(this, new HashSet<>(), stack, false);
 	}
 
 	private Set<Long> collectParentIds(ConceptImpl concept, Set<Long> ancestors, Stack<Long> stack, boolean inferred) {
@@ -107,7 +107,7 @@ public class ConceptImpl implements Concept {
 	 */
 	@Override
 	public Set<Long> getInferredDescendantIds() throws IllegalStateException {
-		return collectChildIds(this, new HashSet<Long>(),true);
+		return collectChildIds(this, new HashSet<>(),true);
 	}
 
 	/**
@@ -115,7 +115,7 @@ public class ConceptImpl implements Concept {
 	 */
 	@Override
 	public Set<Long> getStatedDescendantIds() throws IllegalStateException {
-		return collectChildIds(this, new HashSet<Long>(),  false);
+		return collectChildIds(this, new HashSet<>(),  false);
 	}
 	
 	private Set<Long> collectChildIds(ConceptImpl concept, Set<Long> descendants, boolean inferred) {

@@ -69,11 +69,11 @@ public class ReleaseImporterTest {
 
 		// Example of concept state overridden in extension
 		assertTrue("Concept 362969004 is inactive in the effective release", conceptLines.contains("362969004|20170231|0|100101001"));
-		assertTrue("The state of 362969004 from the base release has not been loaded", !conceptLines.contains("362969004|20170131|1|900000000000207008"));
+        assertFalse("The state of 362969004 from the base release has not been loaded", conceptLines.contains("362969004|20170131|1|900000000000207008"));
 
 		// Example of donated content without extension inactivation
 		assertTrue("Concept 73211009 is in the international module in the effective release", conceptLines.contains("73211009|20170131|1|900000000000207008"));
-		assertTrue("The state of 73211009 from the extension release has not been loaded", !conceptLines.contains("73211009|20160231|1|100101001"));
+        assertFalse("The state of 73211009 from the extension release has not been loaded", conceptLines.contains("73211009|20160231|1|100101001"));
 
 		assertTrue("Refset Member c69ad177-9756-4ad1-a8b3-02407ca95b36 is inactive in the effective release", testComponentFactory.getRefsetMemberLines().contains("c69ad177-9756-4ad1-a8b3-02407ca95b36|20170231|0|100101001"));
 

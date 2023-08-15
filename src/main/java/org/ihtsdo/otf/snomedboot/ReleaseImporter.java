@@ -165,7 +165,7 @@ public class ReleaseImporter {
 
 		DELTA("Delta"), SNAPSHOT("Snapshot"), FULL("Full"), SNAPSHOT_AND_DELTA(null);
 
-		private String filenamePart;
+		private final String filenamePart;
 
 		ImportType(String filenamePart) {
 			this.filenamePart = filenamePart;
@@ -373,7 +373,7 @@ public class ReleaseImporter {
 						throw new FileNotFoundException("Could not find release directory '" + releaseDirPath + "'");
 					}
 
-					Files.walkFileTree(releaseDir.toPath(), EnumSet.of(FileVisitOption.FOLLOW_LINKS), Integer.MAX_VALUE, new SimpleFileVisitor<Path>() {
+					Files.walkFileTree(releaseDir.toPath(), EnumSet.of(FileVisitOption.FOLLOW_LINKS), Integer.MAX_VALUE, new SimpleFileVisitor<>() {
 						@Override
 						public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) {
 							collectReleaseFile(file, filenamePart, releaseFiles);
