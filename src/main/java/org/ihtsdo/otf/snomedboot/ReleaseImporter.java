@@ -322,7 +322,7 @@ public class ReleaseImporter {
 						String filename = refsetSnapshot.getFileName().toString();
 						for (String pattern : includedReferenceSetFilenamePatterns) {
 							if (filename.matches(pattern)) {
-								logger.info("refset '{}' matches pattern '{}'", filename, pattern);
+								logger.debug("refset '{}' matches pattern '{}'", filename, pattern);
 								refsetTasks.add(loadRefsets(refsetSnapshot, loadingProfile, releaseVersion, componentFactory, true));
 								filenamesMatchedByPattern.add(filename);
 								patternMatch = true;
@@ -335,7 +335,7 @@ public class ReleaseImporter {
 					}
 				}
 				if (includedReferenceSetFilenamePatterns.size() > filenamesMatchedByPattern.size()) {
-					logger.warn("{} reference set filename patterns provided but only {} file matches found. Patterns: {}, Matches: {}",
+					logger.info("{} reference set filename patterns provided but only {} file matches found. Patterns: {}, Matches: {}",
 							includedReferenceSetFilenamePatterns.size(), filenamesMatchedByPattern.size(),
 							includedReferenceSetFilenamePatterns, filenamesMatchedByPattern);
 				}
