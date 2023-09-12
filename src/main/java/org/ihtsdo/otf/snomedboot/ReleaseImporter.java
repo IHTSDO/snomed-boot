@@ -6,11 +6,13 @@ import org.apache.commons.io.IOUtils;
 import org.ihtsdo.otf.snomedboot.domain.ConceptConstants;
 import org.ihtsdo.otf.snomedboot.domain.rf2.*;
 import org.ihtsdo.otf.snomedboot.factory.ComponentFactory;
+import org.ihtsdo.otf.snomedboot.factory.ComponentFactoryProvider;
 import org.ihtsdo.otf.snomedboot.factory.HistoryAwareComponentFactory;
 import org.ihtsdo.otf.snomedboot.factory.LoadingProfile;
 import org.ihtsdo.otf.snomedboot.factory.filter.LatestEffectiveDateComponentFactory;
 import org.ihtsdo.otf.snomedboot.factory.filter.LatestEffectiveDateFilter;
 import org.ihtsdo.otf.snomedboot.factory.filter.ModuleFilter;
+import org.ihtsdo.otf.snomedboot.factory.implementation.ListComponentFactoryProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -55,8 +57,17 @@ public class ReleaseImporter {
 	 * This is achieved by gathering the latest effectiveTime for each component and using this information within a content filter.
 	 * This is useful when loading Extension archives in combination with the International Edition.
 	 */
-	public void loadEffectiveSnapshotReleaseFiles(Set<String> releaseDirPaths, LoadingProfile loadingProfile, ComponentFactory componentFactory, boolean multiThreaded) throws ReleaseImportException {
-		new ImportRun(componentFactory).doLoadReleaseFiles(new ArrayList<>(releaseDirPaths), loadingProfile.withEffectiveComponentFilter(), ImportType.SNAPSHOT, multiThreaded);
+	public void loadEffectiveSnapshotReleaseFiles(Set<String> releaseDirPaths, LoadingProfile loadingProfile,
+			ComponentFactory componentFactory, boolean multiThreaded) throws ReleaseImportException {
+
+		ComponentFactoryProvider listFactoryProvider = new ListComponentFactoryProvider(componentFactory);
+		loadEffectiveSnapshotReleaseFiles(releaseDirPaths, loadingProfile, listFactoryProvider, multiThreaded);
+	}
+
+	public void loadEffectiveSnapshotReleaseFiles(Set<String> releaseDirPaths, LoadingProfile loadingProfile,
+			ComponentFactoryProvider componentFactoryProvider, boolean multiThreaded) throws ReleaseImportException {
+
+		new ImportRun(componentFactoryProvider).doLoadReleaseFiles(new ArrayList<>(releaseDirPaths), loadingProfile.withEffectiveComponentFilter(), ImportType.SNAPSHOT, multiThreaded);
 	}
 
 	/**
@@ -81,12 +92,21 @@ public class ReleaseImporter {
 		deleteDirectory(releaseDir);
 	}
 
+	public void loadEffectiveSnapshotReleaseFileStreams(Set<InputStream> releaseZips, LoadingProfile loadingProfile,
+			ComponentFactory componentFactory, boolean multiThreaded) throws ReleaseImportException {
+
+		ListComponentFactoryProvider componentFactoryProvider = new ListComponentFactoryProvider(Collections.singletonList(componentFactory));
+		loadEffectiveSnapshotReleaseFileStreams(releaseZips, loadingProfile, componentFactoryProvider, multiThreaded);
+	}
+
 	/**
 	 * Load only the effective components from multiple snapshot archives.
 	 * This is achieved by gathering the latest effectiveTime for each component and using this information within a content filter.
 	 * This is useful when loading Extension archives in combination with the International Edition.
 	 */
-	public void loadEffectiveSnapshotReleaseFileStreams(Set<InputStream> releaseZips, LoadingProfile loadingProfile, ComponentFactory componentFactory, boolean multiThreaded) throws ReleaseImportException {
+	public void loadEffectiveSnapshotReleaseFileStreams(Set<InputStream> releaseZips, LoadingProfile loadingProfile,
+			ComponentFactoryProvider componentFactoryProvider, boolean multiThreaded) throws ReleaseImportException {
+
 		File tempDir = createTempDir();
 		int a = 1;
 		for (InputStream releaseZip : releaseZips) {
@@ -94,7 +114,7 @@ public class ReleaseImporter {
 			releaseTempDir.mkdirs();
 			unzipRelease(releaseZip, ImportType.SNAPSHOT, releaseTempDir);
 		}
-		loadEffectiveSnapshotReleaseFiles(Collections.singleton(tempDir.getAbsolutePath()), loadingProfile, componentFactory, multiThreaded);
+		loadEffectiveSnapshotReleaseFiles(Collections.singleton(tempDir.getAbsolutePath()), loadingProfile, componentFactoryProvider, multiThreaded);
 		deleteDirectory(tempDir);
 	}
 
@@ -185,7 +205,7 @@ public class ReleaseImporter {
 
 	static final class ImportRun {
 
-		private ComponentFactory runComponentFactory;
+		private final ComponentFactoryProvider componentFactoryProvider;
 
 		private final ExecutorService executorService;
 		private final List<Exception> loadingExceptions;
@@ -193,10 +213,14 @@ public class ReleaseImporter {
 		private static final Pattern DATE_EXTRACT_PATTERN = Pattern.compile("[^\\t]*\\t([^\\t]*)\t.*");
 		private static final Pattern LEGACY_IDENTIFIER_DATE_EXTRACT_PATTERN = Pattern.compile("[^\\t]*\\t[^\\t]*\\t([^\\t]*)\t.*");
 
-		private ImportRun(ComponentFactory componentFactory) {
+		private ImportRun(ComponentFactoryProvider componentFactoryProvider) {
 			executorService = Executors.newCachedThreadPool();
-			this.runComponentFactory = componentFactory;
+			this.componentFactoryProvider = componentFactoryProvider;
 			loadingExceptions = new ArrayList<>();
+		}
+
+		private ImportRun(ComponentFactory componentFactory) {
+			this(new ListComponentFactoryProvider(componentFactory));
 		}
 
 		private void doLoadReleaseFiles(String releaseDirPath, LoadingProfile loadingProfile, ImportType importType, boolean multiThreaded) throws ReleaseImportException {
@@ -220,35 +244,51 @@ public class ReleaseImporter {
 			logger.info("Loading {} release files {}", importType, combinedReleaseFiles);
 
 			try {
+				ComponentFactory componentFactory = componentFactoryProvider.getNextComponentFactory();
 
-				// Add any component loading filters
-				if (!loadingProfile.getModuleIds().isEmpty()) {
-					this.runComponentFactory = addModuleIdFilter(runComponentFactory, loadingProfile.getModuleIds());
-				}
+				// Prepare any component filters
+				componentFactory.preprocessingContent();
+				LatestEffectiveDateComponentFactory effectiveComponentFilter = null;
 				if (loadingProfile.isEffectiveComponentFilter()) {
-					this.runComponentFactory = addEffectiveComponentFilter(runComponentFactory, combinedReleaseFiles, loadingProfile);
+					effectiveComponentFilter = createEffectiveComponentFilter(combinedReleaseFiles, loadingProfile);
 				}
 
-				runComponentFactory.loadingComponentsStarting();
-
-				if (importType == ImportType.FULL) {
-					final Set<String> releaseVersions = gatherVersions(combinedReleaseFiles);
-					for (String releaseVersion : releaseVersions) {
-						((HistoryAwareComponentFactory) runComponentFactory).loadingReleaseDeltaStarting(releaseVersion);
-						logger.info("Loading release delta {}", releaseVersion);
-						loadAll(loadingProfile, combinedReleaseFiles, releaseVersion, runComponentFactory, multiThreaded);
-						((HistoryAwareComponentFactory) runComponentFactory).loadingReleaseDeltaFinished(releaseVersion);
+				do {
+					// Add content filters by wrapping this component factory
+					if (effectiveComponentFilter != null) {
+						componentFactory = new LatestEffectiveDateFilter(componentFactory, effectiveComponentFilter);
 					}
-				} else {
-					loadAll(loadingProfile, combinedReleaseFiles, null, runComponentFactory, multiThreaded);
-				}
-				if (!loadingExceptions.isEmpty()) {
-					Exception firstException = loadingExceptions.get(0);
-					throw new ReleaseImportException(String.format("Failed to load release files during release import process. " +
-							"%s exceptions caught in threads. First exception: %s", loadingExceptions.size(), firstException.getMessage()), firstException);
-				}
+					if (!loadingProfile.getModuleIds().isEmpty()) {
+						Set<String> moduleIds = loadingProfile.getModuleIds();
+						componentFactory = new ModuleFilter(componentFactory, moduleIds);
+					}
 
-				runComponentFactory.loadingComponentsCompleted();
+					if (componentFactory.getLoadingProfile() != null) {
+						loadingProfile = componentFactory.getLoadingProfile();
+					}
+
+					componentFactory.loadingComponentsStarting();
+
+					if (importType == ImportType.FULL) {
+						final Set<String> releaseVersions = gatherVersions(combinedReleaseFiles);
+						for (String releaseVersion : releaseVersions) {
+							((HistoryAwareComponentFactory) componentFactory).loadingReleaseDeltaStarting(releaseVersion);
+							logger.info("Loading release delta {}", releaseVersion);
+							loadAll(loadingProfile, combinedReleaseFiles, releaseVersion, componentFactory, multiThreaded);
+							((HistoryAwareComponentFactory) componentFactory).loadingReleaseDeltaFinished(releaseVersion);
+						}
+					} else {
+						loadAll(loadingProfile, combinedReleaseFiles, null, componentFactory, multiThreaded);
+					}
+
+					if (!loadingExceptions.isEmpty()) {
+						Exception firstException = loadingExceptions.get(0);
+						throw new ReleaseImportException(String.format("Failed to load release files during release import process. " +
+								"%s exceptions caught in threads. First exception: %s", loadingExceptions.size(), firstException.getMessage()), firstException);
+					}
+
+					componentFactory.loadingComponentsCompleted();
+				} while ((componentFactory = componentFactoryProvider.getNextComponentFactory()) != null);
 
 				logger.info("Release files read. JVM total memory is approx {} MB.", formatAsMB(Runtime.getRuntime().totalMemory()));
 			} catch (IOException | InterruptedException e) {
@@ -257,14 +297,9 @@ public class ReleaseImporter {
 			executorService.shutdown();
 		}
 
-		private ComponentFactory addModuleIdFilter(ComponentFactory runComponentFactory, Set<String> moduleIds) {
-			return new ModuleFilter(runComponentFactory, moduleIds);
-		}
-
-		private ComponentFactory addEffectiveComponentFilter(ComponentFactory runComponentFactory, ReleaseFiles releaseFiles, LoadingProfile loadingProfile) throws IOException, InterruptedException, ReleaseImportException {
+		private LatestEffectiveDateComponentFactory createEffectiveComponentFilter(ReleaseFiles releaseFiles, LoadingProfile loadingProfile) throws IOException, InterruptedException, ReleaseImportException {
 			logger.info("Gathering effective dates for effective component filtering.");
 			LatestEffectiveDateComponentFactory latestEffectiveDateComponentFactory = new LatestEffectiveDateComponentFactory();
-			runComponentFactory.preprocessingContent();
 
 			// Multi-threading disabled to avoid the need to synchronize LatestEffectiveDateComponentFactory.
 			boolean multiThreaded = false;
@@ -275,9 +310,11 @@ public class ReleaseImporter {
 					.withInactiveRefsetMembers();
 
 			loadAll(effectiveComponentLoadingProfile, releaseFiles, null, latestEffectiveDateComponentFactory, multiThreaded);
+			latestEffectiveDateComponentFactory.loadingComponentsCompleted();
+			logger.info("Effective time filter is primed. Ready to read release files again.");
 
 			// Wrap component factory to only let effective components through
-			return new LatestEffectiveDateFilter(this.runComponentFactory, latestEffectiveDateComponentFactory);
+			return latestEffectiveDateComponentFactory;
 		}
 
 		private void loadAll(LoadingProfile loadingProfile, ReleaseFiles releaseFiles, String releaseVersion, ComponentFactory componentFactory, boolean multiThreaded) throws IOException, InterruptedException, ReleaseImportException {

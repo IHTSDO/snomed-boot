@@ -1,7 +1,9 @@
 package org.ihtsdo.otf.snomedboot.factory.filter;
 
+import org.ihtsdo.otf.snomedboot.ReleaseImportException;
 import org.ihtsdo.otf.snomedboot.factory.ComponentFactory;
 import org.ihtsdo.otf.snomedboot.factory.ImpotentComponentFactory;
+import org.ihtsdo.otf.snomedboot.factory.LoadingProfile;
 
 public class LatestEffectiveDateFilter extends ImpotentComponentFactory {
 
@@ -11,6 +13,11 @@ public class LatestEffectiveDateFilter extends ImpotentComponentFactory {
 	public LatestEffectiveDateFilter(ComponentFactory delegateComponentFactory, LatestEffectiveDateComponentFactory effectiveDateHolder) {
 		this.delegateComponentFactory = delegateComponentFactory;
 		this.effectiveDateHolder = effectiveDateHolder;
+	}
+
+	@Override
+	public LoadingProfile getLoadingProfile() {
+		return delegateComponentFactory.getLoadingProfile();
 	}
 
 	@Override
@@ -24,7 +31,7 @@ public class LatestEffectiveDateFilter extends ImpotentComponentFactory {
 	}
 
 	@Override
-	public void loadingComponentsCompleted() {
+	public void loadingComponentsCompleted() throws ReleaseImportException {
 		delegateComponentFactory.loadingComponentsCompleted();
 	}
 

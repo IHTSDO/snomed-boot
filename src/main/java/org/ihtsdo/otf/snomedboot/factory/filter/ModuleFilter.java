@@ -1,7 +1,9 @@
 package org.ihtsdo.otf.snomedboot.factory.filter;
 
+import org.ihtsdo.otf.snomedboot.ReleaseImportException;
 import org.ihtsdo.otf.snomedboot.factory.ComponentFactory;
 import org.ihtsdo.otf.snomedboot.factory.ImpotentComponentFactory;
+import org.ihtsdo.otf.snomedboot.factory.LoadingProfile;
 
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -19,6 +21,11 @@ public class ModuleFilter extends ImpotentComponentFactory {
 	}
 
 	@Override
+	public LoadingProfile getLoadingProfile() {
+		return delegateComponentFactory.getLoadingProfile();
+	}
+
+	@Override
 	public void preprocessingContent() {
 		delegateComponentFactory.preprocessingContent();
 	}
@@ -29,7 +36,7 @@ public class ModuleFilter extends ImpotentComponentFactory {
 	}
 
 	@Override
-	public void loadingComponentsCompleted() {
+	public void loadingComponentsCompleted() throws ReleaseImportException {
 		delegateComponentFactory.loadingComponentsCompleted();
 	}
 

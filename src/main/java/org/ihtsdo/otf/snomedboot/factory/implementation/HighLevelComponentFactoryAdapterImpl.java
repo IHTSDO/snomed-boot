@@ -1,5 +1,6 @@
 package org.ihtsdo.otf.snomedboot.factory.implementation;
 
+import org.ihtsdo.otf.snomedboot.ReleaseImportException;
 import org.ihtsdo.otf.snomedboot.domain.ConceptConstants;
 import org.ihtsdo.otf.snomedboot.factory.*;
 
@@ -16,6 +17,11 @@ public class HighLevelComponentFactoryAdapterImpl implements ComponentFactory {
 	}
 
 	@Override
+	public LoadingProfile getLoadingProfile() {
+		return null;
+	}
+
+	@Override
 	public void preprocessingContent() {
 		delegateComponentFactory.preprocessingContent();
 	}
@@ -26,7 +32,7 @@ public class HighLevelComponentFactoryAdapterImpl implements ComponentFactory {
 	}
 
 	@Override
-	public void loadingComponentsCompleted() {
+	public void loadingComponentsCompleted() throws ReleaseImportException {
 		delegateComponentFactory.loadingComponentsCompleted();
 	}
 

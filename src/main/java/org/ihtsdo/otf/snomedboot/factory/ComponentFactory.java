@@ -1,12 +1,16 @@
 package org.ihtsdo.otf.snomedboot.factory;
 
+import org.ihtsdo.otf.snomedboot.ReleaseImportException;
+
 public interface ComponentFactory {
+
+	LoadingProfile getLoadingProfile();
 
 	void preprocessingContent();
 
 	void loadingComponentsStarting();
 
-	void loadingComponentsCompleted();
+	void loadingComponentsCompleted() throws ReleaseImportException;
 
 	void newConceptState(String conceptId, String effectiveTime, String active, String moduleId, String definitionStatusId);
 

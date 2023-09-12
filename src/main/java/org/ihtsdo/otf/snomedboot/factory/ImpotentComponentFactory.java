@@ -1,6 +1,13 @@
 package org.ihtsdo.otf.snomedboot.factory;
 
+import org.ihtsdo.otf.snomedboot.ReleaseImportException;
+
 public class ImpotentComponentFactory implements ComponentFactory {
+
+	@Override
+	public LoadingProfile getLoadingProfile() {
+		return null;
+	}
 
 	@Override
 	public void preprocessingContent() {
@@ -13,7 +20,7 @@ public class ImpotentComponentFactory implements ComponentFactory {
 	}
 
 	@Override
-	public void loadingComponentsCompleted() {
+	public void loadingComponentsCompleted() throws ReleaseImportException {
 
 	}
 
