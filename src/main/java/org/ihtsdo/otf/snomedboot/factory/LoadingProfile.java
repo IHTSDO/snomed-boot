@@ -7,19 +7,27 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
-public class LoadingProfile implements Cloneable {
+public class LoadingProfile {
 
 	public static final LoadingProfile light = new LoadingProfile();
 	public static final LoadingProfile complete = new LoadingProfile();
 
 	static {
 		light.inferredAttributeMapOnConcept = true;
+		light.concepts = true;
 		light.descriptions = true;
+		light.textDefinitions = true;
+		light.relationships = true;
+		light.identifiers = true;
 		light.refsetIds.add(ConceptConstants.GB_EN_LANGUAGE_REFERENCE_SET);
 		light.refsetIds.add(ConceptConstants.US_EN_LANGUAGE_REFERENCE_SET);
 
 		complete.inferredAttributeMapOnConcept = true;
+		complete.concepts = true;
 		complete.descriptions = true;
+		complete.textDefinitions = true;
+		complete.relationships = true;
+		complete.identifiers = true;
 		complete.statedRelationships = true;
 		complete.inactiveConcepts = true;
 		complete.inactiveDescriptions = true;
@@ -32,8 +40,12 @@ public class LoadingProfile implements Cloneable {
 	private boolean effectiveComponentFilter;
 	private boolean inferredAttributeMapOnConcept;
 	private boolean statedAttributeMapOnConcept;
-	private boolean statedRelationships;
+	private boolean concepts;
 	private boolean descriptions;
+	private boolean textDefinitions;
+	private boolean relationships;
+	private boolean identifiers;
+	private boolean statedRelationships;
 	private boolean inactiveConcepts;
 	private boolean inactiveDescriptions;
 	private boolean inactiveRelationships;
@@ -77,12 +89,44 @@ public class LoadingProfile implements Cloneable {
 		return this.cloneObject().setStatedRelationships(false);
 	}
 
+	public LoadingProfile withConcepts() {
+		return this.cloneObject().setConcepts(true);
+	}
+
+	public LoadingProfile withoutConcepts() {
+		return this.cloneObject().setConcepts(false);
+	}
+
 	public LoadingProfile withDescriptions() {
 		return this.cloneObject().setDescriptions(true);
 	}
 
 	public LoadingProfile withoutDescriptions() {
 		return this.cloneObject().setDescriptions(false);
+	}
+
+	public LoadingProfile withTextDefinitions() {
+		return this.cloneObject().setTextDefinitions(true);
+	}
+
+	public LoadingProfile withoutTextDefinitions() {
+		return this.cloneObject().setTextDefinitions(false);
+	}
+
+	public LoadingProfile withRelationships() {
+		return this.cloneObject().setRelationships(true);
+	}
+
+	public LoadingProfile withoutRelationships() {
+		return this.cloneObject().setRelationships(false);
+	}
+
+	public LoadingProfile withIdentifiers() {
+		return this.cloneObject().setIdentifiers(true);
+	}
+
+	public LoadingProfile withoutIdentifiers() {
+		return this.cloneObject().setIdentifiers(false);
 	}
 
 	public LoadingProfile withInactiveComponents() {
@@ -199,9 +243,25 @@ public class LoadingProfile implements Cloneable {
 	public boolean isStatedRelationships() {
 		return statedRelationships;
 	}
-	
+
+	public boolean isConcepts() {
+		return concepts;
+	}
+
 	public boolean isDescriptions() {
 		return descriptions;
+	}
+
+	public boolean isTextDefinitions() {
+		return textDefinitions;
+	}
+
+	public boolean isRelationships() {
+		return relationships;
+	}
+
+	public boolean isIdentifiers() {
+		return identifiers;
 	}
 
 	public boolean isInactiveConcepts() {
@@ -263,9 +323,29 @@ public class LoadingProfile implements Cloneable {
 		this.statedRelationships = statedRelationships;
 		return this;
 	}
-	
+
+	public LoadingProfile setConcepts(boolean concepts) {
+		this.concepts = concepts;
+		return this;
+	}
+
 	private LoadingProfile setDescriptions(boolean descriptions) {
 		this.descriptions = descriptions;
+		return this;
+	}
+
+	public LoadingProfile setTextDefinitions(boolean textDefinitions) {
+		this.textDefinitions = textDefinitions;
+		return this;
+	}
+
+	public LoadingProfile setRelationships(boolean relationships) {
+		this.relationships = relationships;
+		return this;
+	}
+
+	public LoadingProfile setIdentifiers(boolean identifiers) {
+		this.identifiers = identifiers;
 		return this;
 	}
 
@@ -342,7 +422,10 @@ public class LoadingProfile implements Cloneable {
 				.setInferredAttributeMapOnConcept(this.inferredAttributeMapOnConcept)
 				.setStatedAttributeMapOnConcept(this.statedAttributeMapOnConcept)
 				.setStatedRelationships(this.statedRelationships)
+				.setConcepts(this.concepts)
 				.setDescriptions(this.descriptions)
+				.setRelationships(this.relationships)
+				.setIdentifiers(this.identifiers)
 				.setInactiveConcepts(this.inactiveConcepts)
 				.setInactiveDescriptions(this.inactiveDescriptions)
 				.setInactiveRelationships(this.inactiveRelationships)

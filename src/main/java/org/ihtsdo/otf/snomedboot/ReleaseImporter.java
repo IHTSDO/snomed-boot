@@ -283,11 +283,17 @@ public class ReleaseImporter {
 		private void loadAll(LoadingProfile loadingProfile, ReleaseFiles releaseFiles, String releaseVersion, ComponentFactory componentFactory, boolean multiThreaded) throws IOException, InterruptedException, ReleaseImportException {
 			List<Callable<String>> coreComponentTasks = new ArrayList<>();
 			if (!loadingProfile.isJustRefsets()) {
-				loadConcepts(releaseFiles.getConceptPaths(), loadingProfile, releaseVersion, componentFactory);
+				if (loadingProfile.isConcepts()) {
+					loadConcepts(releaseFiles.getConceptPaths(), loadingProfile, releaseVersion, componentFactory);
+				}
 
-				coreComponentTasks.add(loadRelationships(releaseFiles.getRelationshipPaths(), loadingProfile, releaseVersion, componentFactory));
-				coreComponentTasks.add(loadConcreteRelationships(releaseFiles.getConcreteRelationshipPaths(), loadingProfile, releaseVersion, componentFactory));
-				coreComponentTasks.add(loadIdentifiers(releaseFiles.getIdentifierPaths(), loadingProfile, releaseVersion, componentFactory));
+				if (loadingProfile.isRelationships()) {
+					coreComponentTasks.add(loadRelationships(releaseFiles.getRelationshipPaths(), loadingProfile, releaseVersion, componentFactory));
+					coreComponentTasks.add(loadConcreteRelationships(releaseFiles.getConcreteRelationshipPaths(), loadingProfile, releaseVersion, componentFactory));
+				}
+				if (loadingProfile.isIdentifiers()) {
+					coreComponentTasks.add(loadIdentifiers(releaseFiles.getIdentifierPaths(), loadingProfile, releaseVersion, componentFactory));
+				}
 				if (loadingProfile.isStatedRelationships()) {
 					if (!releaseFiles.getStatedRelationshipPaths().isEmpty()) {
 						coreComponentTasks.add(loadRelationships(releaseFiles.getStatedRelationshipPaths(), loadingProfile, releaseVersion, componentFactory));
@@ -296,7 +302,7 @@ public class ReleaseImporter {
 				
 				if (loadingProfile.isDescriptions()) {
 					coreComponentTasks.add(loadDescriptions(releaseFiles.getDescriptionPaths(), loadingProfile, releaseVersion, componentFactory));
-					if (!releaseFiles.getTextDefinitionPaths().isEmpty()) {
+					if (!releaseFiles.getTextDefinitionPaths().isEmpty() && loadingProfile.isTextDefinitions()) {
 						coreComponentTasks.add(loadDescriptions(releaseFiles.getTextDefinitionPaths(), loadingProfile, releaseVersion, componentFactory));
 					}
 				}
