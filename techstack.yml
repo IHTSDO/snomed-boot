@@ -1,0 +1,169 @@
+repo_name: IHTSDO/snomed-boot
+report_id: 1735c6b385298153a9cd30b810be6cc9
+version: 0.1
+repo_type: Public
+timestamp: '2024-03-21T12:56:35+00:00'
+requested_by: kaicode
+provider: github
+branch: master
+detected_tools_count: 13
+tools:
+- name: Java
+  description: A concurrent, class-based, object-oriented, language specifically designed
+    to have as few implementation dependencies as possible
+  website_url: https://www.java.com
+  open_source: true
+  hosted_saas: false
+  category: Languages & Frameworks
+  sub_category: Languages
+  image_url: https://img.stackshare.io/service/995/K85ZWV2F.png
+  detection_source_url: https://github.com/IHTSDO/snomed-boot
+  detection_source: Repo Metadata
+- name: guava
+  description: Google Core Libraries for Java 6+
+  website_url: https://github.com/google/guava
+  license: Apache-2.0
+  open_source: true
+  hosted_saas: false
+  category: Languages & Frameworks
+  sub_category: Java Tools
+  image_url: https://img.stackshare.io/service/2970/wBjKn0ol.png
+  detection_source_url: https://github.com/IHTSDO/snomed-boot/blob/master/pom.xml
+  detection_source: pom.xml
+  last_updated_by: Peter Groves Williams
+  last_updated_on: 2019-06-25 12:25:23.000000000 Z
+- name: Git
+  description: Fast, scalable, distributed revision control system
+  website_url: http://git-scm.com/
+  open_source: true
+  hosted_saas: false
+  category: Build, Test, Deploy
+  sub_category: Version Control System
+  image_url: https://img.stackshare.io/service/1046/git.png
+  detection_source_url: https://github.com/IHTSDO/snomed-boot
+  detection_source: Repo Metadata
+- name: JUnit
+  description: A programmer-oriented testing framework for Java
+  website_url: http://junit.org/
+  license: EPL-1.0
+  open_source: true
+  hosted_saas: false
+  category: Build, Test, Deploy
+  sub_category: Testing Frameworks
+  image_url: https://img.stackshare.io/service/2020/874086.png
+  detection_source_url: https://github.com/IHTSDO/snomed-boot/blob/master/pom.xml
+  detection_source: pom.xml
+  last_updated_by: Kai Kewley
+  last_updated_on: 2016-01-22 23:08:48.000000000 Z
+- name: Log4j
+  description: A Java-based logging utility
+  website_url: https://logging.apache.org/log4j/2.x/
+  license: Apache-2.0
+  open_source: true
+  hosted_saas: false
+  category: Monitoring
+  sub_category: Logging Tools
+  image_url: https://img.stackshare.io/service/2804/Coralogix-log4j-integration.jpg
+  detection_source_url: https://github.com/IHTSDO/snomed-boot/blob/master/pom.xml
+  detection_source: pom.xml
+  last_updated_by: Kai Kewley
+  last_updated_on: 2016-01-22 23:08:48.000000000 Z
+- name: SLF4J
+  description: Simple logging facade for Java
+  website_url: http://slf4j.org/
+  open_source: false
+  hosted_saas: false
+  category: Monitoring
+  sub_category: Log Management
+  image_url: https://img.stackshare.io/service/2805/05518ecaa42841e834421e9d6987b04f_400x400.png
+  detection_source_url: https://github.com/IHTSDO/snomed-boot/blob/master/pom.xml
+  detection_source: pom.xml
+  last_updated_by: Kai Kewley
+  last_updated_on: 2016-01-22 23:08:48.000000000 Z
+- name: Travis CI
+  description: A hosted continuous integration service for open source and private
+    projects
+  website_url: http://travis-ci.com/
+  open_source: false
+  hosted_saas: true
+  category: Build, Test, Deploy
+  sub_category: Continuous Integration
+  image_url: https://img.stackshare.io/service/460/Lu6cGu0z_400x400.png
+  detection_source_url: https://github.com/IHTSDO/snomed-boot/blob/master/.travis.yml
+  detection_source: ".travis.yml"
+  last_updated_by: Kai Kewley
+  last_updated_on: 2018-04-26 21:55:37.000000000 Z
+- name: com.google.guava:guava
+  description: Guava is a suite of core and expanded libraries that include utility
+    classes
+  license: Apache-2.0
+  open_source: true
+  hosted_saas: false
+  category: Libraries
+  sub_category: Maven Packages
+  image_url: https://img.stackshare.io/package/maven/image.png
+  detection_source_url: https://github.com/IHTSDO/snomed-boot/blob/master/pom.xml
+  detection_source: pom.xml
+  last_updated_by: Peter Groves Williams
+  last_updated_on: 2019-06-25 12:25:23.000000000 Z
+- name: commons-io:commons-io
+  description: The Apache Commons IO library contains utility classes
+  license: Apache-2.0
+  open_source: true
+  hosted_saas: false
+  category: Libraries
+  sub_category: Maven Packages
+  image_url: https://img.stackshare.io/package/maven/image.png
+  detection_source_url: https://github.com/IHTSDO/snomed-boot/blob/master/pom.xml
+  detection_source: pom.xml
+  last_updated_by: Kai Kewley
+  last_updated_on: 2018-11-26 16:19:48.000000000 Z
+- name: it.unimi.dsi:fastutil
+  description: Fastutil extends the Java Collections Framework by providing type-specific
+    maps
+  license: Apache-2.0
+  open_source: true
+  hosted_saas: false
+  category: Libraries
+  sub_category: Maven Packages
+  image_url: https://img.stackshare.io/package/maven/image.png
+  detection_source_url: https://github.com/IHTSDO/snomed-boot/blob/master/pom.xml
+  detection_source: pom.xml
+  last_updated_by: Kai Kewley
+  last_updated_on: 2021-08-04 20:27:17.000000000 Z
+- name: junit:junit
+  description: JUnit is a unit testing framework for Java
+  license: EPL-1.0
+  open_source: true
+  hosted_saas: false
+  category: Libraries
+  sub_category: Maven Packages
+  image_url: https://img.stackshare.io/package/maven/image.png
+  detection_source_url: https://github.com/IHTSDO/snomed-boot/blob/master/pom.xml
+  detection_source: pom.xml
+  last_updated_by: Kai Kewley
+  last_updated_on: 2018-11-26 16:19:48.000000000 Z
+- name: org.slf4j:slf4j-api
+  description: The slf4j API
+  license: MIT
+  open_source: true
+  hosted_saas: false
+  category: Libraries
+  sub_category: Maven Packages
+  image_url: https://img.stackshare.io/package/maven/image.png
+  detection_source_url: https://github.com/IHTSDO/snomed-boot/blob/master/pom.xml
+  detection_source: pom.xml
+  last_updated_by: Kai Kewley
+  last_updated_on: 2023-03-30 16:27:15.000000000 Z
+- name: org.slf4j:slf4j-log4j12
+  description: SLF4J LOG4J-12 Binding
+  license: MIT
+  open_source: true
+  hosted_saas: false
+  category: Libraries
+  sub_category: Maven Packages
+  image_url: https://img.stackshare.io/package/maven/image.png
+  detection_source_url: https://github.com/IHTSDO/snomed-boot/blob/master/pom.xml
+  detection_source: pom.xml
+  last_updated_by: Kai Kewley
+  last_updated_on: 2023-03-30 16:27:15.000000000 Z
