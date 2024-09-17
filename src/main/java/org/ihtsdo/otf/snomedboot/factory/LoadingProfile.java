@@ -3,9 +3,7 @@ package org.ihtsdo.otf.snomedboot.factory;
 import com.google.common.collect.ImmutableSet;
 import org.ihtsdo.otf.snomedboot.domain.ConceptConstants;
 
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.*;
 
 public class LoadingProfile {
 
@@ -56,6 +54,7 @@ public class LoadingProfile {
 	private Set<String> refsetIds = new HashSet<>();
 	private Set<String> includedReferenceSetFilenamePatterns = new HashSet<>();
 	private Set<String> moduleIds = new HashSet<>();
+	private Map<String, Integer> moduleEffectiveTimeFilters = new HashMap<>();
 
 	public LoadingProfile withEffectiveComponentFilter() {
 		return this.cloneObject().setEffectiveComponentFilter(true);
@@ -228,6 +227,12 @@ public class LoadingProfile {
 		return clone;
 	}
 
+	public LoadingProfile withModuleEffectiveTimeFilter(Map<String, Integer> moduleEffectiveTimesAlreadyImported) {
+		final LoadingProfile clone = this.cloneObject();
+		clone.setModuleEffectiveTimeFilters(moduleEffectiveTimesAlreadyImported);
+		return clone;
+	}
+
 	public boolean isEffectiveComponentFilter() {
 		return effectiveComponentFilter;
 	}
@@ -302,6 +307,10 @@ public class LoadingProfile {
 
 	public Set<String> getModuleIds() {
 		return ImmutableSet.copyOf(moduleIds);
+	}
+
+	public Map<String, Integer> getModuleEffectiveTimeFilters() {
+		return moduleEffectiveTimeFilters;
 	}
 
 	public LoadingProfile setEffectiveComponentFilter(boolean effectiveComponentFilter) {
@@ -408,6 +417,11 @@ public class LoadingProfile {
 		return this;
 	}
 
+	public LoadingProfile setModuleEffectiveTimeFilters(Map<String, Integer> moduleEffectiveTimeFilters) {
+		this.moduleEffectiveTimeFilters = moduleEffectiveTimeFilters;
+		return this;
+	}
+
 	private Set<String> getRefsetIdsNoClone() {
 		return refsetIds;
 	}
@@ -434,6 +448,7 @@ public class LoadingProfile {
 				.setJustRefsets(this.justRefsets)
 				.setRefsetIds(new HashSet<>(this.refsetIds))
 				.setIncludedReferenceSetFilenamePatterns(new HashSet<>(this.includedReferenceSetFilenamePatterns))
-				.setModuleIds(new HashSet<>(this.moduleIds));
+				.setModuleIds(new HashSet<>(this.moduleIds))
+				.setModuleEffectiveTimeFilters(new HashMap<>(this.moduleEffectiveTimeFilters));
 	}
 }
