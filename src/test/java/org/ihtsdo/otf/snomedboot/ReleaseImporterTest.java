@@ -11,6 +11,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.List;
+import java.util.Map;
 
 import static org.junit.Assert.*;
 
@@ -34,7 +35,7 @@ public class ReleaseImporterTest {
 		assertEquals(11, conceptLines.size());
 
 		assertTrue("Concept 362969004 is active in the base release", conceptLines.contains("362969004|20170131|1|900000000000207008"));
-		assertTrue("Concept 73211009 is in the international module in the base release", conceptLines.contains("73211009|20170131|1|900000000000207008"));
+		assertTrue("Concept 73211009 is in the international module in the base release", conceptLines.contains("73211009|20170731|1|900000000000207008"));
 		assertTrue("Refset Member c69ad177-9756-4ad1-a8b3-02407ca95b36 is active in the base release", testComponentFactory.getRefsetMemberLines().contains("c69ad177-9756-4ad1-a8b3-02407ca95b36|20170131|1|900000000000012004"));
 		assertTrue("Text Definition 1228465017 is active", testComponentFactory.getDescriptionLines().contains("1228465017|20170731|1|900000000000207008"));
 
@@ -60,6 +61,19 @@ public class ReleaseImporterTest {
 		assertEquals(6, conceptLines.size());
 
 
+		// Filter by model effective-time
+		testComponentFactory = new TestComponentFactory();
+		Map<String, Integer> moduleEffectiveTimesAlreadyImported = Map.of(
+				"900000000000207008", 20170131,
+				"900000000000012004", 20170131
+				);
+		LoadingProfile loadingProfileWithModuleEffectiveTimeFilter = LoadingProfile.complete.withModuleEffectiveTimeFilter(moduleEffectiveTimesAlreadyImported);
+		releaseImporter.loadSnapshotReleaseFiles(new FileInputStream(baseRF2SnapshotZip), loadingProfileWithModuleEffectiveTimeFilter, testComponentFactory, true);
+
+		conceptLines = testComponentFactory.getConceptLines();
+		assertEquals(1, conceptLines.size());
+
+
 		// Load effective components
 		testComponentFactory = new TestComponentFactory();
 		releaseImporter.loadEffectiveSnapshotReleaseFileStreams(Sets.newHashSet(new FileInputStream(baseRF2SnapshotZip), new FileInputStream(extensionRF2SnapshotZip)), LoadingProfile.complete, testComponentFactory, true);
@@ -72,7 +86,7 @@ public class ReleaseImporterTest {
         assertFalse("The state of 362969004 from the base release has not been loaded", conceptLines.contains("362969004|20170131|1|900000000000207008"));
 
 		// Example of donated content without extension inactivation
-		assertTrue("Concept 73211009 is in the international module in the effective release", conceptLines.contains("73211009|20170131|1|900000000000207008"));
+		assertTrue("Concept 73211009 is in the international module in the effective release", conceptLines.contains("73211009|20170731|1|900000000000207008"));
         assertFalse("The state of 73211009 from the extension release has not been loaded", conceptLines.contains("73211009|20160231|1|100101001"));
 
 		assertTrue("Refset Member c69ad177-9756-4ad1-a8b3-02407ca95b36 is inactive in the effective release", testComponentFactory.getRefsetMemberLines().contains("c69ad177-9756-4ad1-a8b3-02407ca95b36|20170231|0|100101001"));

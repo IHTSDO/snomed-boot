@@ -11,6 +11,7 @@ import org.ihtsdo.otf.snomedboot.factory.HistoryAwareComponentFactory;
 import org.ihtsdo.otf.snomedboot.factory.LoadingProfile;
 import org.ihtsdo.otf.snomedboot.factory.filter.LatestEffectiveDateComponentFactory;
 import org.ihtsdo.otf.snomedboot.factory.filter.LatestEffectiveDateFilter;
+import org.ihtsdo.otf.snomedboot.factory.filter.ModuleEffectiveTimeFilter;
 import org.ihtsdo.otf.snomedboot.factory.filter.ModuleFilter;
 import org.ihtsdo.otf.snomedboot.factory.implementation.ListComponentFactoryProvider;
 import org.slf4j.Logger;
@@ -261,6 +262,10 @@ public class ReleaseImporter {
 					if (!loadingProfile.getModuleIds().isEmpty()) {
 						Set<String> moduleIds = loadingProfile.getModuleIds();
 						componentFactory = new ModuleFilter(componentFactory, moduleIds);
+					}
+					if (!loadingProfile.getModuleEffectiveTimeFilters().isEmpty()) {
+						Map<String, Integer> moduleEffectiveTimeFilters = loadingProfile.getModuleEffectiveTimeFilters();
+						componentFactory = new ModuleEffectiveTimeFilter(componentFactory, moduleEffectiveTimeFilters);
 					}
 
 					if (componentFactory.getLoadingProfile() != null) {
