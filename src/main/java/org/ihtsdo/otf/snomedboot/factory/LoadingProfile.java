@@ -424,6 +424,7 @@ public class LoadingProfile {
 				.setStatedRelationships(this.statedRelationships)
 				.setConcepts(this.concepts)
 				.setDescriptions(this.descriptions)
+				.setTextDefinitions(this.textDefinitions)
 				.setRelationships(this.relationships)
 				.setIdentifiers(this.identifiers)
 				.setInactiveConcepts(this.inactiveConcepts)
