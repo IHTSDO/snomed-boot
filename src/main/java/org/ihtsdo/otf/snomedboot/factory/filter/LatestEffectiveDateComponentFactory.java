@@ -70,10 +70,11 @@ public class LatestEffectiveDateComponentFactory extends ImpotentComponentFactor
 
 	private synchronized void storeLatestDateMember(String id, String effectiveTime) {
 		int newDate = parseInt(effectiveTime);
+		if (latestRefsetMemberEffectiveDates.get(id) != null) {
+			refsetMembersWithMoreThanOneRow.add(id);
+		}
 		if (newDateGreater(newDate, latestRefsetMemberEffectiveDates.get(id))) {
-			if (latestRefsetMemberEffectiveDates.put(id, newDate) != null) {
-				refsetMembersWithMoreThanOneRow.add(id);
-			}
+			latestRefsetMemberEffectiveDates.put(id, newDate);
 		}
 	}
 
