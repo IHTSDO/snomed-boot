@@ -6,12 +6,12 @@
 	<parent>
 		<groupId>org.snomed</groupId>
 		<artifactId>snomed-parent-bom</artifactId>
-		<version>3.7.0</version>
+		<version>3.7.1</version>
 	</parent>
 
 	<groupId>org.snomed.otf</groupId>
 	<artifactId>snomed-boot</artifactId>
-	<version>5.2.0</version>
+	<version>5.2.1</version>
 
 	<name>Snomed Boot</name>
 	<description>Load Snomed CT Release Content into Memory</description>
