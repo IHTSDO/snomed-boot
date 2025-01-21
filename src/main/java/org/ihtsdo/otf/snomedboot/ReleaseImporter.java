@@ -454,7 +454,7 @@ public class ReleaseImporter {
 					releaseFiles.addStatedRelationshipPath(file);
 				} else if (fileName.matches("x?(sct|rel)2_Identifier_[^_]*" + fileType + "_.*")) {
 					releaseFiles.addIdentifierPath(file);
-				} else if (fileName.matches("x?(sct|rel)2_sRefset_OWL.*[^_]*" + fileType + "_.*")) {
+				} else if (fileName.matches("x?(sct|rel)2_sRefset_.*OWL.*[^_]*" + fileType + "_.*")) {
 					releaseFiles.addRefsetPath(file);
 				} else if (fileName.matches("x?(der|rel)2_[sci]*Refset_[^_]*" + fileType + "(-[a-zA-Z\\-]*)?_.*")) {
 					releaseFiles.addRefsetPath(file);
