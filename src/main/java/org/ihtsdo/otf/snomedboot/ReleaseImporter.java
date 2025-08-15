@@ -560,6 +560,7 @@ public class ReleaseImporter {
 					final String refsetId = values[RefsetFieldIndexes.refsetId];
 					if (loadingProfile.isAllRefsets() || filenamePatternMatch || loadingProfile.isRefset(refsetId)) {
 						componentFactory.newReferenceSetMemberState(
+								rf2File.getFileName().toString(),
 								fieldNames,
 								values[RefsetFieldIndexes.id],
 								values[RefsetFieldIndexes.effectiveTime],

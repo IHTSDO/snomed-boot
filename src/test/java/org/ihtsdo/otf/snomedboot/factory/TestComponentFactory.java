@@ -34,7 +34,7 @@ public class TestComponentFactory extends ImpotentHistoryAwareComponentFactory {
 	}
 
 	@Override
-	public void newReferenceSetMemberState(String[] fieldNames, String id, String effectiveTime, String active, String moduleId, String refsetId, String referencedComponentId, String... otherValues) {
+	public void newReferenceSetMemberState(String filename, String[] fieldNames, String id, String effectiveTime, String active, String moduleId, String refsetId, String referencedComponentId, String... otherValues) {
 		refsetMemberLines.add(String.join("|", id, effectiveTime, active, moduleId));
 	}
 

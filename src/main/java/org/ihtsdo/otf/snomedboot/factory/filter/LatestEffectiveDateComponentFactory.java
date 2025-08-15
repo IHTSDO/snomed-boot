@@ -6,7 +6,6 @@ import org.ihtsdo.otf.snomedboot.factory.ImpotentComponentFactory;
 import org.slf4j.LoggerFactory;
 
 import java.util.*;
-import java.util.stream.Collectors;
 
 import static java.lang.Long.parseLong;
 
@@ -39,7 +38,7 @@ public class LatestEffectiveDateComponentFactory extends ImpotentComponentFactor
 	}
 
 	@Override
-	public void newReferenceSetMemberState(String[] fieldNames, String id, String effectiveTime, String active, String moduleId, String refsetId, String referencedComponentId, String... otherValues) {
+	public void newReferenceSetMemberState(String filename, String[] fieldNames, String id, String effectiveTime, String active, String moduleId, String refsetId, String referencedComponentId, String... otherValues) {
 		storeLatestDateMember(id, effectiveTime);
 	}
 

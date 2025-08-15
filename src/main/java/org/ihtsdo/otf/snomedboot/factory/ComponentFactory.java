@@ -22,7 +22,7 @@ public interface ComponentFactory {
 	void newConcreteRelationshipState(String id, String effectiveTime, String active, String moduleId, String sourceId,
 							  String value, String relationshipGroup, String typeId, String characteristicTypeId, String modifierId);
 
-	void newReferenceSetMemberState(String[] fieldNames, String id, String effectiveTime, String active, String moduleId, String refsetId, String referencedComponentId, String... otherValues);
+	void newReferenceSetMemberState(String filename, String[] fieldNames, String id, String effectiveTime, String active, String moduleId, String refsetId, String referencedComponentId, String... otherValues);
 
 	void newIdentifierState(String alternateIdentifier, String effectiveTime, String active, String moduleId, String identifierSchemeId, String referencedComponentId);
 
