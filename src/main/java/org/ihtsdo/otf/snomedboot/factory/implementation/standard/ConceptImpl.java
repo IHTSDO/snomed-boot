@@ -1,5 +1,7 @@
 package org.ihtsdo.otf.snomedboot.factory.implementation.standard;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import org.ihtsdo.otf.snomedboot.domain.Concept;
 import org.ihtsdo.otf.snomedboot.domain.ConcreteRelationship;
 import org.ihtsdo.otf.snomedboot.domain.Description;
@@ -7,6 +9,7 @@ import org.ihtsdo.otf.snomedboot.domain.Relationship;
 
 import java.util.*;
 
+@JsonPropertyOrder("conceptId")
 public class ConceptImpl implements Concept {
 
 	private final Long id;
@@ -77,6 +80,7 @@ public class ConceptImpl implements Concept {
 	 * or if an ancestor loop is found.
 	 */
 	@Override
+	@JsonIgnore
 	public Set<Long> getStatedAncestorIds() throws IllegalStateException {
 		final Stack<Long> stack = new Stack<>();
 		stack.push(id);
@@ -106,6 +110,7 @@ public class ConceptImpl implements Concept {
 	 * @return A set of all inferred descendants
 	 */
 	@Override
+	@JsonIgnore
 	public Set<Long> getInferredDescendantIds() throws IllegalStateException {
 		return collectChildIds(this, new HashSet<>(),true);
 	}
@@ -114,6 +119,7 @@ public class ConceptImpl implements Concept {
 	 * @return A set of all stated ancestors
 	 */
 	@Override
+	@JsonIgnore
 	public Set<Long> getStatedDescendantIds() throws IllegalStateException {
 		return collectChildIds(this, new HashSet<>(),  false);
 	}
@@ -143,7 +149,8 @@ public class ConceptImpl implements Concept {
 	public void removeInferredParent(Concept parentConcept) {
 		inferredParents.remove(parentConcept);
 	}
-	
+
+	@JsonIgnore
 	public Set<Concept> getInferredParents() {
 		return inferredParents;
 	}
@@ -155,7 +162,8 @@ public class ConceptImpl implements Concept {
 	public void removeStatedParent(Concept parentConcept) {
 		statedParents.remove(parentConcept);
 	}
-	
+
+	@JsonIgnore
 	public Set<Concept> getStatedParents() {
 		return statedParents;
 	}
@@ -177,8 +185,13 @@ public class ConceptImpl implements Concept {
 	}
 
 	@Override
+	@JsonIgnore
 	public Long getId() {
 		return id;
+	}
+
+	public String getConceptId() {
+		return id.toString();
 	}
 
 	@Override
@@ -201,6 +214,7 @@ public class ConceptImpl implements Concept {
 	}
 
 	@Override
+	@JsonIgnore
 	public String getFsn() {
 		return fsn;
 	}
@@ -224,6 +238,7 @@ public class ConceptImpl implements Concept {
 	}
 
 	@Override
+	@JsonIgnore
 	public Map<String, Set<String>> getStatedAttributes() {
 		return statedAttributes;
 	}

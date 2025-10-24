@@ -1,5 +1,6 @@
 package org.ihtsdo.otf.snomedboot;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.Lists;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
@@ -13,7 +14,11 @@ import org.ihtsdo.otf.snomedboot.factory.filter.LatestEffectiveDateComponentFact
 import org.ihtsdo.otf.snomedboot.factory.filter.LatestEffectiveDateFilter;
 import org.ihtsdo.otf.snomedboot.factory.filter.ModuleEffectiveTimeFilter;
 import org.ihtsdo.otf.snomedboot.factory.filter.ModuleFilter;
+import org.ihtsdo.otf.snomedboot.factory.implementation.HighLevelComponentFactoryAdapterImpl;
 import org.ihtsdo.otf.snomedboot.factory.implementation.ListComponentFactoryProvider;
+import org.ihtsdo.otf.snomedboot.factory.implementation.standard.ComponentStore;
+import org.ihtsdo.otf.snomedboot.factory.implementation.standard.ComponentStoreComponentFactoryImpl;
+import org.ihtsdo.otf.snomedboot.factory.implementation.standard.ConceptImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -40,6 +45,34 @@ public class ReleaseImporter {
 	public static final Charset UTF_8 = StandardCharsets.UTF_8;
 	private static final Logger logger = LoggerFactory.getLogger(ReleaseImporter.class);
 	private static final String IDENTIFIERS_TYPE = "identifiers";
+
+	public static void main(String[] args) throws ReleaseImportException, IOException {
+		ReleaseImporter releaseImporter = new ReleaseImporter();
+		ComponentStore componentStore = new ComponentStore();
+		final LoadingProfile loadingProfile = LoadingProfile.complete;
+		ComponentStoreComponentFactoryImpl componentFactory = new ComponentStoreComponentFactoryImpl(componentStore);
+		releaseImporter.loadEffectiveSnapshotReleaseFileStreams(Set.of(
+						new FileInputStream("/Users/kai/release/SnomedCT_ManagedServiceBE_PRODUCTION_BE1000172_20250315T120000Z.zip"),
+						new FileInputStream("/Users/kai/release/SnomedCT_InternationalRF2_PRODUCTION_20250301T120000Z.zip")),
+				loadingProfile,
+				new HighLevelComponentFactoryAdapterImpl(loadingProfile, componentFactory, componentFactory), false);
+
+		Map<Long, ConceptImpl> concepts = componentStore.getConcepts();
+		ObjectMapper objectMapper = new ObjectMapper();
+		File file = new File("export.ndjson");
+		System.out.println("Exporting concepts to NDJSON");
+		int count = 0;
+		try (BufferedWriter writer = Files.newBufferedWriter(file.toPath())) {
+			for (ConceptImpl concept : concepts.values()) {
+				writer.write(objectMapper.writeValueAsString(concept));
+				writer.newLine();
+				count++;
+				if (count % 1000 == 0) {
+					System.out.print(".");
+				}
+			}
+		}
+	}
 
 	public void loadFullReleaseFiles(String releaseDirPath, LoadingProfile loadingProfile, HistoryAwareComponentFactory componentFactory, boolean multiThreaded) throws ReleaseImportException {
 		new ImportRun(componentFactory).doLoadReleaseFiles(releaseDirPath, loadingProfile, ImportType.FULL, multiThreaded);

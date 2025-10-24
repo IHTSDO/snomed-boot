@@ -19,7 +19,7 @@ public class ComponentStoreComponentFactoryImpl extends ImpotentComponentFactory
 
 	@Override
 	public void newDescriptionState(String id, String effectiveTime, String active, String moduleId, String conceptId, String languageCode, String typeId, String term, String caseSignificanceId) {
-		getConceptForReference(conceptId).addDescription(new DescriptionImpl(id, FactoryUtils.parseActive(active), term, conceptId));
+		getConceptForReference(conceptId).addDescription(new DescriptionImpl(id, FactoryUtils.parseActive(active), term, conceptId, languageCode, typeId, caseSignificanceId));
 	}
 
 	@Override

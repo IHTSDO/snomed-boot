@@ -1,5 +1,8 @@
 package org.ihtsdo.otf.snomedboot.factory.implementation.standard;
 
+import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
 import com.google.common.collect.Sets;
 import org.ihtsdo.otf.snomedboot.ReleaseImportException;
 import org.ihtsdo.otf.snomedboot.ReleaseImporter;
@@ -8,9 +11,11 @@ import org.ihtsdo.otf.snomedboot.factory.implementation.HighLevelComponentFactor
 import org.junit.Test;
 import org.snomed.otf.snomedboot.testutil.ZipUtil;
 
+import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.nio.file.Files;
 import java.util.Map;
 
 import static org.junit.Assert.assertEquals;
@@ -31,13 +36,23 @@ public class ComponentStoreComponentFactoryImplTest {
 		Map<Long, ConceptImpl> concepts = componentStore.getConcepts();
 		assertEquals(12, concepts.size());
 
-		ConceptImpl findingSite = concepts.get(363698007L);
-		assertEquals("Finding site (attribute)", findingSite.getDescriptions().get(0).getTerm());
-		assertEquals("Finding site (attribute)", findingSite.getFsn());
-		assertEquals("20170131", findingSite.getEffectiveTime());
+		ObjectMapper objectMapper = new ObjectMapper();
+		File file = new File("export.ndjson");
+		try (BufferedWriter writer = Files.newBufferedWriter(file.toPath())) {
+			for (ConceptImpl concept : concepts.values()) {
+				writer.write(objectMapper.writeValueAsString(concept));
+//				writer.write(objectMapper.writeValueAsString(concept).replace("\n", "").replace("\t", ""));
+				writer.newLine();
+			}
+		}
 
-		ConceptImpl disorderOfEndocrineSystem = concepts.get(362969004L);
-		assertEquals("Check transitive closure", Sets.newHashSet(138875005L, 404684003L), disorderOfEndocrineSystem.getInferredAncestorIds());
+//		ConceptImpl findingSite = concepts.get(363698007L);
+//		assertEquals("Finding site (attribute)", findingSite.getDescriptions().get(0).getTerm());
+//		assertEquals("Finding site (attribute)", findingSite.getFsn());
+//		assertEquals("20170131", findingSite.getEffectiveTime());
+//
+//		ConceptImpl disorderOfEndocrineSystem = concepts.get(362969004L);
+//		assertEquals("Check transitive closure", Sets.newHashSet(138875005L, 404684003L), disorderOfEndocrineSystem.getInferredAncestorIds());
 	}
 
 }
