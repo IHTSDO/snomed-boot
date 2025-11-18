@@ -205,6 +205,10 @@ public class ConceptImpl implements Concept {
 		return fsn;
 	}
 
+	public Set<Concept> getInferredChildren() {
+		return inferredChildren;
+	}
+
 	@Override
 	public Map<String, Set<String>> getInferredAttributes() {
 		return inferredAttributes;

@@ -44,9 +44,6 @@ public class HighLevelComponentFactoryAdapterImpl implements ComponentFactory {
 	@Override
 	public void newDescriptionState(String id, String effectiveTime, String active, String moduleId, String conceptId, String languageCode, String typeId, String term, String caseSignificanceId) {
 		if (isActive(active) && ConceptConstants.FSN.equals(typeId)) {
-			if (conceptId.equals("102563003")) {
-				System.out.println();
-			}
 			highLevelFactory.addConceptFSN(conceptId, term);
 		}
 		delegateComponentFactory.newDescriptionState(id, effectiveTime, active, moduleId, conceptId, languageCode, typeId, term, caseSignificanceId);
