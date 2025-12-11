@@ -26,7 +26,7 @@ public class ComponentStoreComponentFactoryImplTest {
 		final LoadingProfile loadingProfile = LoadingProfile.complete;
 		ComponentStoreComponentFactoryImpl componentFactory = new ComponentStoreComponentFactoryImpl(componentStore);
 		releaseImporter.loadSnapshotReleaseFiles(new FileInputStream(baseRF2SnapshotZip), loadingProfile,
-				new HighLevelComponentFactoryAdapterImpl(loadingProfile, componentFactory, componentFactory), true);
+				new HighLevelComponentFactoryAdapterImpl(loadingProfile, componentFactory, componentFactory), false);
 
 		Map<Long, ConceptImpl> concepts = componentStore.getConcepts();
 		assertEquals(12, concepts.size());
