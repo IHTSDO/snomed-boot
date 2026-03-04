@@ -95,12 +95,12 @@ class ReleaseFiles {
 
 	public void assertFullSet(LoadingProfile loadingProfile, String debugInfo) throws FileNotFoundException {
 		if (!loadingProfile.isJustRefsets()) {
-			if (conceptPaths.isEmpty()) {
-				throw new FileNotFoundException("No Concept RF2 file found " + debugInfo);
+			if (loadingProfile.isConcepts() && conceptPaths.isEmpty()) {
+				throw new FileNotFoundException("No Concept RF2 file found %s. If they are not required set concepts to false in the loading profile.".formatted(debugInfo));
 			} else if (loadingProfile.isDescriptions() && descriptionPaths.isEmpty()) {
-				throw new FileNotFoundException("No Description RF2 file found " + debugInfo);
-			} else if (relationshipPaths.isEmpty()) {
-				throw new FileNotFoundException("No Relationship RF2 file found " + debugInfo);
+				throw new FileNotFoundException("No Description RF2 file found %s. If they are not required set descriptions to false in the loading profile.".formatted(debugInfo));
+			} else if (loadingProfile.isRelationships() && relationshipPaths.isEmpty()) {
+				throw new FileNotFoundException("No Relationship RF2 file found %s. If they are not required set relationships to false in the loading profile.".formatted(debugInfo));
 			}
 		}
 	}
