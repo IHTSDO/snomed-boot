@@ -37,20 +37,20 @@ public class HighLevelComponentFactoryAdapterImpl implements ComponentFactory {
 	}
 
 	@Override
-	public void newConceptState(String conceptId, String effectiveTime, String active, String moduleId, String definitionStatusId) {
-		delegateComponentFactory.newConceptState(conceptId, effectiveTime, active, moduleId, definitionStatusId);
+	public void newConceptState(String filename, long lineNumber, String conceptId, String effectiveTime, String active, String moduleId, String definitionStatusId) {
+		delegateComponentFactory.newConceptState(filename, lineNumber, conceptId, effectiveTime, active, moduleId, definitionStatusId);
 	}
 
 	@Override
-	public void newDescriptionState(String id, String effectiveTime, String active, String moduleId, String conceptId, String languageCode, String typeId, String term, String caseSignificanceId) {
+	public void newDescriptionState(String filename, long lineNumber, String id, String effectiveTime, String active, String moduleId, String conceptId, String languageCode, String typeId, String term, String caseSignificanceId) {
 		if (isActive(active) && ConceptConstants.FSN.equals(typeId)) {
 			highLevelFactory.addConceptFSN(conceptId, term);
 		}
-		delegateComponentFactory.newDescriptionState(id, effectiveTime, active, moduleId, conceptId, languageCode, typeId, term, caseSignificanceId);
+		delegateComponentFactory.newDescriptionState(filename, lineNumber, id, effectiveTime, active, moduleId, conceptId, languageCode, typeId, term, caseSignificanceId);
 	}
 
 	@Override
-	public void newRelationshipState(String id, String effectiveTime, String active, String moduleId, String sourceId, String destinationId, String relationshipGroup, String typeId, String characteristicTypeId, String modifierId) {
+	public void newRelationshipState(String filename, long lineNumber, String id, String effectiveTime, String active, String moduleId, String sourceId, String destinationId, String relationshipGroup, String typeId, String characteristicTypeId, String modifierId) {
 		boolean inferred = ConceptConstants.INFERRED_RELATIONSHIP.equals(characteristicTypeId);
 		if (isActive(active)) {
 			if (!inferred && loadingProfile.isStatedAttributeMapOnConcept()) {
@@ -78,28 +78,28 @@ public class HighLevelComponentFactoryAdapterImpl implements ComponentFactory {
 				}
 			}
 		}
-		delegateComponentFactory.newRelationshipState(id, effectiveTime, active, moduleId, sourceId, destinationId, relationshipGroup, typeId, characteristicTypeId, modifierId);
+		delegateComponentFactory.newRelationshipState(filename, lineNumber, id, effectiveTime, active, moduleId, sourceId, destinationId, relationshipGroup, typeId, characteristicTypeId, modifierId);
 	}
 
 	@Override
-	public void newConcreteRelationshipState(String id, String effectiveTime, String active, String moduleId, String sourceId, String value, String relationshipGroup, String typeId, String characteristicTypeId, String modifierId) {
+	public void newConcreteRelationshipState(String filename, long lineNumber, String id, String effectiveTime, String active, String moduleId, String sourceId, String value, String relationshipGroup, String typeId, String characteristicTypeId, String modifierId) {
 		if (isActive(active) && loadingProfile.isInferredAttributeMapOnConcept()) {
 			highLevelFactory.addInferredConceptConcreteAttribute(sourceId, typeId, value);
 		}
-		delegateComponentFactory.newConcreteRelationshipState(id, effectiveTime, active, moduleId, sourceId, value, relationshipGroup, typeId, characteristicTypeId, modifierId);
+		delegateComponentFactory.newConcreteRelationshipState(filename, lineNumber, id, effectiveTime, active, moduleId, sourceId, value, relationshipGroup, typeId, characteristicTypeId, modifierId);
 	}
 
 	@Override
-	public void newReferenceSetMemberState(String filename, String[] fieldNames, String id, String effectiveTime, String active, String moduleId, String refsetId, String referencedComponentId, String... otherValues) {
+	public void newReferenceSetMemberState(String filename, long lineNumber, String[] fieldNames, String id, String effectiveTime, String active, String moduleId, String refsetId, String referencedComponentId, String... otherValues) {
 		if (isActive(active) && FactoryUtils.isConceptId(referencedComponentId)) {
 			highLevelFactory.addConceptReferencedInRefsetId(refsetId, referencedComponentId);
 		}
-		delegateComponentFactory.newReferenceSetMemberState(filename, fieldNames, id, effectiveTime, active, moduleId, refsetId, referencedComponentId, otherValues);
+		delegateComponentFactory.newReferenceSetMemberState(filename, lineNumber, fieldNames, id, effectiveTime, active, moduleId, refsetId, referencedComponentId, otherValues);
 	}
 
 	@Override
-	public void newIdentifierState(String alternateIdentifier, String effectiveTime, String active, String moduleId, String identifierSchemeId, String referencedComponentId) {
-		delegateComponentFactory.newIdentifierState(alternateIdentifier, effectiveTime, active, moduleId, identifierSchemeId, referencedComponentId);
+	public void newIdentifierState(String filename, long lineNumber, String alternateIdentifier, String effectiveTime, String active, String moduleId, String identifierSchemeId, String referencedComponentId) {
+		delegateComponentFactory.newIdentifierState(filename, lineNumber, alternateIdentifier, effectiveTime, active, moduleId, identifierSchemeId, referencedComponentId);
 	}
 
 	private boolean isActive(String active) {

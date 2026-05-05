@@ -14,32 +14,32 @@ public class TestComponentFactory extends ImpotentHistoryAwareComponentFactory {
 	private List<String> versionsLoaded = new ArrayList<>();
 
 	@Override
-	public void newConceptState(String conceptId, String effectiveTime, String active, String moduleId, String definitionStatusId) {
+	public void newConceptState(String filename, long lineNumber, String conceptId, String effectiveTime, String active, String moduleId, String definitionStatusId) {
 		conceptLines.add(String.join("|", conceptId, effectiveTime, active, moduleId));
 	}
 
 	@Override
-	public void newDescriptionState(String id, String effectiveTime, String active, String moduleId, String conceptId, String languageCode, String typeId, String term, String caseSignificanceId) {
+	public void newDescriptionState(String filename, long lineNumber, String id, String effectiveTime, String active, String moduleId, String conceptId, String languageCode, String typeId, String term, String caseSignificanceId) {
 		descriptionLines.add(String.join("|", id, effectiveTime, active, moduleId));
 	}
 
 	@Override
-	public void newRelationshipState(String id, String effectiveTime, String active, String moduleId, String sourceId, String destinationId, String relationshipGroup, String typeId, String characteristicTypeId, String modifierId) {
+	public void newRelationshipState(String filename, long lineNumber, String id, String effectiveTime, String active, String moduleId, String sourceId, String destinationId, String relationshipGroup, String typeId, String characteristicTypeId, String modifierId) {
 		relationshipLines.add(String.join("|", id, effectiveTime, active, moduleId));
 	}
 
 	@Override
-	public void newConcreteRelationshipState(String id, String effectiveTime, String active, String moduleId, String sourceId, String value, String relationshipGroup, String typeId, String characteristicTypeId, String modifierId) {
+	public void newConcreteRelationshipState(String filename, long lineNumber, String id, String effectiveTime, String active, String moduleId, String sourceId, String value, String relationshipGroup, String typeId, String characteristicTypeId, String modifierId) {
 		concreteRelationshipLines.add(String.join("|", id, effectiveTime, active, moduleId));
 	}
 
 	@Override
-	public void newReferenceSetMemberState(String filename, String[] fieldNames, String id, String effectiveTime, String active, String moduleId, String refsetId, String referencedComponentId, String... otherValues) {
+	public void newReferenceSetMemberState(String filename, long lineNumber, String[] fieldNames, String id, String effectiveTime, String active, String moduleId, String refsetId, String referencedComponentId, String... otherValues) {
 		refsetMemberLines.add(String.join("|", id, effectiveTime, active, moduleId));
 	}
 
 	@Override
-	public void newIdentifierState(String alternateIdentifier, String effectiveTime, String active, String moduleId, String identifierSchemeId, String referencedComponentId) {
+	public void newIdentifierState(String filename, long lineNumber, String alternateIdentifier, String effectiveTime, String active, String moduleId, String identifierSchemeId, String referencedComponentId) {
 		identifierLines.add(String.join("|", alternateIdentifier, effectiveTime, active, moduleId, identifierSchemeId, referencedComponentId));
 	}
 
