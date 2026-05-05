@@ -1,19 +1,17 @@
 package org.ihtsdo.otf.snomedboot.factory.implementation;
 
-import org.ihtsdo.otf.snomedboot.ReleaseImportException;
 import org.ihtsdo.otf.snomedboot.domain.ConceptConstants;
 import org.ihtsdo.otf.snomedboot.factory.*;
 
-public class HighLevelComponentFactoryAdapterImpl implements ComponentFactory {
+public class HighLevelComponentFactoryAdapterImpl extends DelegatingComponentFactory {
 
 	private final LoadingProfile loadingProfile;
 	private final HighLevelComponentFactory highLevelFactory;
-	private final ComponentFactory delegateComponentFactory;
 
 	public HighLevelComponentFactoryAdapterImpl(final LoadingProfile loadingProfile, HighLevelComponentFactory highLevelComponentFactory, ComponentFactory delegateComponentFactory) {
+		super(delegateComponentFactory);
 		this.loadingProfile = loadingProfile;
 		this.highLevelFactory = highLevelComponentFactory;
-		this.delegateComponentFactory = delegateComponentFactory;
 	}
 
 	@Override
@@ -22,31 +20,11 @@ public class HighLevelComponentFactoryAdapterImpl implements ComponentFactory {
 	}
 
 	@Override
-	public void preprocessingContent() {
-		delegateComponentFactory.preprocessingContent();
-	}
-
-	@Override
-	public void loadingComponentsStarting() {
-		delegateComponentFactory.loadingComponentsStarting();
-	}
-
-	@Override
-	public void loadingComponentsCompleted() throws ReleaseImportException {
-		delegateComponentFactory.loadingComponentsCompleted();
-	}
-
-	@Override
-	public void newConceptState(String filename, long lineNumber, String conceptId, String effectiveTime, String active, String moduleId, String definitionStatusId) {
-		delegateComponentFactory.newConceptState(filename, lineNumber, conceptId, effectiveTime, active, moduleId, definitionStatusId);
-	}
-
-	@Override
 	public void newDescriptionState(String filename, long lineNumber, String id, String effectiveTime, String active, String moduleId, String conceptId, String languageCode, String typeId, String term, String caseSignificanceId) {
 		if (isActive(active) && ConceptConstants.FSN.equals(typeId)) {
 			highLevelFactory.addConceptFSN(conceptId, term);
 		}
-		delegateComponentFactory.newDescriptionState(filename, lineNumber, id, effectiveTime, active, moduleId, conceptId, languageCode, typeId, term, caseSignificanceId);
+		super.newDescriptionState(filename, lineNumber, id, effectiveTime, active, moduleId, conceptId, languageCode, typeId, term, caseSignificanceId);
 	}
 
 	@Override
@@ -78,7 +56,7 @@ public class HighLevelComponentFactoryAdapterImpl implements ComponentFactory {
 				}
 			}
 		}
-		delegateComponentFactory.newRelationshipState(filename, lineNumber, id, effectiveTime, active, moduleId, sourceId, destinationId, relationshipGroup, typeId, characteristicTypeId, modifierId);
+		super.newRelationshipState(filename, lineNumber, id, effectiveTime, active, moduleId, sourceId, destinationId, relationshipGroup, typeId, characteristicTypeId, modifierId);
 	}
 
 	@Override
@@ -86,7 +64,7 @@ public class HighLevelComponentFactoryAdapterImpl implements ComponentFactory {
 		if (isActive(active) && loadingProfile.isInferredAttributeMapOnConcept()) {
 			highLevelFactory.addInferredConceptConcreteAttribute(sourceId, typeId, value);
 		}
-		delegateComponentFactory.newConcreteRelationshipState(filename, lineNumber, id, effectiveTime, active, moduleId, sourceId, value, relationshipGroup, typeId, characteristicTypeId, modifierId);
+		super.newConcreteRelationshipState(filename, lineNumber, id, effectiveTime, active, moduleId, sourceId, value, relationshipGroup, typeId, characteristicTypeId, modifierId);
 	}
 
 	@Override
@@ -94,12 +72,7 @@ public class HighLevelComponentFactoryAdapterImpl implements ComponentFactory {
 		if (isActive(active) && FactoryUtils.isConceptId(referencedComponentId)) {
 			highLevelFactory.addConceptReferencedInRefsetId(refsetId, referencedComponentId);
 		}
-		delegateComponentFactory.newReferenceSetMemberState(filename, lineNumber, fieldNames, id, effectiveTime, active, moduleId, refsetId, referencedComponentId, otherValues);
-	}
-
-	@Override
-	public void newIdentifierState(String filename, long lineNumber, String alternateIdentifier, String effectiveTime, String active, String moduleId, String identifierSchemeId, String referencedComponentId) {
-		delegateComponentFactory.newIdentifierState(filename, lineNumber, alternateIdentifier, effectiveTime, active, moduleId, identifierSchemeId, referencedComponentId);
+		super.newReferenceSetMemberState(filename, lineNumber, fieldNames, id, effectiveTime, active, moduleId, refsetId, referencedComponentId, otherValues);
 	}
 
 	private boolean isActive(String active) {

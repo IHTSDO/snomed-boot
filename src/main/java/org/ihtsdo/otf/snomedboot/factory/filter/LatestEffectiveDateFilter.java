@@ -1,38 +1,15 @@
 package org.ihtsdo.otf.snomedboot.factory.filter;
 
-import org.ihtsdo.otf.snomedboot.ReleaseImportException;
 import org.ihtsdo.otf.snomedboot.factory.ComponentFactory;
-import org.ihtsdo.otf.snomedboot.factory.ImpotentComponentFactory;
-import org.ihtsdo.otf.snomedboot.factory.LoadingProfile;
+import org.ihtsdo.otf.snomedboot.factory.DelegatingComponentFactory;
 
-public class LatestEffectiveDateFilter extends ImpotentComponentFactory {
+public class LatestEffectiveDateFilter extends DelegatingComponentFactory {
 
-	private final ComponentFactory delegateComponentFactory;
 	private final LatestEffectiveDateComponentFactory effectiveDateHolder;
 
 	public LatestEffectiveDateFilter(ComponentFactory delegateComponentFactory, LatestEffectiveDateComponentFactory effectiveDateHolder) {
-		this.delegateComponentFactory = delegateComponentFactory;
+		super(delegateComponentFactory);
 		this.effectiveDateHolder = effectiveDateHolder;
-	}
-
-	@Override
-	public LoadingProfile getLoadingProfile() {
-		return delegateComponentFactory.getLoadingProfile();
-	}
-
-	@Override
-	public void preprocessingContent() {
-		delegateComponentFactory.preprocessingContent();
-	}
-
-	@Override
-	public void loadingComponentsStarting() {
-		delegateComponentFactory.loadingComponentsStarting();
-	}
-
-	@Override
-	public void loadingComponentsCompleted() throws ReleaseImportException {
-		delegateComponentFactory.loadingComponentsCompleted();
 	}
 
 	@Override
