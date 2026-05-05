@@ -1,43 +1,20 @@
 package org.ihtsdo.otf.snomedboot.factory.filter;
 
-import org.ihtsdo.otf.snomedboot.ReleaseImportException;
 import org.ihtsdo.otf.snomedboot.factory.ComponentFactory;
-import org.ihtsdo.otf.snomedboot.factory.ImpotentComponentFactory;
-import org.ihtsdo.otf.snomedboot.factory.LoadingProfile;
+import org.ihtsdo.otf.snomedboot.factory.DelegatingComponentFactory;
 
 import java.util.Set;
 import java.util.stream.Collectors;
 
 import static java.lang.Long.parseLong;
 
-public class ModuleFilter extends ImpotentComponentFactory {
+public class ModuleFilter extends DelegatingComponentFactory {
 
-	private final ComponentFactory delegateComponentFactory;
 	private final Set<Long> moduleIdLongs;
 
 	public ModuleFilter(ComponentFactory delegateComponentFactory, Set<String> moduleIds) {
-		this.delegateComponentFactory = delegateComponentFactory;
+		super(delegateComponentFactory);
 		moduleIdLongs = moduleIds.stream().map(Long::parseLong).collect(Collectors.toSet());
-	}
-
-	@Override
-	public LoadingProfile getLoadingProfile() {
-		return delegateComponentFactory.getLoadingProfile();
-	}
-
-	@Override
-	public void preprocessingContent() {
-		delegateComponentFactory.preprocessingContent();
-	}
-
-	@Override
-	public void loadingComponentsStarting() {
-		delegateComponentFactory.loadingComponentsStarting();
-	}
-
-	@Override
-	public void loadingComponentsCompleted() throws ReleaseImportException {
-		delegateComponentFactory.loadingComponentsCompleted();
 	}
 
 	@Override
